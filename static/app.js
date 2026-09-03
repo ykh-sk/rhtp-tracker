@@ -47,6 +47,8 @@ let STAGES = [];
 let STATES = [];
 let DEADLINES = [];
 let COMMENTARY = [];
+let FEDERAL_MILESTONES = [];
+let SEARCH_INDEX = [];
 let currentStatus = [];
 let currentState = null;
 let currentView = null;
@@ -86,16 +88,19 @@ function goStatus(status) {
 }
 
 async function boot() {
-  const [statesRes, deadlinesRes, commentaryRes] = await Promise.all([
+  const [statesRes, deadlinesRes, commentaryRes, federalRes] = await Promise.all([
     fetch("/api/states").then(r => r.json()),
     fetch("/api/deadlines").then(r => r.json()),
     fetch("/api/commentary").then(r => r.json()),
+    fetch("/api/federal_milestones").then(r => r.json()).catch(() => []),
   ]);
 
   STAGES = statesRes.status_taxonomy.map((key, i) => ({ key, order: i + 1, var: `--stage-${i + 1}` }));
   STATES = statesRes.states;
   DEADLINES = deadlinesRes;
   COMMENTARY = commentaryRes;
+  FEDERAL_MILESTONES = federalRes;
+  SEARCH_INDEX = buildSearchIndex();
 
   document.getElementById("stamp").textContent = `${STATES.length} states · FY26`;
 
@@ -128,7 +133,158 @@ async function boot() {
     renderDashboard();
   });
 
+  document.getElementById("cal-state-filter").addEventListener("input", e => {
+    calStateFilter = e.target.value;
+    renderCalendar();
+  });
+
+  ["federal-info-btn-dash", "federal-info-btn-cal"].forEach(id => {
+    document.getElementById(id).addEventListener("click", openFederalModal);
+  });
+  document.getElementById("detail").addEventListener("click", e => {
+    if (e.target.closest("[data-open-federal-modal]")) openFederalModal();
+  });
+  document.getElementById("federal-modal-close").addEventListener("click", closeFederalModal);
+  document.getElementById("federal-modal-overlay").addEventListener("click", e => {
+    if (e.target.id === "federal-modal-overlay") closeFederalModal();
+  });
+  window.addEventListener("keydown", e => {
+    if (e.key === "Escape") closeFederalModal();
+  });
+
+  initSiteSearch();
+
   renderAll();
+}
+
+// ---- federal guidelines modal ----
+
+function federalMilestoneHtml(m) {
+  const flagged = m.confidence !== "confirmed";
+  const personal = m.confidence === "personal";
+  const range = m.end_date ? `${fmtDate(m.start_date)} &ndash; ${fmtDate(m.end_date)}` : fmtDate(m.start_date);
+  const categoryLabel = titleCase(m.category === "other" ? "" : m.category);
+  return `
+    <div class="cal-item">
+      <div class="cal-when">${range}${flagged ? `<span class="caution-tag${personal ? " personal" : ""}">${personal ? "Personal" : "Unverified"}</span>` : ""}</div>
+      <div class="cal-body">
+        <h3>${esc(m.title)}</h3>
+        ${categoryLabel ? `<div class="cal-state federal-category">${esc(categoryLabel)}</div>` : ""}
+        ${flagged
+          ? `<div class="caution${personal ? " personal" : ""}">${esc(m.notes || "")}</div>`
+          : (m.notes ? `<p class="cal-notes">${esc(m.notes)}</p>` : "")}
+        <a href="${esc(m.source_url)}" target="_blank" rel="noopener">Source ↗</a>
+      </div>
+    </div>
+  `;
+}
+
+function renderFederalModalBody() {
+  const body = document.getElementById("federal-modal-body");
+  if (!FEDERAL_MILESTONES.length) {
+    body.innerHTML = `<div class="cal-empty">No federal milestones added yet.</div>`;
+    return;
+  }
+  const sorted = [...FEDERAL_MILESTONES].sort((a, b) => a.start_date.localeCompare(b.start_date));
+  body.innerHTML = sorted.map(federalMilestoneHtml).join("");
+}
+
+function openFederalModal() {
+  renderFederalModalBody();
+  document.getElementById("federal-modal-overlay").hidden = false;
+  document.body.classList.add("modal-open");
+}
+
+function closeFederalModal() {
+  document.getElementById("federal-modal-overlay").hidden = true;
+  document.body.classList.remove("modal-open");
+}
+
+// ---- site search ----
+
+function buildSearchIndex() {
+  const idx = [];
+  STATES.forEach(s => {
+    const haystack = [s.state, s.lead_agency, s.current_status, (s.overview || {}).emphasis, latestNote(s)]
+      .filter(Boolean).join(" ").toLowerCase();
+    idx.push({ group: "States", label: s.state, sub: titleCase(s.current_status), hash: `state=${encodeURIComponent(s.state)}`, haystack });
+  });
+  DEADLINES.forEach(d => {
+    const haystack = [d.title, d.state, d.notes].filter(Boolean).join(" ").toLowerCase();
+    idx.push({ group: "Deadlines", label: d.title, sub: `${d.state} · ${fmtDate(d.start_date)}`, hash: "view=calendar", haystack });
+  });
+  COMMENTARY.forEach(c => {
+    const haystack = [c.title, c.summary, c.source_name].filter(Boolean).join(" ").toLowerCase();
+    idx.push({ group: "Commentary", label: c.title, sub: c.source_name, hash: "view=commentary", haystack });
+  });
+  FEDERAL_MILESTONES.forEach(m => {
+    const haystack = [m.title, m.notes, m.category].filter(Boolean).join(" ").toLowerCase();
+    idx.push({ group: "Federal guidelines", label: m.title, sub: fmtDate(m.start_date), openFederal: true, haystack });
+  });
+  return idx;
+}
+
+function initSiteSearch() {
+  const input = document.getElementById("site-search-input");
+  const results = document.getElementById("site-search-results");
+
+  function renderResults(query) {
+    const q = query.trim().toLowerCase();
+    if (q.length < 2) {
+      results.hidden = true;
+      results.innerHTML = "";
+      return;
+    }
+    const matches = SEARCH_INDEX.filter(r => r.haystack.includes(q)).slice(0, 20);
+    if (!matches.length) {
+      results.innerHTML = `<div class="search-empty">No matches for "${esc(query)}".</div>`;
+      results.hidden = false;
+      return;
+    }
+    const groups = [];
+    matches.forEach(m => {
+      let g = groups.find(g => g.group === m.group);
+      if (!g) { g = { group: m.group, items: [] }; groups.push(g); }
+      g.items.push(m);
+    });
+    results.innerHTML = groups.map(g => `
+      <div class="search-group">
+        <div class="search-group-label">${esc(g.group)}</div>
+        ${g.items.map((m, i) => `
+          <button type="button" class="search-result" data-index="${SEARCH_INDEX.indexOf(m)}">
+            <span class="sr-label">${esc(m.label)}</span>
+            <span class="sr-sub">${esc(m.sub || "")}</span>
+          </button>
+        `).join("")}
+      </div>
+    `).join("");
+    results.hidden = false;
+  }
+
+  input.addEventListener("input", () => renderResults(input.value));
+  input.addEventListener("focus", () => { if (input.value.trim().length >= 2) renderResults(input.value); });
+
+  results.addEventListener("click", e => {
+    const btn = e.target.closest(".search-result");
+    if (!btn) return;
+    const item = SEARCH_INDEX[+btn.dataset.index];
+    if (!item) return;
+    input.value = "";
+    results.hidden = true;
+    if (item.openFederal) {
+      location.hash = "";
+      openFederalModal();
+    } else {
+      location.hash = item.hash;
+    }
+  });
+
+  document.addEventListener("click", e => {
+    if (!e.target.closest("#site-search")) { results.hidden = true; }
+  });
+  input.addEventListener("keydown", e => {
+    if (e.key === "Escape") { results.hidden = true; input.blur(); }
+  });
 }
 
 function sortStates(list) {
@@ -486,7 +642,7 @@ function renderDetail(name) {
           ${flagged
             ? `<div class="caution${personal ? " personal" : ""}">${esc(main)}</div>`
             : `<p class="tl-notes">${esc(main)}</p>${flag ? `<div class="flag">FLAG — ${esc(flag)}</div>` : ""}`}
-          <a class="tl-source" href="${e.source_url}" target="_blank" rel="noopener">Source ↗</a>
+          <a class="tl-source" href="${esc(e.source_url)}" target="_blank" rel="noopener">Source ↗</a>
         </div>
       </li>
     `;
@@ -545,7 +701,7 @@ function renderDetail(name) {
         </div>
         <div class="title-row">
           <h1>${esc(s.state)}</h1>
-          <a class="official-badge" href="${s.official_url}" target="_blank" rel="noopener">Official page ↗</a>
+          <a class="official-badge" href="${esc(s.official_url)}" target="_blank" rel="noopener">Official page ↗</a>
         </div>
         <div class="agency">${esc(s.lead_agency)}</div>
       </div>
@@ -563,8 +719,11 @@ function renderDetail(name) {
       </div>
       <aside class="detail-side">
         <h2>Sources</h2>
-        <a href="${s.official_url}" target="_blank" rel="noopener">Official program page ↗</a>
-        <a href="${latest.source_url}" target="_blank" rel="noopener">Latest source article ↗</a>
+        <a href="${esc(s.official_url)}" target="_blank" rel="noopener">Official program page ↗</a>
+        <a href="${esc(latest.source_url)}" target="_blank" rel="noopener">Latest source article ↗</a>
+        <h2 class="deadlines-heading">Deadlines</h2>
+        ${stateDeadlinesHtml(s.state)}
+        <button type="button" class="info-btn info-btn-block" data-open-federal-modal>ⓘ Federal guidelines &amp; deadlines</button>
       </aside>
       <div class="compare">
         <div class="compare-head"><h2>How ${esc(s.state)} compares</h2></div>
@@ -581,20 +740,48 @@ function renderDetail(name) {
 
 // ---- calendar ----
 
+let calStateFilter = "";
+
+function stateDeadlinesHtml(stateName) {
+  const items = DEADLINES.filter(d => d.state === stateName).sort((a, b) => a.start_date.localeCompare(b.start_date));
+  if (!items.length) return `<p class="side-empty">No dated deadlines published for this state yet.</p>`;
+  return `<ul class="side-deadline-list">${items.map(d => {
+    const flagged = d.confidence !== "confirmed";
+    const personal = d.confidence === "personal";
+    const range = d.end_date ? `${fmtDate(d.start_date)}&ndash;${fmtDate(d.end_date)}` : fmtDate(d.start_date);
+    return `
+      <li>
+        <div class="sd-when">${range}</div>
+        <div class="sd-title">${esc(d.title)}${flagged ? `<span class="caution-tag${personal ? " personal" : ""}">${personal ? "Personal" : "Unverified"}</span>` : ""}</div>
+      </li>
+    `;
+  }).join("")}</ul>`;
+}
+
 function renderCalendar() {
   const confirmedCount = DEADLINES.filter(d => d.confidence === "confirmed").length;
   const unverifiedCount = DEADLINES.length - confirmedCount;
   document.getElementById("cal-caption").textContent =
-    `${confirmedCount} confirmed application window${confirmedCount === 1 ? "" : "s"}` +
+    `${confirmedCount} confirmed dated deadline${confirmedCount === 1 ? "" : "s"}` +
     (unverifiedCount ? ` plus ${unverifiedCount} unverified lead${unverifiedCount === 1 ? "" : "s"} (flagged below)` : "") +
-    ` across the ${STATES.length} states. Most states haven't published a dated RFA window yet — this list only shows deadlines a source states, never an estimate.`;
+    ` across the ${STATES.length} states — RFA/subaward application windows, funds-obligation deadlines, and similar dated ` +
+    `milestones a source explicitly states, never an estimate. A state can be further along in its pipeline (see its Stage ` +
+    `on the dashboard) without a specific dated item appearing here — this list only reflects what has a published date, ` +
+    `not the state's overall progress.`;
 
   if (!DEADLINES.length) {
     document.getElementById("cal-list").innerHTML = `<div class="cal-empty">No confirmed deadlines yet.</div>`;
     return;
   }
 
-  const sorted = [...DEADLINES].sort((a, b) => b.start_date.localeCompare(a.start_date));
+  const q = calStateFilter.trim().toLowerCase();
+  const filtered = q ? DEADLINES.filter(d => d.state.toLowerCase().includes(q)) : DEADLINES;
+  const sorted = [...filtered].sort((a, b) => b.start_date.localeCompare(a.start_date));
+
+  if (!sorted.length) {
+    document.getElementById("cal-list").innerHTML = `<div class="cal-empty">No deadlines match "${esc(calStateFilter)}".</div>`;
+    return;
+  }
 
   document.getElementById("cal-list").innerHTML = sorted.map(d => {
     const unverified = d.confidence === "unverified";
@@ -609,11 +796,11 @@ function renderCalendar() {
         <div class="cal-when">${range}<span class="cal-days">${dayLabel}</span>${flagged ? `<span class="caution-tag${personal ? " personal" : ""}">${personal ? "Personal" : "Unverified"}</span>` : ""}</div>
         <div class="cal-body">
           <h3>${esc(d.title)}</h3>
-          <div class="cal-state">${esc(d.state)}</div>
+          <a class="cal-state" href="#state=${encodeURIComponent(d.state)}">${esc(d.state)}</a>
           ${flagged
             ? `<div class="caution${personal ? " personal" : ""}">${esc(d.notes || "")}</div>`
             : (d.notes ? `<p class="cal-notes">${esc(d.notes)}</p>` : "")}
-          <a href="${d.source_url}" target="_blank" rel="noopener">Source ↗</a>
+          <a href="${esc(d.source_url)}" target="_blank" rel="noopener">Source ↗</a>
         </div>
       </div>
     `;
@@ -632,7 +819,7 @@ function renderCommentary() {
         <h3>${esc(c.title)}<span class="angle-tag">${esc(c.angle)}</span></h3>
         <div class="cal-state">${esc(c.source_name)}${c.state ? ` &middot; ${esc(c.state)}` : " &middot; National"}</div>
         ${c.summary ? `<p class="cal-notes">${esc(c.summary)}</p>` : ""}
-        <a href="${c.url}" target="_blank" rel="noopener">Read ↗</a>
+        <a href="${esc(c.url)}" target="_blank" rel="noopener">Read ↗</a>
       </div>
     </div>
   `).join("") || `<div class="cal-empty">No commentary gathered yet.</div>`;

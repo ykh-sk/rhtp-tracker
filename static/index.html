@@ -28,6 +28,11 @@
       </div>
     </header>
 
+    <div class="site-search" id="site-search">
+      <input type="search" id="site-search-input" placeholder="Search states, deadlines, commentary…" autocomplete="off" aria-label="Search the site" />
+      <div class="site-search-results" id="site-search-results" hidden></div>
+    </div>
+
     <div id="dashboard">
       <div class="summary">
         <div class="metric">
@@ -39,7 +44,10 @@
           <div class="label">total awarded, FY26</div>
         </div>
         <div class="pipeline">
-          <div class="label">funding pipeline — 5 stages, in order</div>
+          <div class="label pipeline-label-row">
+            <span>funding pipeline — 5 stages, in order</span>
+            <button type="button" class="info-btn" id="federal-info-btn-dash">ⓘ Federal guidelines &amp; deadlines</button>
+          </div>
           <div class="segbar" id="segbar"></div>
           <div class="segbar-caption"><span>Earliest</span><span>Most advanced</span></div>
           <div class="legend" id="legend"></div>
@@ -104,7 +112,13 @@
     <div id="detail" hidden></div>
 
     <div id="calendar" hidden>
-      <p class="cal-caption" id="cal-caption"></p>
+      <div class="cal-toolbar">
+        <p class="cal-caption" id="cal-caption"></p>
+        <button type="button" class="info-btn" id="federal-info-btn-cal">ⓘ Federal guidelines &amp; deadlines</button>
+      </div>
+      <div class="cal-filter-row">
+        <input type="text" id="cal-state-filter" placeholder="Filter by state…" autocomplete="off" aria-label="Filter deadlines by state" />
+      </div>
       <div class="cal-list" id="cal-list"></div>
     </div>
 
@@ -127,6 +141,19 @@
         <p id="footer-note"></p>
       </div>
     </footer>
+  </div>
+
+  <div class="modal-overlay" id="federal-modal-overlay" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="federal-modal-title">
+      <button type="button" class="modal-close" id="federal-modal-close" aria-label="Close">&times;</button>
+      <h2 id="federal-modal-title">Federal program guidelines &amp; schedule</h2>
+      <p class="modal-caption">
+        The statutory and CMS-level timeline for the Rural Health Transformation Program itself — separate from any
+        one state's own pipeline stage above. Compare a state's progress against these federal dates to see whether
+        it's ahead of or behind the program-wide schedule.
+      </p>
+      <div class="cal-list" id="federal-modal-body"></div>
+    </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>

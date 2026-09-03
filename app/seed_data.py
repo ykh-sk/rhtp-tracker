@@ -437,6 +437,127 @@ STATE_CHANGELOG = [
     # {"state": "...", "changed_at": "YYYY-MM-DD", "summary": "..."},
 ]
 
+# Federal-level (not state-specific) statutory/programmatic milestones for the
+# Rural Health Transformation Program itself — the authorizing law, CMS's
+# Notice of Funding Opportunity, application/award dates, the funds-obligation
+# deadline, and reporting cadence. Same sourcing discipline as everything else
+# here: every entry cites a source_url, and anything not confirmed on an
+# official .gov primary source is marked "unverified" rather than stated as
+# settled fact. category is one of: statute, application, award, obligation,
+# reporting, other.
+FEDERAL_MILESTONES = [
+    {
+        "title": "Rural Health Transformation Program established",
+        "category": "statute",
+        "start_date": "2025-07-04",
+        "end_date": None,
+        "source_url": "https://apply07.grants.gov/apply/opportunities/instructions/PKG00291485-instructions.pdf",
+        "notes": (
+            "Created by Section 71401 of Public Law 119-21 (the July 2025 reconciliation act), codified at "
+            "42 U.S.C. § 1397ee(h). Establishes $50B over five budget periods, $10B available each, aligned to "
+            "FY2026–FY2030. Per the NOFO: \"Baseline funding: We will distribute $25 billion equally among all "
+            "approved States... Workload funding: We will distribute the other $25 billion based on the content "
+            "and quality of your application and rural factors.\" No more than 10% of a state's allotment for a "
+            "budget period may go to administrative costs (statutory)."
+        ),
+        "confidence": "confirmed",
+    },
+    {
+        "title": "CMS Notice of Funding Opportunity (NOFO) released",
+        "category": "application",
+        "start_date": "2025-09-15",
+        "end_date": None,
+        "source_url": "https://www.cms.gov/newsroom/press-releases/cms-launches-landmark-50-billion-rural-health-transformation-program",
+        "notes": "CMS opens the RHT Program application window (Opportunity CMS-RHT-26-001).",
+        "confidence": "confirmed",
+    },
+    {
+        "title": "Optional Letter of Intent deadline",
+        "category": "application",
+        "start_date": "2025-09-30",
+        "end_date": None,
+        "source_url": "https://apply07.grants.gov/apply/opportunities/instructions/PKG00291485-instructions.pdf",
+        "notes": "Non-binding letter of intent, due 11:59pm ET, emailed to MAHARural@cms.hhs.gov. Not required to apply.",
+        "confidence": "confirmed",
+    },
+    {
+        "title": "State application deadline",
+        "category": "application",
+        "start_date": "2025-11-05",
+        "end_date": None,
+        "source_url": "https://www.cms.gov/newsroom/press-releases/all-50-states-seek-transform-rural-health-cms",
+        "notes": "Full application due 11:59pm ET. All 50 states applied. One application period covers the entire five-year program — no separate planning-grant round.",
+        "confidence": "confirmed",
+    },
+    {
+        "title": "FY2026 awards announced to all 50 states",
+        "category": "award",
+        "start_date": "2025-12-29",
+        "end_date": None,
+        "source_url": "https://www.cms.gov/newsroom/press-releases/cms-announces-50-billion-awards-strengthen-rural-health-all-50-states",
+        "notes": (
+            "CMS's NOFO listed an expected award date of December 31, 2025; awards were announced two days "
+            "early. First-year awards averaged ~$200M, ranging $147M–$281M per state."
+        ),
+        "confidence": "confirmed",
+    },
+    {
+        "title": "Budget resubmission deadline",
+        "category": "reporting",
+        "start_date": "2026-01-30",
+        "end_date": None,
+        "source_url": "https://kffhealthnews.org/news/article/rural-health-transformation-state-distribution-technical-scores-variation-deadlines/",
+        "notes": (
+            "KFF Health News, citing the standard Notice of Award: \"States have until Jan. 30 to resubmit "
+            "their budgets, and CMS then has 30 days to respond.\" Sourced from CMS's award-notice terms via "
+            "KFF's reporting, not the NOFO document itself."
+        ),
+        "confidence": "confirmed",
+    },
+    {
+        "title": "Annual reporting requirement",
+        "category": "reporting",
+        "start_date": "2025-12-29",
+        "end_date": None,
+        "source_url": "https://apply07.grants.gov/apply/opportunities/instructions/PKG00291485-instructions.pdf",
+        "notes": (
+            "Per the NOFO: recipients submit an annual non-competing continuation (NCC) application and an "
+            "annual progress report to receive funding for each subsequent budget period, plus standard federal "
+            "financial/FFATA reporting. The NOFO does not specify a separate quarterly reporting cadence — only "
+            "annual reporting is stated explicitly."
+        ),
+        "confidence": "confirmed",
+    },
+    {
+        "title": "Deadline to spend FY2026 (Year 1) award funds",
+        "category": "obligation",
+        "start_date": "2027-09-30",
+        "end_date": None,
+        "source_url": "https://apply07.grants.gov/apply/opportunities/instructions/PKG00291485-instructions.pdf",
+        "notes": (
+            "Per the NOFO: \"For each budget period, recipients will have until the end of the following fiscal "
+            "year to spend awarded funding.\" The first budget period is 10 months (the remainder align to "
+            "FY2026–FY2030); federal fiscal years end September 30, so FY2026 funds must be spent by the end "
+            "of FY2027. The NOFO does not spell out an exact day-of-month \"obligation\" cutoff separate from "
+            "this spend deadline, so none is stated here."
+        ),
+        "confidence": "confirmed",
+    },
+    {
+        "title": "Final deadline — unspent funds return to U.S. Treasury",
+        "category": "obligation",
+        "start_date": "2032-10-01",
+        "end_date": None,
+        "source_url": "https://apply07.grants.gov/apply/opportunities/instructions/PKG00291485-instructions.pdf",
+        "notes": (
+            "Verbatim from the NOFO: \"Any funding that is unexpended or unobligated as of October 1, 2032, "
+            "shall be returned to the Treasury of the United States.\" Statutory hard backstop for the whole "
+            "five-year, $50B program."
+        ),
+        "confidence": "confirmed",
+    },
+]
+
 STATUS_TAXONOMY = [
     "plan approved",
     "admin structure named",

@@ -90,6 +90,22 @@ CREATE TABLE IF NOT EXISTS state_pillars (
     name TEXT NOT NULL,
     source_url TEXT
 );
+
+-- Federal-level (not state-specific) statutory/programmatic milestones for
+-- the Rural Health Transformation Program itself: the law, NOFO release,
+-- application windows, award notifications, the funds-obligation deadline,
+-- reporting cadence. Rendered as its own "Federal guidelines" panel and
+-- cross-referenced from the calendar, distinct from any one state's deadlines.
+CREATE TABLE IF NOT EXISTS federal_milestones (
+    id SERIAL PRIMARY KEY,
+    title TEXT NOT NULL,
+    category TEXT NOT NULL CHECK (category IN ('statute', 'application', 'award', 'obligation', 'reporting', 'other')),
+    start_date TEXT NOT NULL,
+    end_date TEXT,
+    source_url TEXT NOT NULL,
+    notes TEXT,
+    confidence TEXT NOT NULL DEFAULT 'confirmed' CHECK (confidence IN ('confirmed', 'unverified', 'personal'))
+);
 """
 
 

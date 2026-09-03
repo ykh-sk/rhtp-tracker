@@ -8,7 +8,7 @@ Safe to re-run: clears and reloads all rows. Usage:
 from db import get_connection, init_db, execute, execute_many
 from seed_data import (
     SOURCES, AWARDS, STATUS_EVENTS, DEADLINES, ANALYSIS, COMMENTARY,
-    STATE_OVERVIEW, STATE_PILLARS, STATE_CHANGELOG,
+    STATE_OVERVIEW, STATE_PILLARS, STATE_CHANGELOG, FEDERAL_MILESTONES,
 )
 
 
@@ -16,6 +16,7 @@ def seed():
     init_db()
     conn = get_connection()
 
+    execute(conn, "DELETE FROM federal_milestones")
     execute(conn, "DELETE FROM state_changelog")
     execute(conn, "DELETE FROM state_pillars")
     execute(conn, "DELETE FROM state_overview")
@@ -93,12 +94,21 @@ def seed():
             STATE_CHANGELOG,
         )
 
+    if FEDERAL_MILESTONES:
+        execute_many(
+            conn,
+            """INSERT INTO federal_milestones (title, category, start_date, end_date, source_url, notes, confidence)
+               VALUES (%(title)s, %(category)s, %(start_date)s, %(end_date)s, %(source_url)s, %(notes)s, %(confidence)s)""",
+            FEDERAL_MILESTONES,
+        )
+
     conn.commit()
     conn.close()
     print(
         f"Seeded {len(SOURCES)} sources, {len(AWARDS)} awards, {len(STATUS_EVENTS)} status events, "
         f"{len(DEADLINES)} deadlines, {len(COMMENTARY)} commentary links, {len(analysis_rows)} analysis rows, "
-        f"{len(overview_rows)} overviews, {len(pillar_rows)} pillars, {len(STATE_CHANGELOG)} changelog entries."
+        f"{len(overview_rows)} overviews, {len(pillar_rows)} pillars, {len(STATE_CHANGELOG)} changelog entries, "
+        f"{len(FEDERAL_MILESTONES)} federal milestones."
     )
 
 

@@ -181,5 +181,36 @@ def api_commentary():
     return jsonify(rows)
 
 
+@app.route("/api/federal_milestones")
+def api_federal_milestones():
+    conn = get_connection()
+    rows = rows_to_dicts(query(conn, "SELECT * FROM federal_milestones ORDER BY start_date"))
+    conn.close()
+    return jsonify(rows)
+
+
+@app.route("/api/federal_milestones", methods=["POST"])
+def add_federal_milestone():
+    payload = request.get_json(force=True)
+    required = {"title", "category", "start_date", "source_url"}
+    missing = required - payload.keys()
+    if missing:
+        return jsonify({"error": f"missing fields: {sorted(missing)}"}), 400
+    payload.setdefault("end_date", None)
+    payload.setdefault("notes", None)
+    payload.setdefault("confidence", "confirmed")
+
+    conn = get_connection()
+    execute(
+        conn,
+        """INSERT INTO federal_milestones (title, category, start_date, end_date, source_url, notes, confidence)
+           VALUES (%(title)s, %(category)s, %(start_date)s, %(end_date)s, %(source_url)s, %(notes)s, %(confidence)s)""",
+        payload,
+    )
+    conn.commit()
+    conn.close()
+    return jsonify({"ok": True}), 201
+
+
 if __name__ == "__main__":
     app.run(debug=True, port=5050)

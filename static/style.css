@@ -1235,3 +1235,210 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outlin
 @media (prefers-reduced-motion: no-preference) {
   table.states tbody tr { transition: background 120ms ease; }
 }
+
+/* ---- site search ---- */
+.site-search {
+  position: relative;
+  margin: 18px 0 26px;
+}
+
+.site-search input {
+  width: 100%;
+  font: inherit;
+  font-size: 13.5px;
+  padding: 11px 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.site-search input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.site-search-results {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  max-height: 60vh;
+  overflow-y: auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: var(--shadow), 0 8px 24px rgba(0, 0, 0, 0.12);
+  padding: 6px;
+}
+
+.search-group + .search-group { margin-top: 4px; border-top: 1px solid var(--border); padding-top: 4px; }
+
+.search-group-label {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 6px 10px 2px;
+}
+
+.search-result {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  padding: 8px 10px;
+  border: none;
+  border-radius: 7px;
+  background: none;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.search-result:hover, .search-result:focus-visible { background: var(--surface-2); outline: none; }
+
+.search-result .sr-label { font-weight: 500; font-size: 13px; }
+.search-result .sr-sub { font-size: 11px; color: var(--muted); white-space: nowrap; }
+
+.search-empty { padding: 14px 10px; font-size: 12.5px; color: var(--muted); text-align: center; }
+
+/* ---- federal guidelines info button + modal ---- */
+.pipeline-label-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+
+.info-btn {
+  font: inherit;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.02em;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 5px 12px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.info-btn:hover { border-color: var(--accent); }
+
+.info-btn-block { display: block; width: 100%; text-align: center; margin-top: 4px; }
+
+.cal-toolbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.cal-toolbar .cal-caption { margin-bottom: 0; flex: 1 1 320px; }
+
+.cal-filter-row { margin: 0 0 18px; }
+
+.cal-filter-row input {
+  font: inherit;
+  font-size: 13px;
+  padding: 9px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink);
+  width: 100%;
+  max-width: 320px;
+}
+
+.cal-filter-row input:focus { outline: none; border-color: var(--accent); }
+
+a.cal-state {
+  display: inline-block;
+  font-size: 11.5px;
+  color: var(--accent);
+  text-decoration: none;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+a.cal-state:hover { text-decoration: underline; }
+
+.federal-category {
+  font-family: "IBM Plex Mono", monospace;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent) !important;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(10, 16, 14, 0.5);
+  align-items: flex-start;
+  justify-content: center;
+  padding: 6vh 20px;
+  overflow-y: auto;
+}
+
+/* Higher specificity than the bare .modal-overlay display below, so the
+   [hidden] attribute (toggled from JS via .hidden = true/false) always wins
+   over the flex layout needed to center the modal when it's shown. */
+.modal-overlay:not([hidden]) { display: flex; }
+
+body.modal-open { overflow: hidden; }
+
+.modal {
+  position: relative;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  max-width: 720px;
+  width: 100%;
+  padding: 32px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.modal h2 { font-family: "IBM Plex Serif", Georgia, serif; font-size: 20px; margin: 0 0 10px; padding-right: 30px; }
+
+.modal-caption { font-size: 12.5px; color: var(--muted); line-height: 1.55; max-width: 62ch; margin: 0 0 20px; }
+
+.modal .cal-list { max-height: 55vh; overflow-y: auto; padding-right: 4px; }
+
+.modal-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.modal-close:hover { color: var(--ink); border-color: var(--accent); }
+
+/* ---- state-detail deadlines sidebar ---- */
+.deadlines-heading { margin-top: 8px; }
+
+.side-empty { font-size: 12px; color: var(--muted); margin: 0; }
+
+.side-deadline-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+
+.side-deadline-list li { font-size: 12.5px; line-height: 1.4; }
+
+.side-deadline-list .sd-when {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.side-deadline-list .sd-title { color: var(--ink); }
