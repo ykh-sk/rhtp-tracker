@@ -64,12 +64,16 @@ CREATE TABLE IF NOT EXISTS commentary (
 """
 
 
+_DSN_ENV_VARS = ("DATABASE_URL", "POSTGRES_URL", "DATABASE_URL_UNPOOLED", "POSTGRES_URL_NON_POOLING")
+
+
 def get_connection():
-    dsn = os.environ.get("DATABASE_URL")
+    dsn = next((os.environ[name] for name in _DSN_ENV_VARS if os.environ.get(name)), None)
     if not dsn:
         raise RuntimeError(
-            "DATABASE_URL is not set. Set it to your Neon connection string "
-            "(export DATABASE_URL=... locally, or add it in Vercel's project settings)."
+            "No database connection string found. Set DATABASE_URL to your Neon connection string "
+            "(export DATABASE_URL=... locally — Vercel's Neon integration sets this, or one of "
+            f"{_DSN_ENV_VARS[1:]}, automatically in production)."
         )
     return psycopg2.connect(dsn, cursor_factory=psycopg2.extras.RealDictCursor)
 
