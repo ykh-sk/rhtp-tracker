@@ -58,22 +58,37 @@ def api_states():
     for c in changelog:
         changelog_by_state.setdefault(c["state"], []).append(c)
 
-    ranked = sorted(sources, key=lambda s: sum(a["amount"] for a in awards_by_state.get(s["state"], [])), reverse=True)
+    # "Current" award = the latest fiscal year on record for that state, not
+    # the sum of every year ever added. This matters once FY27+ rows exist:
+    # ranking, dashboard totals, and subawards figures should all reflect the
+    # most recent year, with older years still available in `awards` for a
+    # future multi-year view — never silently blended together.
+    def current_award(state):
+        state_awards = awards_by_state.get(state, [])
+        return max(state_awards, key=lambda a: a["fiscal_year"], default=None)
+
+    ranked = sorted(
+        sources,
+        key=lambda s: (current_award(s["state"]) or {}).get("amount", 0),
+        reverse=True,
+    )
     rank_by_state = {s["state"]: i + 1 for i, s in enumerate(ranked)}
 
     result = []
     for s in sources:
-        state_awards = awards_by_state.get(s["state"], [])
+        state_awards = sorted(awards_by_state.get(s["state"], []), key=lambda a: a["fiscal_year"], reverse=True)
         state_events = sorted(events_by_state.get(s["state"], []), key=lambda e: e["event_date"])
         confirmed_events = [e for e in state_events if e["confidence"] == "confirmed"]
         latest_event = (confirmed_events or state_events)[-1] if state_events else None
+        latest_award = current_award(s["state"])
         result.append(
             {
                 **s,
                 "awards": state_awards,
+                "current_award": latest_award,
                 "status_events": state_events,
                 "current_status": latest_event["status"] if latest_event else None,
-                "total_awarded": sum(a["amount"] for a in state_awards),
+                "total_awarded": (latest_award or {}).get("amount", 0),
                 "rank": rank_by_state[s["state"]],
                 "analysis": analysis_by_state.get(s["state"], {"pros": [], "cons": []}),
                 "overview": overview_by_state.get(s["state"]),

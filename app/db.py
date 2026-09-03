@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS status_events (
     source_url TEXT NOT NULL,
     event_date TEXT NOT NULL,
     notes TEXT NOT NULL,
-    confidence TEXT NOT NULL DEFAULT 'confirmed' CHECK (confidence IN ('confirmed', 'unverified'))
+    confidence TEXT NOT NULL DEFAULT 'confirmed' CHECK (confidence IN ('confirmed', 'unverified', 'personal'))
 );
 
 CREATE TABLE IF NOT EXISTS deadlines (
@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS deadlines (
     end_date TEXT,
     source_url TEXT NOT NULL,
     notes TEXT,
-    confidence TEXT NOT NULL DEFAULT 'confirmed' CHECK (confidence IN ('confirmed', 'unverified'))
+    confidence TEXT NOT NULL DEFAULT 'confirmed' CHECK (confidence IN ('confirmed', 'unverified', 'personal'))
 );
 
 CREATE TABLE IF NOT EXISTS state_analysis (

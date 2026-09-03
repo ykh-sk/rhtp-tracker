@@ -8,6 +8,14 @@ function esc(str) {
   return d.innerHTML;
 }
 
+// Capitalizes the first letter of each word without touching existing case
+// elsewhere in the word — "RFA issued" -> "RFA Issued", not "Rfa Issued".
+// Applied only to status labels themselves, never to surrounding sentence
+// text (so "Stage 4 of 5" keeps a lowercase "of").
+function titleCase(str) {
+  return str.replace(/\b\w/g, c => c.toUpperCase());
+}
+
 function splitFlag(notes) {
   const i = notes.indexOf("FLAG:");
   if (i === -1) return { main: notes, flag: null };
@@ -76,7 +84,7 @@ async function boot() {
 
   document.getElementById("footer-note").textContent =
     `Tracking ${STATES.length} states as of ${STATES.reduce((max, s) => {
-      const v = (s.awards[0] || {}).verified_at;
+      const v = (s.current_award || {}).verified_at;
       return v && v > max ? v : max;
     }, "")}.`;
 
@@ -89,6 +97,13 @@ async function boot() {
   document.getElementById("legend").addEventListener("click", e => {
     const el = e.target.closest("[data-status]");
     if (el && !el.disabled) goStatus(el.dataset.status);
+  });
+  document.getElementById("map-toggle").addEventListener("click", e => {
+    const btn = e.target.closest("button[data-metric]");
+    if (!btn) return;
+    mapMetric = btn.dataset.metric;
+    document.querySelectorAll("#map-toggle button").forEach(b => b.classList.toggle("active", b === btn));
+    renderMap();
   });
 
   renderAll();
@@ -145,7 +160,7 @@ function renderDashboard() {
     .filter(c => c.count > 0)
     .map(c => `<span data-status="${esc(c.key)}" class="${currentStatus && currentStatus !== c.key ? "dim" : ""}"
         style="width:${(c.count / STATES.length) * 100}%; background:var(${c.var})"
-        title="${esc(c.key)} — ${c.count} state${c.count === 1 ? "" : "s"}"></span>`)
+        title="${esc(titleCase(c.key))} — ${c.count} state${c.count === 1 ? "" : "s"}"></span>`)
     .join("");
 
   document.getElementById("legend").innerHTML = counts
@@ -155,7 +170,7 @@ function renderDashboard() {
           aria-pressed="${currentStatus === c.key}">
           <span class="step-num">${c.order}</span>
           <span class="dot" style="background:var(${c.var})"></span>
-          ${esc(c.key)} (${c.count})
+          ${esc(titleCase(c.key))} (${c.count})
         </button>`;
       return i < counts.length - 1 ? btn + `<span class="arrow" aria-hidden="true">&rarr;</span>` : btn;
     })
@@ -165,7 +180,7 @@ function renderDashboard() {
   if (currentStatus) {
     const n = STATES.filter(s => s.current_status === currentStatus).length;
     document.getElementById("filter-banner-text").textContent =
-      `Showing "${currentStatus}" — ${n} of ${STATES.length} states. This view is linkable: copy the URL to share it.`;
+      `Showing "${titleCase(currentStatus)}" — ${n} of ${STATES.length} states. This view is linkable: copy the URL to share it.`;
     banner.hidden = false;
   } else {
     banner.hidden = true;
@@ -179,7 +194,7 @@ function renderDashboard() {
   const rows = ordered.map(s => {
     const { main } = splitFlag(latestNote(s));
     const hasFlag = latestNote(s).includes("FLAG:");
-    const sub = s.awards[0] && s.awards[0].subawards_amount;
+    const sub = s.current_award && s.current_award.subawards_amount;
     const recent = recentChange(s);
     return `
       <tr>
@@ -192,11 +207,11 @@ function renderDashboard() {
           <div class="state-agency">${esc(s.lead_agency)}</div>
         </td>
         <td>
-          <span class="stage-pill"><span class="dot" style="background:${stageVar(s.current_status)}"></span>${esc(s.current_status)}</span>
+          <span class="stage-pill"><span class="dot" style="background:${stageVar(s.current_status)}"></span>${esc(titleCase(s.current_status))}</span>
         </td>
         <td class="num amount">${usd(s.total_awarded)}</td>
         <td class="num sub${sub ? "" : " empty"}">
-          ${sub ? `${usd(sub)}<span class="sa-label">${esc(s.awards[0].subawards_label)}</span>` : "—"}
+          ${sub ? `${usd(sub)}<span class="sa-label">${esc(s.current_award.subawards_label)}</span>` : "—"}
         </td>
         <td class="cell-notes" title="${esc(latestNote(s))}">${hasFlag ? '<span class="flag-mark">⚑</span>' : ""}${esc(main)}</td>
         <td class="cell-links">
@@ -208,6 +223,101 @@ function renderDashboard() {
 
   document.getElementById("states-tbody").innerHTML =
     rows || `<tr><td colspan="6" style="text-align:center; color:var(--muted); padding:24px;">No states currently in this stage.</td></tr>`;
+
+  renderMap();
+}
+
+// ---- award map ----
+
+let usTopo = null;
+let mapMetric = "total";
+
+async function ensureUsTopo() {
+  if (!usTopo) {
+    const res = await fetch("https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json");
+    usTopo = await res.json();
+  }
+  return usTopo;
+}
+
+function stateMapValue(s, metric) {
+  if (metric === "sub") {
+    const a = s.current_award;
+    return a && a.subawards_amount ? a.subawards_amount : null;
+  }
+  return s.total_awarded || null;
+}
+
+async function renderMap() {
+  if (typeof d3 === "undefined" || typeof topojson === "undefined") return; // CDN blocked/offline: skip gracefully
+  const container = document.getElementById("us-map");
+  let topo;
+  try {
+    topo = await ensureUsTopo();
+  } catch {
+    container.innerHTML = `<p style="text-align:center; color:var(--muted); font-size:12px;">Map data unavailable right now.</p>`;
+    return;
+  }
+
+  const geo = topojson.feature(topo, topo.objects.states).features;
+  const byName = {};
+  STATES.forEach(s => { byName[s.state] = s; });
+
+  const values = STATES.map(s => stateMapValue(s, mapMetric)).filter(v => v != null);
+  const max = Math.max(1, ...values);
+  const colorScale = d3.scaleSequential(d3.interpolateReds).domain([0, max]);
+
+  const width = 960, height = 600;
+  const projection = d3.geoAlbersUsa().scale(1180).translate([width / 2, height / 2]);
+  const path = d3.geoPath(projection);
+
+  const svg = d3.select(container).selectAll("svg").data([null]).join("svg")
+    .attr("viewBox", `0 0 ${width} ${height}`)
+    .attr("role", "img")
+    .attr("aria-label", "US map colored by state funding");
+
+  const tooltip = d3.select("body").selectAll(".map-tooltip").data([null]).join("div").attr("class", "map-tooltip");
+  tooltip.style("display", "none");
+
+  svg.selectAll("path.state")
+    .data(geo, d => d.properties.name)
+    .join("path")
+    .attr("class", d => "state" + (byName[d.properties.name] ? "" : " untracked"))
+    .attr("d", path)
+    .attr("fill", d => {
+      const s = byName[d.properties.name];
+      if (!s) return "var(--border)";
+      const v = stateMapValue(s, mapMetric);
+      return v == null ? "var(--surface-2)" : colorScale(v);
+    })
+    .on("mousemove", (event, d) => {
+      const s = byName[d.properties.name];
+      const v = s ? stateMapValue(s, mapMetric) : null;
+      const label = s
+        ? (v == null ? "No subawards figure yet" : usd(v))
+        : "Not yet tracked";
+      tooltip
+        .style("display", "block")
+        .style("left", (event.clientX + 14) + "px")
+        .style("top", (event.clientY + 14) + "px")
+        .html(`<div class="mt-state">${esc(d.properties.name)}</div><div class="mt-value">${label}</div>`);
+    })
+    .on("mouseleave", () => tooltip.style("display", "none"))
+    .on("click", (event, d) => {
+      const s = byName[d.properties.name];
+      if (s) location.hash = "state=" + encodeURIComponent(s.state);
+    });
+
+  const steps = [0, 0.25, 0.5, 0.75, 1];
+  document.getElementById("map-legend").innerHTML = `
+    <span class="map-legend-label">Low</span>
+    <div class="map-legend-scale">${steps.map(t => `<span style="background:${colorScale(t * max)}"></span>`).join("")}</div>
+    <span class="map-legend-label">High</span>
+  `;
+
+  document.getElementById("map-caption").textContent = mapMetric === "sub"
+    ? "Colored by subawards/disbursed amount, where a source states one. Light-gray tracked states have no subawards figure yet — that's a stage difference, not a zero. Untracked states are neutral gray."
+    : "Colored by total FY26 award among tracked states. Untracked states are neutral gray.";
 }
 
 function latestConfirmedEvent(s) {
@@ -233,23 +343,27 @@ function renderDetail(name) {
     return;
   }
 
-  const latest = s.awards[0] || {};
+  const latest = s.current_award || {};
   const events = [...s.status_events].sort((a, b) => a.event_date.localeCompare(b.event_date));
 
   const timelineHtml = events.map((e, i) => {
     const unverified = e.confidence === "unverified";
+    const personal = e.confidence === "personal";
+    const flagged = unverified || personal;
+    const dotColor = unverified ? "var(--warn)" : personal ? "var(--personal)" : stageVar(e.status);
+    const tagText = unverified ? "Unverified lead" : personal ? "Personal source" : "";
     const { main, flag } = splitFlag(e.notes);
     return `
       <li>
         <div class="tl-date">${fmtDate(e.event_date)}</div>
         <div class="tl-rail">
-          <span class="tl-dot" style="background:${unverified ? "var(--warn)" : stageVar(e.status)}"></span>
+          <span class="tl-dot" style="background:${dotColor}"></span>
           ${i < events.length - 1 ? '<span class="tl-line"></span>' : ""}
         </div>
         <div>
-          <div class="tl-status">${esc(e.status)}${unverified ? '<span class="caution-tag">Unverified lead</span>' : ""}</div>
-          ${unverified
-            ? `<div class="caution">${esc(main)}</div>`
+          <div class="tl-status">${esc(e.status)}${flagged ? `<span class="caution-tag${personal ? " personal" : ""}">${tagText}</span>` : ""}</div>
+          ${flagged
+            ? `<div class="caution${personal ? " personal" : ""}">${esc(main)}</div>`
             : `<p class="tl-notes">${esc(main)}</p>${flag ? `<div class="flag">FLAG — ${esc(flag)}</div>` : ""}`}
           <a class="tl-source" href="${e.source_url}" target="_blank" rel="noopener">Source ↗</a>
         </div>
@@ -306,7 +420,7 @@ function renderDetail(name) {
       <div>
         <div class="stage-pill">
           <span class="dot" style="background:${stageVar(s.current_status)}"></span>
-          Stage ${stageIndex(s.current_status) + 1} of ${STAGES.length} &mdash; ${esc(s.current_status)}
+          Stage ${stageIndex(s.current_status) + 1} of ${STAGES.length} &mdash; ${esc(titleCase(s.current_status))}
         </div>
         <div class="title-row">
           <h1>${esc(s.state)}</h1>
@@ -363,18 +477,20 @@ function renderCalendar() {
 
   document.getElementById("cal-list").innerHTML = sorted.map(d => {
     const unverified = d.confidence === "unverified";
+    const personal = d.confidence === "personal";
+    const flagged = unverified || personal;
     const closes = d.end_date || d.start_date;
     const n = daysUntil(closes);
     const dayLabel = n > 0 ? `${n} day${n === 1 ? "" : "s"} left` : n === 0 ? "closes today" : "closed";
     const range = d.end_date ? `${fmtDate(d.start_date)} &ndash; ${fmtDate(d.end_date)}` : fmtDate(d.start_date);
     return `
       <div class="cal-item">
-        <div class="cal-when">${range}<span class="cal-days">${dayLabel}</span>${unverified ? '<span class="caution-tag">Unverified</span>' : ""}</div>
+        <div class="cal-when">${range}<span class="cal-days">${dayLabel}</span>${flagged ? `<span class="caution-tag${personal ? " personal" : ""}">${personal ? "Personal" : "Unverified"}</span>` : ""}</div>
         <div class="cal-body">
           <h3>${esc(d.title)}</h3>
           <div class="cal-state">${esc(d.state)}</div>
-          ${unverified
-            ? `<div class="caution">${esc(d.notes || "")}</div>`
+          ${flagged
+            ? `<div class="caution${personal ? " personal" : ""}">${esc(d.notes || "")}</div>`
             : (d.notes ? `<p class="cal-notes">${esc(d.notes)}</p>` : "")}
           <a href="${d.source_url}" target="_blank" rel="noopener">Source ↗</a>
         </div>
