@@ -335,9 +335,10 @@ nav.tabs a.active {
 }
 
 .legend .arrow {
-  color: var(--border);
-  font-size: 13px;
-  padding: 0 1px;
+  color: var(--muted);
+  font-size: 16px;
+  font-weight: 700;
+  padding: 0 2px;
   user-select: none;
 }
 
