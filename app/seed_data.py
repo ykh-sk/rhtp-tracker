@@ -529,6 +529,21 @@ FEDERAL_MILESTONES = [
         "confidence": "confirmed",
     },
     {
+        "title": "Budget Period 1 ends / Budget Period 2 begins (approximate)",
+        "category": "obligation",
+        "start_date": "2026-10-31",
+        "end_date": None,
+        "source_url": "https://apply07.grants.gov/apply/opportunities/instructions/PKG00291485-instructions.pdf",
+        "notes": (
+            "Not a literal CMS-stated date — flagged unverified because it's our own calculation. The NOFO "
+            "states budget periods run \"10 months for the first budget period and 12 months for each "
+            "subsequent budget period,\" starting from the ~Dec 31, 2025 award date; 10 months out lands here. "
+            "CMS does not spell out the exact day itself, so treat this as an approximate marker of when Year 2 "
+            "scoring/funding activity begins, not a hard deadline."
+        ),
+        "confidence": "unverified",
+    },
+    {
         "title": "Deadline to spend FY2026 (Year 1) award funds",
         "category": "obligation",
         "start_date": "2027-09-30",
@@ -540,6 +555,22 @@ FEDERAL_MILESTONES = [
             "FY2026–FY2030); federal fiscal years end September 30, so FY2026 funds must be spent by the end "
             "of FY2027. The NOFO does not spell out an exact day-of-month \"obligation\" cutoff separate from "
             "this spend deadline, so none is stated here."
+        ),
+        "confidence": "confirmed",
+    },
+    {
+        "title": "Policy-action commitment deadline (clawback risk)",
+        "category": "obligation",
+        "start_date": "2027-12-31",
+        "end_date": None,
+        "source_url": "https://apply07.grants.gov/apply/opportunities/instructions/PKG00291485-instructions.pdf",
+        "notes": (
+            "Verbatim from the NOFO's violation-of-agreement section: \"Failure to finalize State policy actions "
+            "proposed in your application by the end of calendar year 2027. States will have until the end of "
+            "calendar year 2028 to enact the relevant policies for factors B.2 and B.4 [Health and lifestyle; "
+            "Nutrition Continuing Medical Education].\" States that pledged policy changes (e.g. licensure "
+            "compacts, scope-of-practice reform) to earn technical-score funding must actually enact them by "
+            "this date or CMS recovers the associated funds."
         ),
         "confidence": "confirmed",
     },
