@@ -82,6 +82,8 @@ async function boot() {
   DEADLINES = deadlinesRes;
   COMMENTARY = commentaryRes;
 
+  document.getElementById("stamp").textContent = `${STATES.length} states · FY26`;
+
   document.getElementById("footer-note").textContent =
     `Tracking ${STATES.length} states as of ${STATES.reduce((max, s) => {
       const v = (s.current_award || {}).verified_at;
@@ -466,7 +468,7 @@ function renderCalendar() {
   document.getElementById("cal-caption").textContent =
     `${confirmedCount} confirmed application window${confirmedCount === 1 ? "" : "s"}` +
     (unverifiedCount ? ` plus ${unverifiedCount} unverified lead${unverifiedCount === 1 ? "" : "s"} (flagged below)` : "") +
-    ` across the 10 states. Most states haven't published a dated RFA window yet — this list only shows deadlines a source states, never an estimate.`;
+    ` across the ${STATES.length} states. Most states haven't published a dated RFA window yet — this list only shows deadlines a source states, never an estimate.`;
 
   if (!DEADLINES.length) {
     document.getElementById("cal-list").innerHTML = `<div class="cal-empty">No confirmed deadlines yet.</div>`;

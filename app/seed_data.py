@@ -444,3 +444,28 @@ STATUS_TAXONOMY = [
     "subawards announced",
     "funds obligated",
 ]
+
+# --- Expansion to the remaining 40 states (2026-09-02 research pass) ---
+# See app/new_states_data.py for the full data and sourcing notes. Merged
+# here via extend/update rather than hand-merged into the lists above so
+# the original 10 states' entries stay untouched and easy to diff.
+from new_states_data import (  # noqa: E402
+    NEW_SOURCES, NEW_AWARDS, NEW_STATUS_EVENTS, NEW_DEADLINES,
+    NEW_PILLARS, NEW_OVERVIEW,
+)
+
+SOURCES.extend(NEW_SOURCES)
+AWARDS.extend(NEW_AWARDS)
+STATUS_EVENTS.extend(NEW_STATUS_EVENTS)
+DEADLINES.extend(NEW_DEADLINES)
+STATE_PILLARS.update(NEW_PILLARS)
+
+for _state, _fields in NEW_OVERVIEW.items():
+    STATE_OVERVIEW[_state] = {
+        "emphasis": _fields["emphasis"],
+        "applicant_profile": None,
+        "contact_name": _fields["contact_name"],
+        "contact_email": _fields["contact_email"],
+        "contact_note": _fields["contact_note"],
+        "updated_at": "2026-09-02",
+    }
