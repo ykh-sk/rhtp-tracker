@@ -463,7 +463,7 @@ STATE_PILLARS.update(NEW_PILLARS)
 for _state, _fields in NEW_OVERVIEW.items():
     STATE_OVERVIEW[_state] = {
         "emphasis": _fields["emphasis"],
-        "applicant_profile": None,
+        "applicant_profile": _fields["applicant_profile"],
         "contact_name": _fields["contact_name"],
         "contact_email": _fields["contact_email"],
         "contact_note": _fields["contact_note"],

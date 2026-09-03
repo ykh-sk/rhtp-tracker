@@ -47,7 +47,7 @@ let STAGES = [];
 let STATES = [];
 let DEADLINES = [];
 let COMMENTARY = [];
-let currentStatus = null;
+let currentStatus = [];
 let currentState = null;
 let currentView = null;
 let currentSort = "stage";
@@ -63,12 +63,21 @@ function stageIndex(status) {
 
 function parseHash() {
   const params = new URLSearchParams(location.hash.replace(/^#/, ""));
-  return { status: params.get("status"), state: params.get("state"), view: params.get("view") };
+  const statusParam = params.get("status");
+  return {
+    status: statusParam ? statusParam.split(",").map(decodeURIComponent) : [],
+    state: params.get("state"),
+    view: params.get("view"),
+  };
 }
 
+// Multi-select: clicking a stage toggles it in/out of the current set
+// rather than replacing it, so several stages can be compared at once.
 function goStatus(status) {
-  const next = status === currentStatus ? null : status;
-  location.hash = next ? "status=" + encodeURIComponent(next) : "";
+  const set = new Set(currentStatus);
+  if (set.has(status)) set.delete(status); else set.add(status);
+  const next = [...set];
+  location.hash = next.length ? "status=" + next.map(encodeURIComponent).join(",") : "";
 }
 
 async function boot() {
@@ -93,7 +102,7 @@ async function boot() {
   document.getElementById("footer-note").textContent = `Tracking ${STATES.length} states as of ${maxVerified}.`;
 
   window.addEventListener("hashchange", renderAll);
-  document.getElementById("filter-clear").addEventListener("click", () => goStatus(currentStatus));
+  document.getElementById("filter-clear").addEventListener("click", () => { location.hash = ""; });
   document.getElementById("segbar").addEventListener("click", e => {
     const el = e.target.closest("[data-status]");
     if (el) goStatus(el.dataset.status);
@@ -142,7 +151,7 @@ function sortStates(list) {
 
 function renderAll() {
   const { status, state, view } = parseHash();
-  currentStatus = state ? null : status;
+  currentStatus = state ? [] : status;
   currentState = state;
   currentView = state ? null : view;
 
@@ -189,16 +198,17 @@ function renderDashboard() {
 
   document.getElementById("segbar").innerHTML = counts
     .filter(c => c.count > 0)
-    .map(c => `<span data-status="${esc(c.key)}" class="${currentStatus && currentStatus !== c.key ? "dim" : ""}"
+    .map(c => `<span data-status="${esc(c.key)}" class="${currentStatus.length && !currentStatus.includes(c.key) ? "dim" : ""}"
         style="width:${(c.count / STATES.length) * 100}%; background:var(${c.var})"
         title="${esc(titleCase(c.key))} — ${c.count} state${c.count === 1 ? "" : "s"}"></span>`)
     .join("");
 
   document.getElementById("legend").innerHTML = counts
     .map((c, i) => {
-      const btn = `<button type="button" class="step${currentStatus === c.key ? " active" : ""}"
+      const active = currentStatus.includes(c.key);
+      const btn = `<button type="button" class="step${active ? " active" : ""}"
           data-status="${esc(c.key)}" ${c.count === 0 ? "disabled" : ""}
-          aria-pressed="${currentStatus === c.key}">
+          aria-pressed="${active}">
           <span class="step-num">${c.order}</span>
           <span class="dot" style="background:var(${c.var})"></span>
           ${esc(titleCase(c.key))} (${c.count})
@@ -208,16 +218,17 @@ function renderDashboard() {
     .join("");
 
   const banner = document.getElementById("filter-banner");
-  if (currentStatus) {
-    const n = STATES.filter(s => s.current_status === currentStatus).length;
+  if (currentStatus.length) {
+    const n = STATES.filter(s => currentStatus.includes(s.current_status)).length;
+    const labels = currentStatus.map(k => `"${titleCase(k)}"`).join(", ");
     document.getElementById("filter-banner-text").textContent =
-      `Showing "${titleCase(currentStatus)}" — ${n} of ${STATES.length} states. This view is linkable: copy the URL to share it.`;
+      `Showing ${labels} — ${n} of ${STATES.length} states. This view is linkable: copy the URL to share it.`;
     banner.hidden = false;
   } else {
     banner.hidden = true;
   }
 
-  const visible = currentStatus ? STATES.filter(s => s.current_status === currentStatus) : STATES;
+  const visible = currentStatus.length ? STATES.filter(s => currentStatus.includes(s.current_status)) : STATES;
   const ordered = sortStates(visible);
 
   const rows = ordered.map(s => {
@@ -319,6 +330,10 @@ async function renderMap() {
   const tooltip = d3.select("body").selectAll(".map-tooltip").data([null]).join("div").attr("class", "map-tooltip");
   tooltip.style("display", "none");
 
+  // When a pipeline-stage filter is active (clicked in the legend/segbar),
+  // echo it on the map: matching states get a bold accent outline, other
+  // tracked states dim — same "dim" convention the segbar already uses, so
+  // the two controls read as one filter rather than two different ideas.
   svg.selectAll("path.state")
     .data(geo, d => d.properties.name)
     .join("path")
@@ -330,6 +345,27 @@ async function renderMap() {
       const v = stateMapValue(s, mapMetric);
       return v == null ? "var(--surface-2)" : colorScale(v);
     })
+    .attr("stroke", d => {
+      const s = byName[d.properties.name];
+      // A hue outside the red fill scale (not --ink) so the outline reads
+      // as a highlight against every fill color, dark reds included.
+      return currentStatus.length && s && currentStatus.includes(s.current_status) ? "var(--accent)" : "var(--surface)";
+    })
+    .attr("stroke-width", d => {
+      const s = byName[d.properties.name];
+      return currentStatus.length && s && currentStatus.includes(s.current_status) ? 3.5 : 1;
+    })
+    .attr("opacity", d => {
+      const s = byName[d.properties.name];
+      return currentStatus.length && s && !currentStatus.includes(s.current_status) ? 0.3 : 1;
+    })
+    .attr("filter", d => {
+      const s = byName[d.properties.name];
+      return currentStatus.length && s && currentStatus.includes(s.current_status)
+        ? "drop-shadow(0 0 3px var(--accent))"
+        : null;
+    })
+    .attr("paint-order", "stroke")
     .on("mousemove", (event, d) => {
       const s = byName[d.properties.name];
       const v = s ? stateMapValue(s, mapMetric) : null;
