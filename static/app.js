@@ -421,7 +421,7 @@ function renderDashboard() {
         <td class="num sub${sub != null ? "" : " empty"}">
           ${sub != null ? `${usd(sub)}<span class="sa-label">${esc(s.current_award.subawards_label)}</span>` : "—"}
         </td>
-        <td class="cell-notes" title="${esc(latestNote(s))}">${hasFlag ? '<span class="flag-mark">⚑</span>' : ""}${esc(main)}</td>
+        <td class="cell-notes" title="${esc(latestNote(s))}"><span class="cell-notes-inner">${hasFlag ? '<span class="flag-mark">⚑</span>' : ""}${esc(main)}</span></td>
         <td class="cell-links">
           <a class="details-link" href="#state=${encodeURIComponent(s.state)}">Details &rarr;</a>
         </td>

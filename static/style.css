@@ -140,15 +140,15 @@ h1 {
 }
 
 .wordmark {
-  height: 72px;
+  height: 64px;
   width: auto;
   max-width: 100%;
   align-self: center;
 }
 
 @media (max-width: 480px) {
-  .wordmark { height: 52px; }
-  .brand-icon { width: 52px; }
+  .wordmark { height: 34px; }
+  .brand-icon { width: 40px; }
 }
 
 /* Theme-swapped image pairs (the wordmark and the icon each ship a light-
@@ -170,7 +170,7 @@ h1 {
 
 .title-row-main {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 10px;
   flex-wrap: wrap;
 }
