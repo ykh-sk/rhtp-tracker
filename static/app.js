@@ -832,4 +832,48 @@ function fmtLoose(s) {
   return s;
 }
 
+// ---- dark mode toggle ----
+// A stored preference (set by the button) always wins; with none stored, the
+// site follows the OS/browser's prefers-color-scheme, same as before this
+// toggle existed. The inline script in index.html's <head> applies any
+// stored choice before first paint so there's no flash of the wrong theme.
+// localStorage access is wrapped because this runs before boot() — an
+// exception here (e.g. storage blocked by a privacy setting) must not take
+// the rest of the page down with it.
+function getStoredTheme() {
+  try { return localStorage.getItem("theme"); } catch { return null; }
+}
+
+function setStoredTheme(value) {
+  try { localStorage.setItem("theme", value); } catch { /* ignore — toggle still works for this page view */ }
+}
+
+function effectiveTheme() {
+  const stored = getStoredTheme();
+  if (stored === "dark" || stored === "light") return stored;
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+
+function updateThemeToggleIcon() {
+  const btn = document.getElementById("theme-toggle");
+  const dark = effectiveTheme() === "dark";
+  btn.textContent = dark ? "☀️" : "🌙";
+  btn.setAttribute("aria-label", dark ? "Switch to light mode" : "Switch to dark mode");
+}
+
+function initThemeToggle() {
+  const btn = document.getElementById("theme-toggle");
+  updateThemeToggleIcon();
+  btn.addEventListener("click", () => {
+    const next = effectiveTheme() === "dark" ? "light" : "dark";
+    setStoredTheme(next);
+    document.documentElement.setAttribute("data-theme", next);
+    updateThemeToggleIcon();
+  });
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
+    if (!getStoredTheme()) updateThemeToggleIcon();
+  });
+}
+
+initThemeToggle();
 boot();
