@@ -23,6 +23,18 @@ function daysUntil(iso) {
   return Math.round(ms / 86400000);
 }
 
+const RECENT_CHANGE_WINDOW_DAYS = 5;
+
+// Most recent changelog entry for a state, if it's within the "recently
+// updated" window — null otherwise. Drives the pink "Updated" badge; badges
+// disappear on their own once an edit ages out, no manual cleanup needed.
+function recentChange(s) {
+  const log = s.changelog || [];
+  if (!log.length) return null;
+  const latest = log[0];
+  return -daysUntil(latest.changed_at) <= RECENT_CHANGE_WINDOW_DAYS ? latest : null;
+}
+
 let STAGES = [];
 let STATES = [];
 let DEADLINES = [];
@@ -168,11 +180,13 @@ function renderDashboard() {
     const { main } = splitFlag(latestNote(s));
     const hasFlag = latestNote(s).includes("FLAG:");
     const sub = s.awards[0] && s.awards[0].subawards_amount;
+    const recent = recentChange(s);
     return `
       <tr>
         <td class="cell-state">
           <div class="state-name-row">
             <div class="state-name">${esc(s.state)}</div>
+            ${recent ? `<span class="updated-badge" title="${esc(recent.summary)}">Updated</span>` : ""}
             <a class="official-badge" href="${s.official_url}" target="_blank" rel="noopener">Official ↗</a>
           </div>
           <div class="state-agency">${esc(s.lead_agency)}</div>
@@ -248,11 +262,13 @@ function renderDetail(name) {
   const cons = s.analysis.cons || [];
   const overview = s.overview || {};
   const pillars = s.pillars || [];
+  const recent = recentChange(s);
 
   const overviewHtml = `
     <div class="overview-section">
       <h2>Program overview</h2>
       <p class="overview-caption">A brief summary derived from the sources on this page — not a direct quote from the state program. See History below for the underlying facts it's based on.</p>
+      ${recent ? `<div class="changelog-banner"><strong>Updated ${fmtDate(recent.changed_at)}:</strong> ${esc(recent.summary)}</div>` : ""}
       <div class="overview-grid">
         <div>
           <div class="overview-field">
@@ -343,7 +359,7 @@ function renderCalendar() {
     return;
   }
 
-  const sorted = [...DEADLINES].sort((a, b) => a.start_date.localeCompare(b.start_date));
+  const sorted = [...DEADLINES].sort((a, b) => b.start_date.localeCompare(a.start_date));
 
   document.getElementById("cal-list").innerHTML = sorted.map(d => {
     const unverified = d.confidence === "unverified";

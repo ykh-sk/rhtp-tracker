@@ -24,6 +24,36 @@ python3 app/main.py   # serves the dashboard at http://localhost:5050
   (unverified ones render with a caution flag instead of being dropped).
 - `state_analysis` — editorial pros/cons per state, clearly separated from sourced facts.
 - `commentary` — third-party opinion/analysis/investigative/news links, shown on their own page.
+- `state_overview` / `state_pillars` — the Program Overview section (emphasis, pillars, applicant
+  profile, contact). `contact_email` is left `NULL` with a `contact_note` explaining why whenever a
+  state hasn't published one — never guessed or constructed from a name.
+- `state_changelog` — see "Update policy" below.
+
+## Update policy
+
+This site gets re-checked and edited roughly every couple of days. Two different kinds of "update"
+need different handling:
+
+**Sourced facts** (`status_events`, `deadlines`, award figures) — already append-only. A correction is
+a *new* dated row referencing what changed; the original stays visible. Never edit these rows in place.
+
+**Editorial/summary content** (`state_overview`, `state_pillars`, `state_analysis`) — these are
+"current snapshot" fields, not a thread. The rule for editing them:
+
+- **Cosmetic** (wording, typo fixes, tightening a sentence with no new facts) — just edit it. No
+  changelog entry, no visible notice. The audience doesn't need to know a sentence got smoother.
+- **Material** (a number changes, a contact appears, a pillar list changes, a status/stage moves,
+  anything that would change someone's actual decision) — add a row to `state_changelog`
+  (`state`, `changed_at`, `summary`) describing what changed, in `app/seed_data.py`'s
+  `STATE_CHANGELOG` list, and bump that state's `updated_at` in `STATE_OVERVIEW` to the same date.
+
+A state with a changelog entry from the last 5 days (`RECENT_CHANGE_WINDOW_DAYS` in `static/app.js`)
+gets a pink "Updated" badge next to its name on the dashboard and a banner on its detail page showing
+the changelog summary — then the badge quietly disappears once it ages out. No manual cleanup needed.
+Adjust the 5-day window there if the re-check cadence changes.
+
+When in doubt about cosmetic vs. material: if it would be *wrong* for a returning visitor to keep
+believing what the old text said, it's material.
 
 Status taxonomy: `plan approved` → `admin structure named` → `RFA issued` → `subawards announced` → `funds obligated`.
 

@@ -338,6 +338,7 @@ STATE_OVERVIEW = {
         "contact_name": None,
         "contact_email": None,
         "contact_note": "No public contact email found in sourced materials.",
+        "updated_at": "2026-09-02",
     },
     "Kentucky": {
         "emphasis": "Five branded initiatives are administered together under a single coordinating body (\"A3 Team\"), with RFAs released per initiative.",
@@ -345,6 +346,7 @@ STATE_OVERVIEW = {
         "contact_name": None,
         "contact_email": None,
         "contact_note": "No public contact email found in sourced materials.",
+        "updated_at": "2026-09-02",
     },
     "Ohio": {
         "emphasis": "Workforce development was the first priority funded, ahead of other possible tracks.",
@@ -352,6 +354,7 @@ STATE_OVERVIEW = {
         "contact_name": None,
         "contact_email": None,
         "contact_note": "No public contact email found in sourced materials.",
+        "updated_at": "2026-09-02",
     },
     "Tennessee": {
         "emphasis": "Uses a rolling, recurring RFA cycle rather than a single funding round, with new opportunities posted weekly.",
@@ -359,6 +362,7 @@ STATE_OVERVIEW = {
         "contact_name": None,
         "contact_email": None,
         "contact_note": "No public contact email found in sourced materials.",
+        "updated_at": "2026-09-02",
     },
     "Virginia": {
         "emphasis": "Program branded \"VA Rural Vitality\"; administrative staffing was still being built out as of the most recent sourced update.",
@@ -366,6 +370,7 @@ STATE_OVERVIEW = {
         "contact_name": None,
         "contact_email": None,
         "contact_note": "No public contact email found in sourced materials.",
+        "updated_at": "2026-09-02",
     },
     "North Carolina": {
         "emphasis": "Combines standing regional infrastructure (hubs, an infrastructure fund) with targeted, topic-specific grant rounds.",
@@ -373,6 +378,7 @@ STATE_OVERVIEW = {
         "contact_name": "Maggie Woods (RHTP Director)",
         "contact_email": None,
         "contact_note": "A director is named publicly; no direct email address has been published in sourced materials.",
+        "updated_at": "2026-09-02",
     },
     "Pennsylvania": {
         "emphasis": "Runs multiple narrow, sequential funding rounds, each scoped to a specific technology or service track rather than one broad RFA.",
@@ -380,6 +386,7 @@ STATE_OVERVIEW = {
         "contact_name": None,
         "contact_email": None,
         "contact_note": "No public contact email found in sourced materials.",
+        "updated_at": "2026-09-02",
     },
     "Georgia": {
         "emphasis": "Disburses under a single branded program (GREAT Health) in sequential phases rather than one lump award.",
@@ -387,6 +394,7 @@ STATE_OVERVIEW = {
         "contact_name": None,
         "contact_email": None,
         "contact_note": "No public contact email found in sourced materials.",
+        "updated_at": "2026-09-02",
     },
     "Alabama": {
         "emphasis": "Runs the broadest initiative slate of the 10 states tracked here — 10 planned initiatives total, with the first 5 already open and a second set of 5 approved.",
@@ -394,6 +402,7 @@ STATE_OVERVIEW = {
         "contact_name": None,
         "contact_email": None,
         "contact_note": "No public contact email found in sourced materials.",
+        "updated_at": "2026-09-02",
     },
     "Mississippi": {
         "emphasis": "Centralized under a dedicated RHTP Office reporting to the Governor's Office, rather than an existing health-agency division.",
@@ -401,6 +410,7 @@ STATE_OVERVIEW = {
         "contact_name": "Richard Grimes (RHTP Office Director)",
         "contact_email": None,
         "contact_note": "A director is named publicly; no direct email address has been published in sourced materials.",
+        "updated_at": "2026-09-02",
     },
 }
 
@@ -416,6 +426,16 @@ STATE_PILLARS = {
     "Alabama": ["ARHTP (5 of 10 initiatives open)"],
     "Mississippi": ["EMS Capacity Assessment (unverified lead)", "Psychiatric Emergency Services / Workforce Expansion (unverified lead)"],
 }
+
+# One entry per MATERIAL change made to a state's overview/pillars/analysis/
+# award figures after initial publication (a number correction, a contact
+# appearing, a pillar list changing) — not for copy-editing. Empty at launch
+# since there's no prior version to have changed from yet; add an entry here
+# (and bump that state's "updated_at" in STATE_OVERVIEW) whenever a real
+# future edit qualifies. See README for the full policy.
+STATE_CHANGELOG = [
+    # {"state": "...", "changed_at": "YYYY-MM-DD", "summary": "..."},
+]
 
 STATUS_TAXONOMY = [
     "plan approved",

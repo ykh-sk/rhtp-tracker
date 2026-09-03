@@ -8,7 +8,7 @@ Safe to re-run: clears and reloads all rows. Usage:
 from db import get_connection, init_db, execute, execute_many
 from seed_data import (
     SOURCES, AWARDS, STATUS_EVENTS, DEADLINES, ANALYSIS, COMMENTARY,
-    STATE_OVERVIEW, STATE_PILLARS,
+    STATE_OVERVIEW, STATE_PILLARS, STATE_CHANGELOG,
 )
 
 
@@ -16,6 +16,7 @@ def seed():
     init_db()
     conn = get_connection()
 
+    execute(conn, "DELETE FROM state_changelog")
     execute(conn, "DELETE FROM state_pillars")
     execute(conn, "DELETE FROM state_overview")
     execute(conn, "DELETE FROM commentary")
@@ -70,8 +71,8 @@ def seed():
     overview_rows = [{"state": state, **entry} for state, entry in STATE_OVERVIEW.items()]
     execute_many(
         conn,
-        """INSERT INTO state_overview (state, emphasis, applicant_profile, contact_name, contact_email, contact_note)
-           VALUES (%(state)s, %(emphasis)s, %(applicant_profile)s, %(contact_name)s, %(contact_email)s, %(contact_note)s)""",
+        """INSERT INTO state_overview (state, emphasis, applicant_profile, contact_name, contact_email, contact_note, updated_at)
+           VALUES (%(state)s, %(emphasis)s, %(applicant_profile)s, %(contact_name)s, %(contact_email)s, %(contact_note)s, %(updated_at)s)""",
         overview_rows,
     )
 
@@ -85,12 +86,19 @@ def seed():
         pillar_rows,
     )
 
+    if STATE_CHANGELOG:
+        execute_many(
+            conn,
+            "INSERT INTO state_changelog (state, changed_at, summary) VALUES (%(state)s, %(changed_at)s, %(summary)s)",
+            STATE_CHANGELOG,
+        )
+
     conn.commit()
     conn.close()
     print(
         f"Seeded {len(SOURCES)} sources, {len(AWARDS)} awards, {len(STATUS_EVENTS)} status events, "
         f"{len(DEADLINES)} deadlines, {len(COMMENTARY)} commentary links, {len(analysis_rows)} analysis rows, "
-        f"{len(overview_rows)} overviews, {len(pillar_rows)} pillars."
+        f"{len(overview_rows)} overviews, {len(pillar_rows)} pillars, {len(STATE_CHANGELOG)} changelog entries."
     )
 
 

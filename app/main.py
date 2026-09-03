@@ -37,6 +37,7 @@ def api_states():
     analysis = rows_to_dicts(query(conn, "SELECT * FROM state_analysis ORDER BY state, kind, sort_order"))
     overviews = rows_to_dicts(query(conn, "SELECT * FROM state_overview"))
     pillars = rows_to_dicts(query(conn, "SELECT * FROM state_pillars ORDER BY state, sort_order"))
+    changelog = rows_to_dicts(query(conn, "SELECT * FROM state_changelog ORDER BY state, changed_at DESC"))
     conn.close()
 
     awards_by_state = {}
@@ -53,6 +54,9 @@ def api_states():
     pillars_by_state = {}
     for p in pillars:
         pillars_by_state.setdefault(p["state"], []).append(p["name"])
+    changelog_by_state = {}
+    for c in changelog:
+        changelog_by_state.setdefault(c["state"], []).append(c)
 
     ranked = sorted(sources, key=lambda s: sum(a["amount"] for a in awards_by_state.get(s["state"], [])), reverse=True)
     rank_by_state = {s["state"]: i + 1 for i, s in enumerate(ranked)}
@@ -74,6 +78,7 @@ def api_states():
                 "analysis": analysis_by_state.get(s["state"], {"pros": [], "cons": []}),
                 "overview": overview_by_state.get(s["state"]),
                 "pillars": pillars_by_state.get(s["state"], []),
+                "changelog": changelog_by_state.get(s["state"], []),
             }
         )
     return jsonify(

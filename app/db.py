@@ -68,7 +68,19 @@ CREATE TABLE IF NOT EXISTS state_overview (
     applicant_profile TEXT,
     contact_name TEXT,
     contact_email TEXT,
-    contact_note TEXT
+    contact_note TEXT,
+    updated_at TEXT NOT NULL
+);
+
+-- One row per MATERIAL change to a state's overview/pillars/analysis/award
+-- figures (a number, a status, a contact, a pillar list changing) — not for
+-- wording/copy-editing touch-ups. This is what "Updated" badges read from,
+-- and it's the audience-facing record of what changed and why.
+CREATE TABLE IF NOT EXISTS state_changelog (
+    id SERIAL PRIMARY KEY,
+    state TEXT NOT NULL REFERENCES sources(state),
+    changed_at TEXT NOT NULL,
+    summary TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS state_pillars (
