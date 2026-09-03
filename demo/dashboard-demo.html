@@ -1,0 +1,1066 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>RHTP Funding Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+  :root {
+    --bg: #f3f6f5;
+    --surface: #ffffff;
+    --surface-2: #eaf0ee;
+    --ink: #16211d;
+    --muted: #5b6a64;
+    --border: #d7e0dc;
+    --accent: #2e6e5e;
+    --accent-soft: #e3efeb;
+    --warn: #a9660d;
+    --warn-bg: #fbeedc;
+    --stage-1: #a7b3ae;
+    --stage-2: #7da398;
+    --stage-3: #4f8b79;
+    --stage-4: #2e6e5e;
+    --stage-5: #1b4a3f;
+    --shadow: 0 1px 2px rgba(22, 33, 29, 0.06);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #101513;
+      --surface: #1a211e;
+      --surface-2: #212a26;
+      --ink: #e7eeec;
+      --muted: #93a39c;
+      --border: #2b3733;
+      --accent: #6fbfa8;
+      --accent-soft: #1e3a33;
+      --warn: #e3a94c;
+      --warn-bg: #3a2a12;
+      --stage-1: #5b6b67;
+      --stage-2: #6b958a;
+      --stage-3: #4fa98f;
+      --stage-4: #6fbfa8;
+      --stage-5: #9be0c9;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #101513;
+    --surface: #1a211e;
+    --surface-2: #212a26;
+    --ink: #e7eeec;
+    --muted: #93a39c;
+    --border: #2b3733;
+    --accent: #6fbfa8;
+    --accent-soft: #1e3a33;
+    --warn: #e3a94c;
+    --warn-bg: #3a2a12;
+    --stage-1: #5b6b67;
+    --stage-2: #6b958a;
+    --stage-3: #4fa98f;
+    --stage-4: #6fbfa8;
+    --stage-5: #9be0c9;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 28px 56px;
+  }
+
+  /* ---- masthead ---- */
+  header.masthead {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 40px 0 22px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 28px;
+  }
+
+  .kicker {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11.5px;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 8px;
+  }
+
+  h1 {
+    font-family: "IBM Plex Serif", Georgia, serif;
+    font-weight: 600;
+    font-size: 30px;
+    margin: 0;
+    text-wrap: balance;
+    letter-spacing: -0.01em;
+  }
+
+  .stamp {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12px;
+    color: var(--muted);
+    text-align: right;
+    line-height: 1.6;
+  }
+
+  .stamp strong { color: var(--ink); font-weight: 500; }
+
+  /* ---- summary ---- */
+  .summary {
+    display: grid;
+    grid-template-columns: auto auto 1fr;
+    gap: 36px;
+    align-items: end;
+    padding: 4px 0 30px;
+    margin-bottom: 30px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .metric .value {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 26px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+  }
+
+  .metric .label {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  .pipeline {
+    min-width: 260px;
+  }
+
+  .pipeline .label {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .segbar {
+    display: flex;
+    height: 8px;
+    border-radius: 4px;
+    overflow: hidden;
+    background: var(--surface-2);
+  }
+
+  .segbar span {
+    display: block;
+    height: 100%;
+    cursor: pointer;
+    transition: opacity 120ms ease;
+  }
+
+  .segbar span.dim { opacity: 0.32; }
+
+  .segbar-caption {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 4px;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    margin-top: 12px;
+  }
+
+  .legend .arrow {
+    color: var(--border);
+    font-size: 13px;
+    padding: 0 1px;
+    user-select: none;
+  }
+
+  .legend .step {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font: inherit;
+    font-size: 11.5px;
+    color: var(--muted);
+    white-space: nowrap;
+    background: none;
+    border: 1px solid transparent;
+    border-radius: 7px;
+    padding: 5px 9px 5px 6px;
+    cursor: pointer;
+  }
+
+  .legend .step:hover:not(:disabled) { background: var(--surface-2); }
+
+  .legend .step:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+
+  .legend .step.active {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+    color: var(--ink);
+  }
+
+  .legend .step-num {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 9.5px;
+    font-weight: 600;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: var(--surface-2);
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+  }
+
+  .legend .step.active .step-num {
+    background: var(--accent);
+    color: var(--surface);
+  }
+
+  .legend .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex: none;
+  }
+
+  .filter-banner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-top: 12px;
+    padding: 8px 12px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    font-size: 12px;
+    color: var(--ink);
+  }
+
+  .filter-banner[hidden] { display: none; }
+
+  .filter-banner button {
+    font: inherit;
+    font-size: 11.5px;
+    color: var(--ink);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 4px 9px;
+    cursor: pointer;
+  }
+
+  .filter-banner button:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ---- grid ---- */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(272px, 1fr));
+    gap: 14px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .card .stripe { height: 3px; }
+
+  .card .body {
+    padding: 16px 18px 18px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+
+  .card .stage-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+
+  .card .stage-row .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex: none;
+  }
+
+  .title-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .card h2 {
+    font-family: "IBM Plex Serif", Georgia, serif;
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 2px;
+  }
+
+  .official-badge {
+    flex: none;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 0.01em;
+    color: var(--accent);
+    text-decoration: none;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 7px;
+    white-space: nowrap;
+    margin-top: 1px;
+  }
+
+  .official-badge:hover, .official-badge:focus-visible {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    text-decoration: none;
+  }
+
+  .card .agency {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  .card .amount {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 21px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    margin-bottom: 2px;
+  }
+
+  .card .amount-label {
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+
+  .subawards-line {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11.5px;
+    font-variant-numeric: tabular-nums;
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+
+  .subawards-line .sa-label {
+    font-family: "IBM Plex Sans", sans-serif;
+    color: var(--muted);
+    font-weight: 400;
+  }
+
+  .card .notes {
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--ink);
+    margin-bottom: 12px;
+  }
+
+  .card .flag {
+    display: block;
+    margin-top: 8px;
+    background: var(--warn-bg);
+    color: var(--warn);
+    padding: 7px 9px;
+    border-radius: 5px;
+    font-size: 11.5px;
+    line-height: 1.45;
+    font-weight: 500;
+  }
+
+  .card .links {
+    margin-top: 2px;
+    padding-top: 12px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    border-top: 1px solid var(--border);
+  }
+
+  .card a {
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .card a:hover, .card a:focus-visible { text-decoration: underline; }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .card .links .details {
+    font-weight: 600;
+    margin-right: auto;
+  }
+
+  .card .links .ext {
+    color: var(--muted);
+    font-weight: 400;
+  }
+
+  .card .links .ext:hover { color: var(--accent); }
+
+  /* ---- detail page ---- */
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--accent);
+    text-decoration: none;
+    margin-bottom: 22px;
+  }
+
+  .back-link:hover { text-decoration: underline; }
+
+  .detail-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding-bottom: 22px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 26px;
+  }
+
+  .detail-head .title-row { align-items: center; gap: 12px; }
+
+  .detail-head h1 {
+    font-family: "IBM Plex Serif", Georgia, serif;
+    font-size: 28px;
+    font-weight: 600;
+    margin: 6px 0 2px;
+    text-wrap: balance;
+  }
+
+  .detail-head .official-badge { font-size: 11px; padding: 5px 9px; margin-top: 8px; }
+
+  .detail-head .agency { font-size: 13px; color: var(--muted); }
+
+  .detail-amount { text-align: right; }
+  .detail-amount .amount { font-size: 26px; margin-bottom: 0; }
+  .detail-amount .subawards-line { margin-bottom: 0; }
+
+  .detail-body {
+    display: grid;
+    grid-template-columns: 1fr 240px;
+    gap: 40px;
+  }
+
+  @media (max-width: 640px) {
+    .detail-body { grid-template-columns: 1fr; }
+  }
+
+  .detail-main h2, .detail-side h2 {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 12px;
+    font-weight: 600;
+  }
+
+  .detail-main p {
+    font-size: 14.5px;
+    line-height: 1.7;
+    max-width: 62ch;
+    margin: 0 0 4px;
+  }
+
+  .detail-side {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    border-left: 1px solid var(--border);
+    padding-left: 24px;
+  }
+
+  .detail-side a {
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .detail-side a:hover { text-decoration: underline; }
+
+  /* ---- comparison / applicant notes ---- */
+  .compare {
+    grid-column: 1 / -1;
+    margin-top: 34px;
+    padding-top: 28px;
+    border-top: 1px solid var(--border);
+  }
+
+  .compare-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+
+  .compare-head h2 {
+    font-family: "IBM Plex Serif", Georgia, serif;
+    font-size: 17px;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .compare-caption {
+    font-size: 11.5px;
+    color: var(--muted);
+    max-width: 62ch;
+    margin: 0 0 18px;
+    line-height: 1.5;
+  }
+
+  .rank-line {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12px;
+    color: var(--ink);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 6px 14px;
+    margin-bottom: 22px;
+  }
+
+  .rank-line strong { font-weight: 600; }
+
+  .pros-cons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+  }
+
+  @media (max-width: 640px) {
+    .pros-cons { grid-template-columns: 1fr; }
+  }
+
+  .pros-cons h3 {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin: 0 0 10px;
+  }
+
+  .pros-cons .pros h3 { color: var(--accent); }
+  .pros-cons .cons h3 { color: var(--warn); }
+
+  .pros-cons ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+  }
+
+  .pros-cons li {
+    font-size: 13px;
+    line-height: 1.55;
+    padding-left: 18px;
+    position: relative;
+  }
+
+  .pros-cons li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 7px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+  }
+
+  .pros-cons .pros li::before { background: var(--accent); }
+  .pros-cons .cons li::before { background: var(--warn); }
+
+  footer {
+    padding-top: 32px;
+    font-size: 11.5px;
+    color: var(--muted);
+  }
+
+  .demo-banner {
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11.5px;
+    text-align: center;
+    padding: 7px;
+    letter-spacing: 0.03em;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .card { transition: transform 120ms ease, box-shadow 120ms ease; }
+    .card:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(22,33,29,0.10); }
+  }
+</style>
+</head>
+<body>
+
+<div class="demo-banner">LAYOUT DEMO — static preview, seed data embedded, no live server</div>
+
+<div class="wrap">
+  <header class="masthead">
+    <div>
+      <p class="kicker">Rural Health Transformation Program</p>
+      <h1>Funding Tracker</h1>
+    </div>
+    <div class="stamp">verified <strong>2026-09-02</strong><br>10 states &middot; FY26</div>
+  </header>
+
+  <div id="dashboard">
+    <div class="summary">
+      <div class="metric">
+        <div class="value" id="m-states">—</div>
+        <div class="label">states tracked</div>
+      </div>
+      <div class="metric">
+        <div class="value" id="m-total">—</div>
+        <div class="label">total awarded, FY26</div>
+      </div>
+      <div class="pipeline">
+        <div class="label">funding pipeline — 5 stages, in order</div>
+        <div class="segbar" id="segbar"></div>
+        <div class="segbar-caption"><span>Earliest</span><span>Most advanced</span></div>
+        <div class="legend" id="legend"></div>
+        <div class="filter-banner" id="filter-banner" hidden>
+          <span id="filter-banner-text"></span>
+          <button type="button" id="filter-clear">Clear filter</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid" id="grid"></div>
+  </div>
+
+  <div id="detail" hidden></div>
+
+  <footer>Data verified 2026-09-02. This is a static layout demo — the live app pulls the same data from the SQLite-backed API.</footer>
+</div>
+
+<script>
+const STAGES = [
+  { key: "plan approved", var: "--stage-1" },
+  { key: "admin structure named", var: "--stage-2" },
+  { key: "RFA issued", var: "--stage-3" },
+  { key: "subawards announced", var: "--stage-4" },
+  { key: "funds obligated", var: "--stage-5" },
+];
+
+const STATES = [
+  {
+    state: "West Virginia", lead_agency: "WV Department of Health",
+    official_url: "https://health.wv.gov/rural-health-transformation-program",
+    amount: 199000000, status: "subawards announced", verified_at: "2026-09-02",
+    latest_source: "https://governor.wv.gov/article/governor-morrisey-announces-first-2856-million-rural-health-transformation-funding",
+    notes: "First $28.56M tranche opened for MSCF, HealthTech Appalachia, Connected Care Grid.",
+    flag: "WV Dept of Health page cites $199M award; a hospital-association source cited $233.5M — needs reconciliation, do not treat as resolved.",
+    subawardsAmount: 28560000, subawardsLabel: "first tranche opened",
+    pros: [
+      "Subawards are already open across three named initiatives (MSCF, HealthTech Appalachia, Connected Care Grid) — a concrete path to funding right now, not a future promise.",
+      "Multiple parallel tracks mean more than one way in, depending on what an applicant does.",
+    ],
+    cons: [
+      "The total award figure is disputed ($199M official vs. $233.5M reported elsewhere) — confirm the number before relying on it for planning.",
+      "Documentation is split across three initiative-specific pages rather than one central RFA.",
+    ],
+  },
+  {
+    state: "Kentucky", lead_agency: "Dept for Public Health (\"A3 Team\")",
+    official_url: "https://ruralhealthplan.ky.gov/Pages/index.aspx",
+    amount: 212900000, status: "RFA issued", verified_at: "2026-09-02",
+    latest_source: "https://www.kentuckytoday.com/news/kentuckys-rural-health-transformation-plan-secures-212-9m-in-federal-funding/article_2adc2281-3461-4430-995d-07f6a6973df4.html",
+    notes: "5 branded initiatives (PoWERing, Rooted in Health, Crisis to Care, Rapid Response to Recovery, Rural Community Hubs) via \"A3 Team\".",
+    pros: [
+      "Five clearly branded initiatives make it easier to identify which track fits a given applicant.",
+      "One of the larger total awards among the 10 states, suggesting room for multiple funded projects.",
+    ],
+    cons: [
+      "Still pre-award — RFA issued but no subawards announced yet, so expect a longer runway before funds are disbursed.",
+    ],
+  },
+  {
+    state: "Ohio", lead_agency: "Ohio Department of Health",
+    official_url: "https://odh.ohio.gov/know-our-programs/rural-health-transformation-program/rural-health-transformation-program",
+    amount: 202000000, status: "subawards announced", verified_at: "2026-09-02",
+    latest_source: "https://governor.ohio.gov/media/news-and-media/governor-dewine-announces-first-rural-health-transformation-program-award-to-ohio-university-for-10-million",
+    notes: "First award: $10M to Ohio University for workforce (\"Health Workforce Ohio\").",
+    subawardsAmount: 10000000, subawardsLabel: "first award announced",
+    pros: [
+      "A first award is already made and public — proof the pipeline is moving and a working example to reference in an application.",
+    ],
+    cons: [
+      "Only $10M of the $202M total has been publicized so far — criteria and scope for future rounds are still thin.",
+    ],
+  },
+  {
+    state: "Tennessee", lead_agency: "Tennessee Department of Health",
+    official_url: "https://www.tn.gov/health/rural.html",
+    amount: 206888882, status: "RFA issued", verified_at: "2026-09-02",
+    latest_source: "https://www.tn.gov/health/news/2026/5/15/tennessee-to-release-1st-grant-funding-opportunity-of-rural-health-transformation-program.html",
+    notes: "Rolling RFAs released weekly through July 10, 2026; 30-day application windows.",
+    pros: [
+      "Rolling weekly RFA releases with defined 30-day windows give a predictable application calendar.",
+    ],
+    cons: [
+      "Because RFAs roll out over months, applicants need to actively monitor for the specific opportunity relevant to them.",
+      "No subawards announced yet.",
+    ],
+  },
+  {
+    state: "Virginia", lead_agency: "HHR / DMAS",
+    official_url: "https://www.ruralhealthtransformationva.virginia.gov/",
+    amount: 189544888, status: "admin structure named", verified_at: "2026-09-02",
+    latest_source: "https://dmas.virginia.gov/data-reporting/programs-services/rural-health-transformation/",
+    notes: "DMAS hiring core team in early 2026; program branded \"VA Rural Vitality.\" Sparsest official documentation of the 10 — verify further before treating as current.",
+    pros: [
+      "Program branding (\"VA Rural Vitality\") and DMAS ownership are established, giving applicants a clear point of contact as the program matures.",
+    ],
+    cons: [
+      "Sparsest official documentation of the 10 states — no RFA or subaward details published yet.",
+      "Smallest total award among the 10 states tracked here.",
+    ],
+  },
+  {
+    state: "North Carolina", lead_agency: "NCDHHS Office of Rural Health",
+    official_url: "https://www.ncdhhs.gov/divisions/office-rural-health/rural-health-transformation-program",
+    amount: 213000000, status: "subawards announced", verified_at: "2026-09-02",
+    latest_source: "https://www.ncdhhs.gov/divisions/office-rural-health/rural-health-transformation-program",
+    notes: "NC ROOTS hubs and Rural Health Infrastructure Fund (RHIF) launched. RHTP Director named (Maggie Woods).",
+    pros: [
+      "A named program director and two launched structures (NC ROOTS hubs, RHIF) suggest real operating capacity, not just a funding announcement.",
+    ],
+    cons: [
+      "No specific subaward dollar figure has been published yet, making it hard to gauge how much of the $213M has actually moved.",
+    ],
+  },
+  {
+    state: "Pennsylvania", lead_agency: "PA Dept of Human Services",
+    official_url: "https://www.pa.gov/agencies/dhs/programs-services/healthcare/rural-health",
+    amount: 193000000, status: "subawards announced", verified_at: "2026-09-02",
+    latest_source: "https://www.pa.gov/agencies/dhs/programs-services/healthcare/rural-health/rhtp-funding-opportunities",
+    notes: "EHR/HIO onboarding payment round opened July 27–Aug 14, 2026; $1.8M across 6 awards.",
+    subawardsAmount: 1800000, subawardsLabel: "6 awards, EHR/HIO round",
+    pros: [
+      "A recent, concrete round (closed within the last month) shows the program is actively disbursing funds, not just planning.",
+    ],
+    cons: [
+      "That round is narrow (EHR/HIO onboarding only) and small relative to the $193M total — most of the program is still unallocated.",
+    ],
+  },
+  {
+    state: "Georgia", lead_agency: "Dept of Community Health",
+    official_url: "https://greathealth.georgia.gov/faqs",
+    amount: 218862169, status: "subawards announced", verified_at: "2026-09-02",
+    latest_source: "https://dch.georgia.gov/announcement/2026-07-16/georgia-issues-30-million-phase-2-great-health-awards-advance-rural",
+    notes: "GREAT Health program; Phase 1 ($12.73M, June 8) + Phase 2 ($30.6M, July 16) = $43.3M committed to date.",
+    subawardsAmount: 43300000, subawardsLabel: "committed across 2 phases",
+    pros: [
+      "Largest total award of the 10 states, plus two funded phases already committed — sustained disbursement, not a one-off.",
+    ],
+    cons: [
+      "$43.3M committed is still a small fraction of the $218.9M total — most capacity remains undecided.",
+    ],
+  },
+  {
+    state: "Alabama", lead_agency: "ADECA",
+    official_url: "https://adeca.alabama.gov/alruralhealth/",
+    amount: 203404327, status: "subawards announced", verified_at: "2026-09-02",
+    latest_source: "https://governor.alabama.gov/newsroom/2026/08/governor-ivey-announces-first-grants-in-major-new-rural-healthcare-program-totaling-more-than-144-million/",
+    notes: "ARHTP; 138 grants totaling $144M across 5 of 11 planned initiatives, administered by ADECA.",
+    subawardsAmount: 144000000, subawardsLabel: "138 grants, 5 of 11 initiatives",
+    pros: [
+      "By far the most subaward activity of the 10 states — 138 grants already made, the strongest evidence that money is reaching recipients.",
+      "5 of 11 planned initiatives are already open, with more expected.",
+    ],
+    cons: [
+      "6 of 11 planned initiatives haven't opened yet, so applicants outside the first 5 tracks have no timeline.",
+    ],
+  },
+  {
+    state: "Mississippi", lead_agency: "Governor's Office (RHTP Office)",
+    official_url: "https://mississippirhtp.com/",
+    amount: 205907220, status: "RFA issued", verified_at: "2026-09-02",
+    latest_source: "https://mississippirhtp.com/",
+    notes: "RHTP Office established under Governor's Office (director: Richard Grimes); first round drew ~700 applications for ~$82M available.",
+    pros: [
+      "High first-round application volume (~700 applications) signals strong demand and an active applicant community to learn from.",
+    ],
+    cons: [
+      "That same demand (~700 applications for ~$82M) means steep competition — worth sizing expectations accordingly.",
+      "No subawards announced yet.",
+    ],
+  },
+];
+
+const ANALYSIS_DISCLAIMER = "Editorial notes derived from the sources above — a starting point for comparison, not official guidance. Verify anything decision-critical directly with the state agency.";
+
+function usd(n) {
+  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
+}
+
+function stageVar(status) {
+  const s = STAGES.find(s => s.key === status);
+  return s ? `var(${s.var})` : "var(--muted)";
+}
+
+function esc(str) {
+  const d = document.createElement("div");
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+// summary metrics (fixed totals, independent of any filter)
+document.getElementById("m-states").textContent = STATES.length;
+document.getElementById("m-total").textContent = usd(STATES.reduce((a, s) => a + s.amount, 0));
+
+const counts = STAGES.map((st, i) => ({ ...st, order: i + 1, count: STATES.filter(s => s.status === st.key).length }));
+
+function parseHash() {
+  const params = new URLSearchParams(location.hash.replace(/^#/, ""));
+  return { status: params.get("status"), state: params.get("state") };
+}
+
+let currentStatus = null;
+let currentState = null;
+
+function goStatus(status) {
+  const next = status === currentStatus ? null : status;
+  location.hash = next ? "status=" + encodeURIComponent(next) : "";
+}
+
+window.addEventListener("hashchange", renderAll);
+
+function renderSegbar() {
+  document.getElementById("segbar").innerHTML = counts
+    .filter(c => c.count > 0)
+    .map(c => `<span data-status="${esc(c.key)}" class="${currentStatus && currentStatus !== c.key ? "dim" : ""}"
+        style="width:${(c.count / STATES.length) * 100}%; background:var(${c.var})"
+        title="${esc(c.key)} — ${c.count} state${c.count === 1 ? "" : "s"}"></span>`)
+    .join("");
+}
+
+function renderLegend() {
+  document.getElementById("legend").innerHTML = counts
+    .map((c, i) => {
+      const btn = `<button type="button" class="step${currentStatus === c.key ? " active" : ""}"
+          data-status="${esc(c.key)}" ${c.count === 0 ? "disabled" : ""}
+          aria-pressed="${currentStatus === c.key}">
+          <span class="step-num">${c.order}</span>
+          <span class="dot" style="background:var(${c.var})"></span>
+          ${esc(c.key)} (${c.count})
+        </button>`;
+      return i < counts.length - 1 ? btn + `<span class="arrow" aria-hidden="true">&rarr;</span>` : btn;
+    })
+    .join("");
+}
+
+function renderFilterBanner() {
+  const banner = document.getElementById("filter-banner");
+  if (!currentStatus) {
+    banner.hidden = true;
+    return;
+  }
+  const n = STATES.filter(s => s.status === currentStatus).length;
+  document.getElementById("filter-banner-text").textContent =
+    `Showing "${currentStatus}" — ${n} of ${STATES.length} states. This view is linkable: copy the URL to share it.`;
+  banner.hidden = false;
+}
+
+function renderGrid() {
+  const visible = currentStatus ? STATES.filter(s => s.status === currentStatus) : STATES;
+  const ordered = [...visible].sort((a, b) => {
+    const ai = STAGES.findIndex(s => s.key === a.status);
+    const bi = STAGES.findIndex(s => s.key === b.status);
+    return bi - ai || a.state.localeCompare(b.state);
+  });
+
+  const html = ordered.map(s => `
+    <div class="card">
+      <div class="stripe" style="background:${stageVar(s.status)}"></div>
+      <div class="body">
+        <div class="stage-row"><span class="dot" style="background:${stageVar(s.status)}"></span>${esc(s.status)}</div>
+        <div class="title-row">
+          <h2>${esc(s.state)}</h2>
+          <a class="official-badge" href="${s.official_url}" target="_blank" rel="noopener">Official page ↗</a>
+        </div>
+        <div class="agency">${esc(s.lead_agency)}</div>
+        <div class="amount">${usd(s.amount)}</div>
+        <div class="amount-label">FY26 award &middot; verified ${esc(s.verified_at)}</div>
+        ${s.subawardsAmount ? `<div class="subawards-line">${usd(s.subawardsAmount)} <span class="sa-label">${esc(s.subawardsLabel)}</span></div>` : ""}
+        <div class="notes">${esc(s.notes)}</div>
+        ${s.flag ? `<div class="flag">FLAG — ${esc(s.flag)}</div>` : ""}
+        <div class="links">
+          <a class="details" href="#state=${encodeURIComponent(s.state)}">Details &rarr;</a>
+          <a class="ext" href="${s.latest_source}" target="_blank" rel="noopener">Latest source ↗</a>
+        </div>
+      </div>
+    </div>
+  `).join("");
+
+  document.getElementById("grid").innerHTML =
+    html || `<p style="color:var(--muted); font-size:13px;">No states currently in this stage.</p>`;
+}
+
+function renderDetail(name) {
+  const root = document.getElementById("detail");
+  const s = STATES.find(x => x.state === name);
+
+  if (!s) {
+    root.innerHTML = `
+      <a class="back-link" href="#">&larr; All states</a>
+      <p>No state named "${esc(name)}" in the seed data.</p>
+    `;
+    return;
+  }
+
+  const stageIdx = STAGES.findIndex(st => st.key === s.status);
+  const rank = [...STATES].sort((a, b) => b.amount - a.amount).findIndex(x => x.state === s.state) + 1;
+
+  root.innerHTML = `
+    <a class="back-link" href="#">&larr; All states</a>
+    <div class="detail-head">
+      <div>
+        <div class="stage-row">
+          <span class="dot" style="background:${stageVar(s.status)}"></span>
+          Stage ${stageIdx + 1} of ${STAGES.length} &mdash; ${esc(s.status)}
+        </div>
+        <div class="title-row">
+          <h1>${esc(s.state)}</h1>
+          <a class="official-badge" href="${s.official_url}" target="_blank" rel="noopener">Official page ↗</a>
+        </div>
+        <div class="agency">${esc(s.lead_agency)}</div>
+      </div>
+      <div class="detail-amount">
+        <div class="amount">${usd(s.amount)}</div>
+        <div class="amount-label">FY26 award &middot; verified ${esc(s.verified_at)}</div>
+        ${s.subawardsAmount ? `<div class="subawards-line">${usd(s.subawardsAmount)} <span class="sa-label">${esc(s.subawardsLabel)}</span></div>` : ""}
+      </div>
+    </div>
+    <div class="detail-body">
+      <div class="detail-main">
+        <h2>Latest update</h2>
+        <p>${esc(s.notes)}</p>
+        ${s.flag ? `<div class="flag">FLAG — ${esc(s.flag)}</div>` : ""}
+      </div>
+      <aside class="detail-side">
+        <h2>Sources</h2>
+        <a href="${s.official_url}" target="_blank" rel="noopener">Official program page ↗</a>
+        <a href="${s.latest_source}" target="_blank" rel="noopener">Latest source article ↗</a>
+      </aside>
+      <div class="compare">
+        <div class="compare-head"><h2>How ${esc(s.state)} compares</h2></div>
+        <p class="compare-caption">${ANALYSIS_DISCLAIMER}</p>
+        <div class="rank-line">
+          <strong>#${rank}</strong> of ${STATES.length} states by total FY26 award &middot; ${usd(s.amount)}
+        </div>
+        <div class="pros-cons">
+          <div class="pros">
+            <h3>Pros</h3>
+            <ul>${s.pros.map(p => `<li>${esc(p)}</li>`).join("")}</ul>
+          </div>
+          <div class="cons">
+            <h3>Cons</h3>
+            <ul>${s.cons.map(c => `<li>${esc(c)}</li>`).join("")}</ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderAll() {
+  const { status, state } = parseHash();
+  currentStatus = status;
+  currentState = state;
+
+  if (currentState) {
+    document.getElementById("dashboard").hidden = true;
+    document.getElementById("detail").hidden = false;
+    renderDetail(currentState);
+    return;
+  }
+
+  document.getElementById("detail").hidden = true;
+  document.getElementById("dashboard").hidden = false;
+  renderSegbar();
+  renderLegend();
+  renderFilterBanner();
+  renderGrid();
+}
+
+document.getElementById("segbar").addEventListener("click", e => {
+  const el = e.target.closest("[data-status]");
+  if (el) goStatus(el.dataset.status);
+});
+
+document.getElementById("legend").addEventListener("click", e => {
+  const el = e.target.closest("[data-status]");
+  if (el && !el.disabled) goStatus(el.dataset.status);
+});
+
+document.getElementById("filter-clear").addEventListener("click", () => goStatus(currentStatus));
+
+renderAll();
+</script>
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RHTP Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="wrap">
+    <header class="masthead">
+      <div>
+        <p class="kicker">Rural Health Transformation Program</p>
+        <h1>Funding Tracker</h1>
+      </div>
+      <div class="masthead-right">
+        <nav class="tabs" id="tabs">
+          <a href="#" data-tab="dashboard">Dashboard</a>
+          <a href="#view=calendar" data-tab="calendar">Calendar</a>
+          <a href="#view=commentary" data-tab="commentary">Commentary</a>
+        </nav>
+        <div class="stamp" id="stamp">10 states &middot; FY26</div>
+      </div>
+    </header>
+
+    <div id="dashboard">
+      <div class="summary">
+        <div class="metric">
+          <div class="value" id="m-states">—</div>
+          <div class="label">states tracked</div>
+        </div>
+        <div class="metric">
+          <div class="value" id="m-total">—</div>
+          <div class="label">total awarded, FY26</div>
+        </div>
+        <div class="pipeline">
+          <div class="label">funding pipeline — 5 stages, in order</div>
+          <div class="segbar" id="segbar"></div>
+          <div class="segbar-caption"><span>Earliest</span><span>Most advanced</span></div>
+          <div class="legend" id="legend"></div>
+          <div class="filter-banner" id="filter-banner" hidden>
+            <span id="filter-banner-text"></span>
+            <button type="button" id="filter-clear">Clear filter</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="states">
+          <thead>
+            <tr>
+              <th>State</th>
+              <th>Stage</th>
+              <th class="num">FY26 award</th>
+              <th class="num">Subawards</th>
+              <th>Latest update</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="states-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="detail" hidden></div>
+
+    <div id="calendar" hidden>
+      <p class="cal-caption" id="cal-caption"></p>
+      <div class="cal-list" id="cal-list"></div>
+    </div>
+
+    <div id="commentary" hidden>
+      <p class="cal-caption" id="commentary-caption">
+        Third-party opinion, analysis, and investigative coverage of the program — outside viewpoints, not sourced
+        facts. Weigh these against the angle labeled on each one.
+      </p>
+      <div class="cal-list" id="commentary-list"></div>
+    </div>
+
+    <footer id="footer-note"></footer>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
