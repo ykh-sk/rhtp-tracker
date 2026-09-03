@@ -74,8 +74,16 @@
         </select>
       </div>
 
-      <div class="table-wrap">
+      <div class="table-wrap desktop-only">
         <table class="states">
+          <colgroup>
+            <col style="width:24%">
+            <col style="width:13%">
+            <col style="width:11%">
+            <col style="width:14%">
+            <col style="width:32%">
+            <col style="width:6%">
+          </colgroup>
           <thead>
             <tr>
               <th>State</th>
@@ -89,6 +97,8 @@
           <tbody id="states-tbody"></tbody>
         </table>
       </div>
+
+      <div class="cards-wrap mobile-only" id="states-cards"></div>
     </div>
 
     <div id="detail" hidden></div>

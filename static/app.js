@@ -57,6 +57,11 @@ function stageVar(status) {
   return s ? `var(${s.var})` : "var(--muted)";
 }
 
+function stagePillHtml(status) {
+  const v = stageVar(status);
+  return `<span class="stage-pill" style="--stage-color:${v}"><span class="dot" style="background:${v}"></span>${esc(titleCase(status))}</span>`;
+}
+
 function stageIndex(status) {
   return STAGES.findIndex(s => s.key === status);
 }
@@ -208,7 +213,7 @@ function renderDashboard() {
       const active = currentStatus.includes(c.key);
       const btn = `<button type="button" class="step${active ? " active" : ""}"
           data-status="${esc(c.key)}" ${c.count === 0 ? "disabled" : ""}
-          aria-pressed="${active}">
+          aria-pressed="${active}" style="--stage-color:var(${c.var})">
           <span class="step-num">${c.order}</span>
           <span class="dot" style="background:var(${c.var})"></span>
           ${esc(titleCase(c.key))} (${c.count})
@@ -231,38 +236,70 @@ function renderDashboard() {
   const visible = currentStatus.length ? STATES.filter(s => currentStatus.includes(s.current_status)) : STATES;
   const ordered = sortStates(visible);
 
-  const rows = ordered.map(s => {
-    const { main } = splitFlag(latestNote(s));
-    const hasFlag = latestNote(s).includes("FLAG:");
-    const sub = s.current_award && s.current_award.subawards_amount;
-    const recent = recentChange(s);
-    return `
+  // Computed once per state and shared by both the desktop table and the
+  // mobile card list below, so the two views can never silently drift apart
+  // on what counts as "flagged", "has a subaward figure", or "recent".
+  const views = ordered.map(s => {
+    const { main, flag } = splitFlag(latestNote(s));
+    return {
+      s,
+      main,
+      hasFlag: !!flag,
+      sub: s.current_award && s.current_award.subawards_amount != null ? s.current_award.subawards_amount : null,
+      recent: recentChange(s),
+    };
+  });
+
+  const rows = views.map(({ s, main, hasFlag, sub, recent }) => `
       <tr>
         <td class="cell-state">
           <div class="state-name-row">
             <a class="state-name" href="#state=${encodeURIComponent(s.state)}">${esc(s.state)}</a>
             ${recent ? `<span class="updated-badge" title="${esc(recent.summary)}">Updated</span>` : ""}
-            <a class="official-badge" href="${s.official_url}" target="_blank" rel="noopener">Official ↗</a>
+            <a class="official-badge" href="${esc(s.official_url)}" target="_blank" rel="noopener">Official ↗</a>
           </div>
           <div class="state-agency">${esc(s.lead_agency)}</div>
         </td>
-        <td>
-          <span class="stage-pill"><span class="dot" style="background:${stageVar(s.current_status)}"></span>${esc(titleCase(s.current_status))}</span>
-        </td>
+        <td>${stagePillHtml(s.current_status)}</td>
         <td class="num amount">${usd(s.total_awarded)}</td>
-        <td class="num sub${sub ? "" : " empty"}">
-          ${sub ? `${usd(sub)}<span class="sa-label">${esc(s.current_award.subawards_label)}</span>` : "—"}
+        <td class="num sub${sub != null ? "" : " empty"}">
+          ${sub != null ? `${usd(sub)}<span class="sa-label">${esc(s.current_award.subawards_label)}</span>` : "—"}
         </td>
         <td class="cell-notes" title="${esc(latestNote(s))}">${hasFlag ? '<span class="flag-mark">⚑</span>' : ""}${esc(main)}</td>
         <td class="cell-links">
           <a class="details-link" href="#state=${encodeURIComponent(s.state)}">Details &rarr;</a>
         </td>
       </tr>
-    `;
-  }).join("");
+    `).join("");
 
   document.getElementById("states-tbody").innerHTML =
     rows || `<tr><td colspan="6" style="text-align:center; color:var(--muted); padding:24px;">No states currently in this stage.</td></tr>`;
+
+  const cards = views.map(({ s, main, hasFlag, sub, recent }) => `
+      <div class="state-card">
+        <div class="sc-top">
+          <div class="sc-name-wrap">
+            <a class="sc-name" href="#state=${encodeURIComponent(s.state)}">${esc(s.state)}</a>
+            ${recent ? `<span class="updated-badge" title="${esc(recent.summary)}">Updated</span>` : ""}
+          </div>
+          <a class="official-badge" href="${esc(s.official_url)}" target="_blank" rel="noopener">Official ↗</a>
+        </div>
+        <div class="sc-agency">${esc(s.lead_agency)}</div>
+        <div class="sc-stage-row">${stagePillHtml(s.current_status)}</div>
+        <div class="sc-amounts">
+          <div class="sc-amount">${usd(s.total_awarded)}</div>
+          <div class="sc-amount-label">FY26 award &middot; verified ${esc((s.current_award || {}).verified_at || "")}</div>
+          ${sub != null ? `<div class="sc-sub">${usd(sub)} <span class="sa-label">${esc(s.current_award.subawards_label)}</span></div>` : ""}
+        </div>
+        <div class="sc-notes">${hasFlag ? '<span class="flag-mark">⚑</span>' : ""}${esc(main)}</div>
+        <div class="sc-links">
+          <a class="details-link" href="#state=${encodeURIComponent(s.state)}">Details &rarr;</a>
+        </div>
+      </div>
+    `).join("");
+
+  document.getElementById("states-cards").innerHTML =
+    cards || `<p style="text-align:center; color:var(--muted); padding:24px;">No states currently in this stage.</p>`;
 
   renderMap();
 }
@@ -502,7 +539,7 @@ function renderDetail(name) {
     <a class="back-link" href="#">&larr; All states</a>
     <div class="detail-head">
       <div>
-        <div class="stage-pill">
+        <div class="stage-pill" style="--stage-color:${stageVar(s.current_status)}">
           <span class="dot" style="background:${stageVar(s.current_status)}"></span>
           Stage ${stageIndex(s.current_status) + 1} of ${STAGES.length} &mdash; ${esc(titleCase(s.current_status))}
         </div>
