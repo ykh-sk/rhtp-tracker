@@ -13,7 +13,10 @@
     <header class="masthead">
       <div>
         <p class="kicker">Rural Health Transformation Program</p>
-        <h1>Funding Tracker</h1>
+        <div class="title-row-main">
+          <h1>Funding Tracker</h1>
+          <span class="last-updated" id="last-updated"></span>
+        </div>
       </div>
       <div class="masthead-right">
         <nav class="tabs" id="tabs">
@@ -58,6 +61,17 @@
         <div id="us-map"></div>
         <div class="map-legend" id="map-legend"></div>
         <p class="map-caption" id="map-caption"></p>
+      </div>
+
+      <div class="table-controls">
+        <label for="sort-select">Sort by</label>
+        <select id="sort-select">
+          <option value="stage">Pipeline stage</option>
+          <option value="award">Award amount</option>
+          <option value="subawards">Subawards disbursed</option>
+          <option value="alpha">State (A–Z)</option>
+          <option value="updated">Recently updated</option>
+        </select>
       </div>
 
       <div class="table-wrap">

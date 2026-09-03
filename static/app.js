@@ -50,6 +50,7 @@ let COMMENTARY = [];
 let currentStatus = null;
 let currentState = null;
 let currentView = null;
+let currentSort = "stage";
 
 function stageVar(status) {
   const s = STAGES.find(s => s.key === status);
@@ -84,11 +85,12 @@ async function boot() {
 
   document.getElementById("stamp").textContent = `${STATES.length} states · FY26`;
 
-  document.getElementById("footer-note").textContent =
-    `Tracking ${STATES.length} states as of ${STATES.reduce((max, s) => {
-      const v = (s.current_award || {}).verified_at;
-      return v && v > max ? v : max;
-    }, "")}.`;
+  const maxVerified = STATES.reduce((max, s) => {
+    const v = (s.current_award || {}).verified_at;
+    return v && v > max ? v : max;
+  }, "");
+  document.getElementById("last-updated").textContent = maxVerified ? `Updated ${fmtDate(maxVerified)}` : "";
+  document.getElementById("footer-note").textContent = `Tracking ${STATES.length} states as of ${maxVerified}.`;
 
   window.addEventListener("hashchange", renderAll);
   document.getElementById("filter-clear").addEventListener("click", () => goStatus(currentStatus));
@@ -107,8 +109,35 @@ async function boot() {
     document.querySelectorAll("#map-toggle button").forEach(b => b.classList.toggle("active", b === btn));
     renderMap();
   });
+  document.getElementById("sort-select").addEventListener("change", e => {
+    currentSort = e.target.value;
+    renderDashboard();
+  });
 
   renderAll();
+}
+
+function sortStates(list) {
+  const arr = [...list];
+  switch (currentSort) {
+    case "alpha":
+      return arr.sort((a, b) => a.state.localeCompare(b.state));
+    case "award":
+      return arr.sort((a, b) => b.total_awarded - a.total_awarded);
+    case "subawards":
+      return arr.sort((a, b) => {
+        const av = (a.current_award && a.current_award.subawards_amount) ?? -1;
+        const bv = (b.current_award && b.current_award.subawards_amount) ?? -1;
+        return bv - av;
+      });
+    case "updated": {
+      const latestDate = s => (s.status_events || []).reduce((max, e) => (e.event_date > max ? e.event_date : max), "");
+      return arr.sort((a, b) => latestDate(b).localeCompare(latestDate(a)));
+    }
+    case "stage":
+    default:
+      return arr.sort((a, b) => stageIndex(b.current_status) - stageIndex(a.current_status) || a.state.localeCompare(b.state));
+  }
 }
 
 function renderAll() {
@@ -189,9 +218,7 @@ function renderDashboard() {
   }
 
   const visible = currentStatus ? STATES.filter(s => s.current_status === currentStatus) : STATES;
-  const ordered = [...visible].sort((a, b) =>
-    stageIndex(b.current_status) - stageIndex(a.current_status) || a.state.localeCompare(b.state)
-  );
+  const ordered = sortStates(visible);
 
   const rows = ordered.map(s => {
     const { main } = splitFlag(latestNote(s));
@@ -202,7 +229,7 @@ function renderDashboard() {
       <tr>
         <td class="cell-state">
           <div class="state-name-row">
-            <div class="state-name">${esc(s.state)}</div>
+            <a class="state-name" href="#state=${encodeURIComponent(s.state)}">${esc(s.state)}</a>
             ${recent ? `<span class="updated-badge" title="${esc(recent.summary)}">Updated</span>` : ""}
             <a class="official-badge" href="${s.official_url}" target="_blank" rel="noopener">Official ↗</a>
           </div>
@@ -242,10 +269,16 @@ async function ensureUsTopo() {
   return usTopo;
 }
 
+// "sub" is a ratio (subawards disbursed / total award), not a raw dollar
+// figure — a $144M subaward on a $203M award and a $30M subaward on a $190M
+// award are differently far along, and only the percentage says so. Fixed
+// 0–100% domain (not the observed min/max) so the scale means the same
+// thing everywhere it's read, not just relative to this batch of states.
 function stateMapValue(s, metric) {
   if (metric === "sub") {
     const a = s.current_award;
-    return a && a.subawards_amount ? a.subawards_amount : null;
+    if (!a || !a.subawards_amount || !s.total_awarded) return null;
+    return a.subawards_amount / s.total_awarded;
   }
   return s.total_awarded || null;
 }
@@ -266,8 +299,13 @@ async function renderMap() {
   STATES.forEach(s => { byName[s.state] = s; });
 
   const values = STATES.map(s => stateMapValue(s, mapMetric)).filter(v => v != null);
-  const max = Math.max(1, ...values);
-  const colorScale = d3.scaleSequential(d3.interpolateReds).domain([0, max]);
+  // Total-award domain spans the observed min–max so relative differences
+  // between states are visible (they cluster in a narrow band; anchoring at
+  // $0 made every one of them look "high"). Subawards domain is fixed 0–1
+  // since it's already a percentage — a strict, portable scale rather than
+  // one relative to whichever states happen to be tracked.
+  const domain = mapMetric === "sub" ? [0, 1] : [Math.min(...values), Math.max(1, ...values)];
+  const colorScale = d3.scaleSequential(d3.interpolateReds).domain(domain);
 
   const width = 960, height = 600;
   const projection = d3.geoAlbersUsa().scale(1180).translate([width / 2, height / 2]);
@@ -295,9 +333,14 @@ async function renderMap() {
     .on("mousemove", (event, d) => {
       const s = byName[d.properties.name];
       const v = s ? stateMapValue(s, mapMetric) : null;
-      const label = s
-        ? (v == null ? "No subawards figure yet" : usd(v))
-        : "Not yet tracked";
+      let label = "Not yet tracked";
+      if (s && mapMetric === "sub") {
+        label = v == null
+          ? "No subawards figure yet"
+          : `${(v * 100).toFixed(0)}% of award disbursed (${usd(s.current_award.subawards_amount)} of ${usd(s.total_awarded)})`;
+      } else if (s) {
+        label = usd(v);
+      }
       tooltip
         .style("display", "block")
         .style("left", (event.clientX + 14) + "px")
@@ -311,15 +354,18 @@ async function renderMap() {
     });
 
   const steps = [0, 0.25, 0.5, 0.75, 1];
+  const [dMin, dMax] = domain;
+  const lowLabel = mapMetric === "sub" ? "0%" : usd(dMin);
+  const highLabel = mapMetric === "sub" ? "100%" : usd(dMax);
   document.getElementById("map-legend").innerHTML = `
-    <span class="map-legend-label">Low</span>
-    <div class="map-legend-scale">${steps.map(t => `<span style="background:${colorScale(t * max)}"></span>`).join("")}</div>
-    <span class="map-legend-label">High</span>
+    <span class="map-legend-label">${lowLabel}</span>
+    <div class="map-legend-scale">${steps.map(t => `<span style="background:${colorScale(dMin + t * (dMax - dMin))}"></span>`).join("")}</div>
+    <span class="map-legend-label">${highLabel}</span>
   `;
 
   document.getElementById("map-caption").textContent = mapMetric === "sub"
-    ? "Colored by subawards/disbursed amount, where a source states one. Light-gray tracked states have no subawards figure yet — that's a stage difference, not a zero. Untracked states are neutral gray."
-    : "Colored by total FY26 award among tracked states. Untracked states are neutral gray.";
+    ? "Colored by percentage of the total award disbursed as subawards, where a source states a figure — not the raw dollar amount, so states with different-sized awards compare fairly. Light-gray tracked states have no subawards figure yet. Untracked states are neutral gray."
+    : "Colored by total FY26 award, scaled to the range actually observed among tracked states (not from $0) so relative differences are visible. Untracked states are neutral gray.";
 }
 
 function latestConfirmedEvent(s) {
@@ -346,7 +392,7 @@ function renderDetail(name) {
   }
 
   const latest = s.current_award || {};
-  const events = [...s.status_events].sort((a, b) => a.event_date.localeCompare(b.event_date));
+  const events = [...s.status_events].sort((a, b) => b.event_date.localeCompare(a.event_date));
 
   const timelineHtml = events.map((e, i) => {
     const unverified = e.confidence === "unverified";
