@@ -114,8 +114,8 @@ header.masthead {
 
 .brand-icon {
   flex: none;
-  width: 52px;
-  height: 52px;
+  width: 72px;
+  height: auto;
 }
 
 .kicker {
@@ -133,40 +133,40 @@ h1 {
   font-size: 30px;
   margin: 0;
   display: flex;
-  align-items: baseline;
+  align-items: center;
   flex-wrap: wrap;
   gap: 8px;
   letter-spacing: -0.01em;
 }
 
 .wordmark {
-  height: 26px;
+  height: 72px;
   width: auto;
   max-width: 100%;
   align-self: center;
 }
 
 @media (max-width: 480px) {
-  .wordmark { height: 20px; }
+  .wordmark { height: 52px; }
+  .brand-icon { width: 52px; }
 }
 
-.wordmark-dark { display: none; }
+/* Theme-swapped image pairs (the wordmark and the icon each ship a light-
+   and a dark-background render): -dark hides by default, and either the
+   system dark preference or an explicit toggle flips which one shows. */
+.wordmark-dark, .brand-icon-dark { display: none; }
 
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .wordmark-light { display: none; }
-  :root:not([data-theme="light"]) .wordmark-dark { display: block; }
+  :root:not([data-theme="light"]) .wordmark-light,
+  :root:not([data-theme="light"]) .brand-icon-light { display: none; }
+  :root:not([data-theme="light"]) .wordmark-dark,
+  :root:not([data-theme="light"]) .brand-icon-dark { display: block; }
 }
 
-:root[data-theme="dark"] .wordmark-light { display: none; }
-:root[data-theme="dark"] .wordmark-dark { display: block; }
-
-.title-sub {
-  font-size: 0.42em;
-  font-weight: 500;
-  color: var(--muted);
-  letter-spacing: 0;
-  margin-left: 2px;
-}
+:root[data-theme="dark"] .wordmark-light,
+:root[data-theme="dark"] .brand-icon-light { display: none; }
+:root[data-theme="dark"] .wordmark-dark,
+:root[data-theme="dark"] .brand-icon-dark { display: block; }
 
 .title-row-main {
   display: flex;
@@ -822,6 +822,13 @@ td.num.sub .sa-label {
   color: var(--ink);
   font-size: 12.5px;
   line-height: 1.5;
+}
+
+/* The line-clamp hack needs its own box (display:-webkit-box) — applied to
+   this inner wrapper, not the <td> itself, since overriding a table cell's
+   display away from table-cell pulls it out of the table's column grid
+   entirely (rows then stack cells instead of laying them out side by side). */
+.cell-notes-inner {
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
@@ -836,9 +843,6 @@ td.num.sub .sa-label {
 
 .cell-links {
   white-space: nowrap;
-  display: flex;
-  gap: 10px;
-  align-items: center;
 }
 
 a { color: var(--accent); }
