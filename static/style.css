@@ -132,9 +132,33 @@ h1 {
   font-weight: 600;
   font-size: 30px;
   margin: 0;
-  text-wrap: balance;
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
   letter-spacing: -0.01em;
 }
+
+.wordmark {
+  height: 26px;
+  width: auto;
+  max-width: 100%;
+  align-self: center;
+}
+
+@media (max-width: 480px) {
+  .wordmark { height: 20px; }
+}
+
+.wordmark-dark { display: none; }
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .wordmark-light { display: none; }
+  :root:not([data-theme="light"]) .wordmark-dark { display: block; }
+}
+
+:root[data-theme="dark"] .wordmark-light { display: none; }
+:root[data-theme="dark"] .wordmark-dark { display: block; }
 
 .title-sub {
   font-size: 0.42em;
