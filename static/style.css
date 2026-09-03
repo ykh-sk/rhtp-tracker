@@ -127,6 +127,14 @@ header.masthead {
   margin: 0 0 8px;
 }
 
+.intro-line {
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--muted);
+  max-width: 60ch;
+  margin: 10px 0 0;
+}
+
 h1 {
   font-family: "IBM Plex Serif", Georgia, serif;
   font-weight: 600;
