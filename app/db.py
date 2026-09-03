@@ -61,6 +61,23 @@ CREATE TABLE IF NOT EXISTS commentary (
     angle TEXT NOT NULL CHECK (angle IN ('opinion', 'analysis', 'investigative', 'news')),
     summary TEXT
 );
+
+CREATE TABLE IF NOT EXISTS state_overview (
+    state TEXT PRIMARY KEY REFERENCES sources(state),
+    emphasis TEXT,
+    applicant_profile TEXT,
+    contact_name TEXT,
+    contact_email TEXT,
+    contact_note TEXT
+);
+
+CREATE TABLE IF NOT EXISTS state_pillars (
+    id SERIAL PRIMARY KEY,
+    state TEXT NOT NULL REFERENCES sources(state),
+    sort_order INTEGER NOT NULL,
+    name TEXT NOT NULL,
+    source_url TEXT
+);
 """
 
 

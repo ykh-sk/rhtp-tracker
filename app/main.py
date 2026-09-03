@@ -35,6 +35,8 @@ def api_states():
     awards = rows_to_dicts(query(conn, "SELECT * FROM awards ORDER BY state"))
     events = rows_to_dicts(query(conn, "SELECT * FROM status_events ORDER BY state, event_date"))
     analysis = rows_to_dicts(query(conn, "SELECT * FROM state_analysis ORDER BY state, kind, sort_order"))
+    overviews = rows_to_dicts(query(conn, "SELECT * FROM state_overview"))
+    pillars = rows_to_dicts(query(conn, "SELECT * FROM state_pillars ORDER BY state, sort_order"))
     conn.close()
 
     awards_by_state = {}
@@ -47,6 +49,10 @@ def api_states():
     for row in analysis:
         bucket = analysis_by_state.setdefault(row["state"], {"pros": [], "cons": []})
         bucket["pros" if row["kind"] == "pro" else "cons"].append(row["text"])
+    overview_by_state = {o["state"]: o for o in overviews}
+    pillars_by_state = {}
+    for p in pillars:
+        pillars_by_state.setdefault(p["state"], []).append(p["name"])
 
     ranked = sorted(sources, key=lambda s: sum(a["amount"] for a in awards_by_state.get(s["state"], [])), reverse=True)
     rank_by_state = {s["state"]: i + 1 for i, s in enumerate(ranked)}
@@ -66,6 +72,8 @@ def api_states():
                 "total_awarded": sum(a["amount"] for a in state_awards),
                 "rank": rank_by_state[s["state"]],
                 "analysis": analysis_by_state.get(s["state"], {"pros": [], "cons": []}),
+                "overview": overview_by_state.get(s["state"]),
+                "pillars": pillars_by_state.get(s["state"], []),
             }
         )
     return jsonify(

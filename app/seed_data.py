@@ -324,6 +324,99 @@ ANALYSIS = {
     },
 }
 
+# Program overview per state — emphasis/applicant_profile are a brief summary
+# derived from the sourced notes/timeline above (not a direct quote from the
+# state), so treat them like the ANALYSIS section: informative, not official.
+# Pillars are the actual named initiative/track titles as they appear in the
+# sources — those are facts, not summary. contact_email is left null and
+# contact_note explains why whenever a state hasn't published one; never
+# guessed or constructed from a name/agency.
+STATE_OVERVIEW = {
+    "West Virginia": {
+        "emphasis": "Funds are moving through three parallel, initiative-specific tracks rather than one central RFA — each with its own scope and timeline.",
+        "applicant_profile": "Not detailed beyond the three initiative names in current sources.",
+        "contact_name": None,
+        "contact_email": None,
+        "contact_note": "No public contact email found in sourced materials.",
+    },
+    "Kentucky": {
+        "emphasis": "Five branded initiatives are administered together under a single coordinating body (\"A3 Team\"), with RFAs released per initiative.",
+        "applicant_profile": "Tracks published so far span chronic care innovation, mobile dental services, telebehavioral health/CMHC support, and community health worker certification — suggesting eligibility spans clinical, community, and workforce-training organizations.",
+        "contact_name": None,
+        "contact_email": None,
+        "contact_note": "No public contact email found in sourced materials.",
+    },
+    "Ohio": {
+        "emphasis": "Workforce development was the first priority funded, ahead of other possible tracks.",
+        "applicant_profile": "The first award went to a university for workforce programming, suggesting higher-education and workforce-training partners are eligible alongside direct care providers.",
+        "contact_name": None,
+        "contact_email": None,
+        "contact_note": "No public contact email found in sourced materials.",
+    },
+    "Tennessee": {
+        "emphasis": "Uses a rolling, recurring RFA cycle rather than a single funding round, with new opportunities posted weekly.",
+        "applicant_profile": "Not yet detailed in current sources — specific tracks/pillars haven't been published beyond the rolling-RFA structure itself.",
+        "contact_name": None,
+        "contact_email": None,
+        "contact_note": "No public contact email found in sourced materials.",
+    },
+    "Virginia": {
+        "emphasis": "Program branded \"VA Rural Vitality\"; administrative staffing was still being built out as of the most recent sourced update.",
+        "applicant_profile": "The one published track (Digital Productivity Tools) suggests technology vendors and/or providers adopting digital tools are an eligible category; broader applicant criteria not yet detailed.",
+        "contact_name": None,
+        "contact_email": None,
+        "contact_note": "No public contact email found in sourced materials.",
+    },
+    "North Carolina": {
+        "emphasis": "Combines standing regional infrastructure (hubs, an infrastructure fund) with targeted, topic-specific grant rounds.",
+        "applicant_profile": "Published rounds span EMS/mobile integrated health providers, diabetes-prevention programs, and school-based health centers — a broad, multi-track eligibility pool.",
+        "contact_name": "Maggie Woods (RHTP Director)",
+        "contact_email": None,
+        "contact_note": "A director is named publicly; no direct email address has been published in sourced materials.",
+    },
+    "Pennsylvania": {
+        "emphasis": "Runs multiple narrow, sequential funding rounds, each scoped to a specific technology or service track rather than one broad RFA.",
+        "applicant_profile": "Tracks published so far target FQHCs, health information organizations (HIOs), and facilities eligible for stabilization funding.",
+        "contact_name": None,
+        "contact_email": None,
+        "contact_note": "No public contact email found in sourced materials.",
+    },
+    "Georgia": {
+        "emphasis": "Disburses under a single branded program (GREAT Health) in sequential phases rather than one lump award.",
+        "applicant_profile": "Not detailed in current sources beyond the phase structure itself.",
+        "contact_name": None,
+        "contact_email": None,
+        "contact_note": "No public contact email found in sourced materials.",
+    },
+    "Alabama": {
+        "emphasis": "Runs the broadest initiative slate of the 10 states tracked here — 10 planned initiatives total, with the first 5 already open and a second set of 5 approved.",
+        "applicant_profile": "Not detailed in current sources beyond the initiative count.",
+        "contact_name": None,
+        "contact_email": None,
+        "contact_note": "No public contact email found in sourced materials.",
+    },
+    "Mississippi": {
+        "emphasis": "Centralized under a dedicated RHTP Office reporting to the Governor's Office, rather than an existing health-agency division.",
+        "applicant_profile": "The first round drew roughly 700 applications for ~$82M, and newer unverified leads point toward EMS capacity and psychiatric emergency services as upcoming tracks (see Calendar) — suggesting broad eligibility across rural EMS and behavioral health providers.",
+        "contact_name": "Richard Grimes (RHTP Office Director)",
+        "contact_email": None,
+        "contact_note": "A director is named publicly; no direct email address has been published in sourced materials.",
+    },
+}
+
+STATE_PILLARS = {
+    "West Virginia": ["MSCF", "HealthTech Appalachia", "Connected Care Grid"],
+    "Kentucky": ["PoWERing", "Rooted in Health", "Crisis to Care", "Rapid Response to Recovery", "Rural Community Hubs"],
+    "Ohio": ["Health Workforce Ohio"],
+    "Tennessee": [],
+    "Virginia": ["Digital Productivity Tools"],
+    "North Carolina": ["NC ROOTS hubs", "Rural Health Infrastructure Fund (RHIF)", "Mobile Integrated Health", "NC Minority Diabetes Prevention", "School Health Centers expansion"],
+    "Pennsylvania": ["FQHC onboarding", "EHR/HIO onboarding", "Rapid Response Stabilization"],
+    "Georgia": ["GREAT Health — Phase 1", "GREAT Health — Phase 2"],
+    "Alabama": ["ARHTP (5 of 10 initiatives open)"],
+    "Mississippi": ["EMS Capacity Assessment (unverified lead)", "Psychiatric Emergency Services / Workforce Expansion (unverified lead)"],
+}
+
 STATUS_TAXONOMY = [
     "plan approved",
     "admin structure named",

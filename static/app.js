@@ -63,8 +63,10 @@ async function boot() {
   COMMENTARY = commentaryRes;
 
   document.getElementById("footer-note").textContent =
-    "Editorial comparison notes are derived from the sources linked on each page — not official guidance. " +
-    "Verify anything decision-critical directly with the state agency. This app pulls from a SQLite-backed API.";
+    `Tracking ${STATES.length} states as of ${STATES.reduce((max, s) => {
+      const v = (s.awards[0] || {}).verified_at;
+      return v && v > max ? v : max;
+    }, "")}.`;
 
   window.addEventListener("hashchange", renderAll);
   document.getElementById("filter-clear").addEventListener("click", () => goStatus(currentStatus));
@@ -169,7 +171,10 @@ function renderDashboard() {
     return `
       <tr>
         <td class="cell-state">
-          <div class="state-name">${esc(s.state)}</div>
+          <div class="state-name-row">
+            <div class="state-name">${esc(s.state)}</div>
+            <a class="official-badge" href="${s.official_url}" target="_blank" rel="noopener">Official ↗</a>
+          </div>
           <div class="state-agency">${esc(s.lead_agency)}</div>
         </td>
         <td>
@@ -181,7 +186,6 @@ function renderDashboard() {
         </td>
         <td class="cell-notes" title="${esc(latestNote(s))}">${hasFlag ? '<span class="flag-mark">⚑</span>' : ""}${esc(main)}</td>
         <td class="cell-links">
-          <a class="official-badge" href="${s.official_url}" target="_blank" rel="noopener">Official ↗</a>
           <a class="details-link" href="#state=${encodeURIComponent(s.state)}">Details &rarr;</a>
         </td>
       </tr>
@@ -242,6 +246,43 @@ function renderDetail(name) {
   const rank = s.rank;
   const pros = s.analysis.pros || [];
   const cons = s.analysis.cons || [];
+  const overview = s.overview || {};
+  const pillars = s.pillars || [];
+
+  const overviewHtml = `
+    <div class="overview-section">
+      <h2>Program overview</h2>
+      <p class="overview-caption">A brief summary derived from the sources on this page — not a direct quote from the state program. See History below for the underlying facts it's based on.</p>
+      <div class="overview-grid">
+        <div>
+          <div class="overview-field">
+            <h3>Emphasis</h3>
+            <p>${esc(overview.emphasis || "Not yet detailed in current sources.")}</p>
+          </div>
+          <div class="overview-field">
+            <h3>Pillars / initiative tracks</h3>
+            ${pillars.length
+              ? `<div class="pillar-list">${pillars.map(p => `<span class="pillar-chip">${esc(p)}</span>`).join("")}</div>`
+              : `<p>Not yet named in current sources.</p>`}
+          </div>
+          <div class="overview-field">
+            <h3>Who they're looking for</h3>
+            <p>${esc(overview.applicant_profile || "Not yet detailed in current sources.")}</p>
+          </div>
+        </div>
+        <div class="overview-field">
+          <h3>Contact</h3>
+          <div class="contact-block">
+            ${overview.contact_name ? `<div class="contact-name">${esc(overview.contact_name)}</div>` : ""}
+            ${overview.contact_email
+              ? `<div><a href="mailto:${esc(overview.contact_email)}">${esc(overview.contact_email)}</a></div>`
+              : `<div>N/A</div>`}
+            ${overview.contact_note ? `<div class="contact-muted">${esc(overview.contact_note)}</div>` : ""}
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
 
   root.innerHTML = `
     <a class="back-link" href="#">&larr; All states</a>
@@ -263,6 +304,7 @@ function renderDetail(name) {
         ${latest.subawards_amount ? `<div class="sub">${usd(latest.subawards_amount)} <span class="sa-label">${esc(latest.subawards_label)}</span></div>` : ""}
       </div>
     </div>
+    ${overviewHtml}
     <div class="detail-body">
       <div class="detail-main">
         <h2>History</h2>
