@@ -31,7 +31,7 @@
               <img src="/static/wordmark-full-light.png" alt="Rural Health Radar — Funding Tracker" class="wordmark wordmark-light" />
               <img src="/static/wordmark-full-dark.png" alt="Rural Health Radar — Funding Tracker" class="wordmark wordmark-dark" />
             </h1>
-            <span class="last-updated" id="last-updated"></span>
+            <button type="button" class="last-updated" id="last-updated" title="View recent updates"></button>
           </div>
         </div>
         <p class="intro-line">State-by-state RHTP funding data lives scattered across 50 different agency sites and
@@ -175,6 +175,18 @@
         it's ahead of or behind the program-wide schedule.
       </p>
       <div class="cal-list" id="federal-modal-body"></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="whatsnew-modal-overlay" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="whatsnew-modal-title">
+      <button type="button" class="modal-close" id="whatsnew-modal-close" aria-label="Close">&times;</button>
+      <h2 id="whatsnew-modal-title">What's new</h2>
+      <p class="modal-caption">
+        Material changes to a state's award figures, status, or program overview since first publication — an
+        audit trail, not a notice of every wording tweak. Click a state to see the full history behind the change.
+      </p>
+      <div class="cal-list" id="whatsnew-modal-body"></div>
     </div>
   </div>
 

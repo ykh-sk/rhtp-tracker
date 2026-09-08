@@ -109,6 +109,7 @@ async function boot() {
     return v && v > max ? v : max;
   }, "");
   document.getElementById("last-updated").textContent = maxVerified ? `Updated ${fmtDate(maxVerified)}` : "";
+  document.getElementById("last-updated").hidden = !maxVerified;
   document.getElementById("footer-note").textContent = `Tracking ${STATES.length} states as of ${maxVerified}.`;
 
   window.addEventListener("hashchange", renderAll);
@@ -148,8 +149,21 @@ async function boot() {
   document.getElementById("federal-modal-overlay").addEventListener("click", e => {
     if (e.target.id === "federal-modal-overlay") closeFederalModal();
   });
+
+  document.getElementById("last-updated").addEventListener("click", openWhatsNewModal);
+  document.getElementById("whatsnew-modal-close").addEventListener("click", closeWhatsNewModal);
+  document.getElementById("whatsnew-modal-overlay").addEventListener("click", e => {
+    if (e.target.id === "whatsnew-modal-overlay") closeWhatsNewModal();
+  });
+  document.getElementById("whatsnew-modal-body").addEventListener("click", e => {
+    const link = e.target.closest("a[data-state]");
+    if (link) closeWhatsNewModal();
+  });
+
   window.addEventListener("keydown", e => {
-    if (e.key === "Escape") closeFederalModal();
+    if (e.key !== "Escape") return;
+    closeFederalModal();
+    closeWhatsNewModal();
   });
 
   initSiteSearch();
@@ -197,6 +211,50 @@ function openFederalModal() {
 
 function closeFederalModal() {
   document.getElementById("federal-modal-overlay").hidden = true;
+  document.body.classList.remove("modal-open");
+}
+
+// ---- what's new modal ----
+// Site-wide feed of every state's changelog (material overview/award/status
+// changes, per state_changelog), newest first — the "Updated" header badge
+// is the entry point, same underlying data that drives each state's own
+// pink changelog banner.
+
+function buildChangelogFeed() {
+  const rows = [];
+  STATES.forEach(s => {
+    (s.changelog || []).forEach(entry => rows.push({ state: s.state, ...entry }));
+  });
+  return rows.sort((a, b) => b.changed_at.localeCompare(a.changed_at));
+}
+
+function renderWhatsNewModalBody() {
+  const body = document.getElementById("whatsnew-modal-body");
+  const feed = buildChangelogFeed();
+  if (!feed.length) {
+    body.innerHTML = `<div class="cal-empty">No material changes recorded yet.</div>`;
+    return;
+  }
+  body.innerHTML = feed.map(entry => `
+    <div class="cal-item">
+      <div class="cal-when">${fmtDate(entry.changed_at)}</div>
+      <div class="cal-body">
+        <h3>${esc(entry.state)}</h3>
+        <p class="cal-notes">${esc(entry.summary)}</p>
+        <a href="#state=${encodeURIComponent(entry.state)}" data-state="${esc(entry.state)}">View ${esc(entry.state)}'s page &rarr;</a>
+      </div>
+    </div>
+  `).join("");
+}
+
+function openWhatsNewModal() {
+  renderWhatsNewModalBody();
+  document.getElementById("whatsnew-modal-overlay").hidden = false;
+  document.body.classList.add("modal-open");
+}
+
+function closeWhatsNewModal() {
+  document.getElementById("whatsnew-modal-overlay").hidden = true;
   document.body.classList.remove("modal-open");
 }
 

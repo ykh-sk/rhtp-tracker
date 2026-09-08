@@ -21,7 +21,7 @@ SOURCES = [
 # concrete disbursed-to-date figure distinct from the total award. Left null
 # otherwise per state — never estimated.
 AWARDS = [
-    {"state": "West Virginia", "fiscal_year": "FY26", "amount": 199000000, "status": "subawards announced", "source_url": "https://governor.wv.gov/article/governor-morrisey-announces-first-2856-million-rural-health-transformation-funding", "verified_at": "2026-09-02", "subawards_amount": 28560000, "subawards_label": "first tranche opened"},
+    {"state": "West Virginia", "fiscal_year": "FY26", "amount": 199000000, "status": "subawards announced", "source_url": "https://wvpublic.org/story/government/2-4-million-awarded-to-help-w-va-residents-stay-healthy-working/", "verified_at": "2026-09-04", "subawards_amount": 30958000, "subawards_label": "cumulative across 2 tranches (Apr + Sep 2026)"},
     {"state": "Kentucky", "fiscal_year": "FY26", "amount": 212900000, "status": "RFA issued", "source_url": "https://www.kentuckytoday.com/news/kentuckys-rural-health-transformation-plan-secures-212-9m-in-federal-funding/article_2adc2281-3461-4430-995d-07f6a6973df4.html", "verified_at": "2026-09-02", "subawards_amount": None, "subawards_label": None},
     {"state": "Ohio", "fiscal_year": "FY26", "amount": 202000000, "status": "subawards announced", "source_url": "https://governor.ohio.gov/media/news-and-media/governor-dewine-announces-first-rural-health-transformation-program-award-to-ohio-university-for-10-million", "verified_at": "2026-09-02", "subawards_amount": 10000000, "subawards_label": "first award announced"},
     {"state": "Tennessee", "fiscal_year": "FY26", "amount": 206888882, "status": "RFA issued", "source_url": "https://www.tn.gov/health/news/2026/5/15/tennessee-to-release-1st-grant-funding-opportunity-of-rural-health-transformation-program.html", "verified_at": "2026-09-02", "subawards_amount": None, "subawards_label": None},
@@ -42,6 +42,7 @@ AWARDS = [
 STATUS_EVENTS = [
     {"state": "West Virginia", "status": "subawards announced", "source_url": "https://governor.wv.gov/article/governor-morrisey-announces-first-2856-million-rural-health-transformation-funding", "event_date": "2026-04-28", "notes": "First $28.56M tranche opened for MSCF, HealthTech Appalachia, Connected Care Grid. FLAG: WV Dept of Health page cites $199M award; a hospital-association source cited $233.5M — needs reconciliation, do not treat as resolved.", "confidence": "confirmed"},
     {"state": "West Virginia", "status": "subawards announced", "source_url": "https://governor.wv.gov/article/governor-morrisey-announces-first-2856-million-rural-health-transformation-funding", "event_date": "2026-09-02", "notes": "Re-check on the $199M/$233.5M discrepancy above: an extensive search found no current source citing $233.5M. All live official sources (governor.wv.gov, health.wv.gov) and the WV Hospital Association consistently cite $199M (one figure specifies $199,476,098.72). Origin of the $233.5M figure could not be traced — the discrepancy is not resolved, but the weight of current evidence favors $199M.", "confidence": "confirmed"},
+    {"state": "West Virginia", "status": "subawards announced", "source_url": "https://wvpublic.org/story/government/2-4-million-awarded-to-help-w-va-residents-stay-healthy-working/", "event_date": "2026-09-04", "notes": "Second subaward round: ~$2.4M in first implementation awards under the worksite-clinic/employer-based-health initiative (announced as an open solicitation June 24, 2026) — Spotted Owl Healthcare Organization ($1,174,000), CAMC/Vandalia Health ($612,000), Cabell Huntington Foundation ($612,000). Governor's office says more announcements are planned over the next 60 days to distribute the remaining balance of the ~$199M award.", "confidence": "confirmed"},
     {"state": "Kentucky", "status": "RFA issued", "source_url": "https://www.kentuckytoday.com/news/kentuckys-rural-health-transformation-plan-secures-212-9m-in-federal-funding/article_2adc2281-3461-4430-995d-07f6a6973df4.html", "event_date": "2025-12-29", "notes": "5 branded initiatives (PoWERing, Rooted in Health, Crisis to Care, Rapid Response to Recovery, Rural Community Hubs) via \"A3 Team\".", "confidence": "confirmed"},
     {"state": "Ohio", "status": "subawards announced", "source_url": "https://governor.ohio.gov/media/news-and-media/governor-dewine-announces-first-rural-health-transformation-program-award-to-ohio-university-for-10-million", "event_date": "2026-07-01", "notes": "First award: $10M to Ohio University for workforce (\"Health Workforce Ohio\").", "confidence": "confirmed"},
     {"state": "Tennessee", "status": "RFA issued", "source_url": "https://www.tn.gov/health/news/2026/5/15/tennessee-to-release-1st-grant-funding-opportunity-of-rural-health-transformation-program.html", "event_date": "2026-05-15", "notes": "Rolling RFAs released weekly through July 10, 2026; 30-day application windows.", "confidence": "confirmed"},
@@ -333,12 +334,12 @@ ANALYSIS = {
 # guessed or constructed from a name/agency.
 STATE_OVERVIEW = {
     "West Virginia": {
-        "emphasis": "Funds are moving through three parallel, initiative-specific tracks rather than one central RFA — each with its own scope and timeline.",
-        "applicant_profile": "Not detailed beyond the three initiative names in current sources.",
+        "emphasis": "Funds are moving through a series of separate, initiative-specific rounds rather than one central RFA — a second round (worksite clinics/employer-based health) has now made its first awards, with more rounds planned over the following two months.",
+        "applicant_profile": "Not detailed beyond the initiative names in current sources.",
         "contact_name": None,
         "contact_email": None,
         "contact_note": "No public contact email found in sourced materials.",
-        "updated_at": "2026-09-02",
+        "updated_at": "2026-09-04",
     },
     "Kentucky": {
         "emphasis": "Five branded initiatives are administered together under a single coordinating body (\"A3 Team\"), with RFAs released per initiative.",
@@ -415,7 +416,7 @@ STATE_OVERVIEW = {
 }
 
 STATE_PILLARS = {
-    "West Virginia": ["MSCF", "HealthTech Appalachia", "Connected Care Grid"],
+    "West Virginia": ["MSCF", "HealthTech Appalachia", "Connected Care Grid", "Health to Prosperity (worksite clinics)"],
     "Kentucky": ["PoWERing", "Rooted in Health", "Crisis to Care", "Rapid Response to Recovery", "Rural Community Hubs"],
     "Ohio": ["Health Workforce Ohio"],
     "Tennessee": [],
@@ -434,7 +435,9 @@ STATE_PILLARS = {
 # (and bump that state's "updated_at" in STATE_OVERVIEW) whenever a real
 # future edit qualifies. See README for the full policy.
 STATE_CHANGELOG = [
-    # {"state": "...", "changed_at": "YYYY-MM-DD", "summary": "..."},
+    {"state": "Hawaii", "changed_at": "2026-09-04", "summary": "Status advanced from 'admin structure named' to 'subawards announced': $58M announced Sep 1, 2026 ($45M UH medical-school workforce program + $13M ambulances/emergency comms), ending an 8-month stall."},
+    {"state": "Delaware", "changed_at": "2026-09-04", "summary": "Status advanced from 'RFA issued' to 'subawards announced': Thomas Jefferson University selected to establish Delaware's first medical school."},
+    {"state": "West Virginia", "changed_at": "2026-09-04", "summary": "Second subaward round announced: ~$2.4M in first implementation awards for worksite clinics, to 3 named organizations. Cumulative subawards now ~$31.0M."},
 ]
 
 # Federal-level (not state-specific) statutory/programmatic milestones for the
@@ -612,6 +615,14 @@ STATUS_EVENTS.extend(NEW_STATUS_EVENTS)
 DEADLINES.extend(NEW_DEADLINES)
 STATE_PILLARS.update(NEW_PILLARS)
 
+# Per-state override for updated_at, for states whose overview text was
+# revised after the initial 2026-09-02 research pass (rather than bumping
+# every state's date just because one field changed).
+_UPDATED_AT_OVERRIDES = {
+    "Hawaii": "2026-09-04",
+    "Delaware": "2026-09-04",
+}
+
 for _state, _fields in NEW_OVERVIEW.items():
     STATE_OVERVIEW[_state] = {
         "emphasis": _fields["emphasis"],
@@ -619,5 +630,5 @@ for _state, _fields in NEW_OVERVIEW.items():
         "contact_name": _fields["contact_name"],
         "contact_email": _fields["contact_email"],
         "contact_note": _fields["contact_note"],
-        "updated_at": "2026-09-02",
+        "updated_at": _UPDATED_AT_OVERRIDES.get(_state, "2026-09-02"),
     }
