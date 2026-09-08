@@ -21,7 +21,7 @@ SOURCES = [
 # concrete disbursed-to-date figure distinct from the total award. Left null
 # otherwise per state — never estimated.
 AWARDS = [
-    {"state": "West Virginia", "fiscal_year": "FY26", "amount": 199000000, "status": "subawards announced", "source_url": "https://wvpublic.org/story/government/2-4-million-awarded-to-help-w-va-residents-stay-healthy-working/", "verified_at": "2026-09-04", "subawards_amount": 30958000, "subawards_label": "cumulative across 2 tranches (Apr + Sep 2026)"},
+    {"state": "West Virginia", "fiscal_year": "FY26", "amount": 199000000, "status": "subawards announced", "source_url": "https://wvpublic.org/story/government/2-4-million-awarded-to-help-w-va-residents-stay-healthy-working/", "verified_at": "2026-09-07", "subawards_amount": 30958000, "subawards_label": "cumulative across 2 tranches (Apr + Sep 2026)"},
     {"state": "Kentucky", "fiscal_year": "FY26", "amount": 212900000, "status": "RFA issued", "source_url": "https://www.kentuckytoday.com/news/kentuckys-rural-health-transformation-plan-secures-212-9m-in-federal-funding/article_2adc2281-3461-4430-995d-07f6a6973df4.html", "verified_at": "2026-09-02", "subawards_amount": None, "subawards_label": None},
     {"state": "Ohio", "fiscal_year": "FY26", "amount": 202000000, "status": "subawards announced", "source_url": "https://governor.ohio.gov/media/news-and-media/governor-dewine-announces-first-rural-health-transformation-program-award-to-ohio-university-for-10-million", "verified_at": "2026-09-02", "subawards_amount": 10000000, "subawards_label": "first award announced"},
     {"state": "Tennessee", "fiscal_year": "FY26", "amount": 206888882, "status": "RFA issued", "source_url": "https://www.tn.gov/health/news/2026/5/15/tennessee-to-release-1st-grant-funding-opportunity-of-rural-health-transformation-program.html", "verified_at": "2026-09-02", "subawards_amount": None, "subawards_label": None},
@@ -339,7 +339,7 @@ STATE_OVERVIEW = {
         "contact_name": None,
         "contact_email": None,
         "contact_note": "No public contact email found in sourced materials.",
-        "updated_at": "2026-09-04",
+        "updated_at": "2026-09-07",
     },
     "Kentucky": {
         "emphasis": "Five branded initiatives are administered together under a single coordinating body (\"A3 Team\"), with RFAs released per initiative.",
@@ -435,9 +435,9 @@ STATE_PILLARS = {
 # (and bump that state's "updated_at" in STATE_OVERVIEW) whenever a real
 # future edit qualifies. See README for the full policy.
 STATE_CHANGELOG = [
-    {"state": "Hawaii", "changed_at": "2026-09-04", "summary": "Status advanced from 'admin structure named' to 'subawards announced': $58M announced Sep 1, 2026 ($45M UH medical-school workforce program + $13M ambulances/emergency comms), ending an 8-month stall."},
-    {"state": "Delaware", "changed_at": "2026-09-04", "summary": "Status advanced from 'RFA issued' to 'subawards announced': Thomas Jefferson University selected to establish Delaware's first medical school."},
-    {"state": "West Virginia", "changed_at": "2026-09-04", "summary": "Second subaward round announced: ~$2.4M in first implementation awards for worksite clinics, to 3 named organizations. Cumulative subawards now ~$31.0M."},
+    {"state": "Hawaii", "changed_at": "2026-09-07", "summary": "Status advanced from 'admin structure named' to 'subawards announced': $58M announced Sep 1, 2026 ($45M UH medical-school workforce program + $13M ambulances/emergency comms), ending an 8-month stall."},
+    {"state": "Delaware", "changed_at": "2026-09-07", "summary": "Status advanced from 'RFA issued' to 'subawards announced': Thomas Jefferson University selected to establish Delaware's first medical school."},
+    {"state": "West Virginia", "changed_at": "2026-09-07", "summary": "Second subaward round announced: ~$2.4M in first implementation awards for worksite clinics, to 3 named organizations. Cumulative subawards now ~$31.0M."},
 ]
 
 # Federal-level (not state-specific) statutory/programmatic milestones for the
@@ -619,8 +619,8 @@ STATE_PILLARS.update(NEW_PILLARS)
 # revised after the initial 2026-09-02 research pass (rather than bumping
 # every state's date just because one field changed).
 _UPDATED_AT_OVERRIDES = {
-    "Hawaii": "2026-09-04",
-    "Delaware": "2026-09-04",
+    "Hawaii": "2026-09-07",
+    "Delaware": "2026-09-07",
 }
 
 for _state, _fields in NEW_OVERVIEW.items():
