@@ -359,7 +359,14 @@ function sortStates(list) {
         return bv - av;
       });
     case "updated": {
-      const latestDate = s => (s.status_events || []).reduce((max, e) => (e.event_date > max ? e.event_date : max), "");
+      // Prefer the changelog date (what actually drives the red "Updated"
+      // badge) so badged states sort to the top; states with no changelog
+      // entry fall back to their latest status-event date.
+      const latestDate = s => {
+        const changelogDate = s.changelog && s.changelog[0] ? s.changelog[0].changed_at : "";
+        const eventDate = (s.status_events || []).reduce((max, e) => (e.event_date > max ? e.event_date : max), "");
+        return changelogDate > eventDate ? changelogDate : eventDate;
+      };
       return arr.sort((a, b) => latestDate(b).localeCompare(latestDate(a)));
     }
     case "stage":
