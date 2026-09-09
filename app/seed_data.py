@@ -237,6 +237,54 @@ COMMENTARY = [
         "published_date": "2026-08", "state": "West Virginia", "angle": "news",
         "summary": "Covers WV legislative interim-committee questions on contract transparency, vendor selection (including a KPMG contract amendment), and the pace of implementation ahead of the Oct 31 obligation deadline.",
     },
+    {
+        "title": "2026 Rural Health State of the State",
+        "source_name": "Chartis", "url": "https://www.chartis.com/insights/2026-rural-health-state-state",
+        "published_date": "2026-02-10", "state": None, "angle": "analysis",
+        "summary": "Finds more than 40% of rural hospitals operating at a loss and 417 vulnerable to closure, arguing RHTP funding — while unprecedented — won't offset the nearly $140B in expected Medicaid-related losses from the same reconciliation law that created it.",
+    },
+    {
+        "title": "The Rural Health Transformation Program — An Avenue for Promoting Administrative Policies",
+        "source_name": "New England Journal of Medicine", "url": "https://www.nejm.org/doi/full/10.1056/NEJMp2515454",
+        "published_date": "2026-02-12", "state": None, "angle": "opinion",
+        "summary": "A Perspective piece by two health-policy academics (Howard & Shachar) arguing, per its title, that the program's design functions partly as a vehicle for the administration's broader health-policy priorities rather than solely as targeted rural-hospital relief.",
+    },
+    {
+        "title": "Can Rural Health Be Transformed Through a New Federal Program?",
+        "source_name": "Commonwealth Fund", "url": "https://www.commonwealthfund.org/blog/2026/can-rural-health-be-transformed-through-new-federal-program",
+        "published_date": "2026-03-12", "state": None, "angle": "analysis",
+        "summary": "Notes the program's annual-renewal structure and use-of-funds guardrails may discourage states from pursuing longer-term structural changes, since CMS ties continued funding to demonstrated short-term progress.",
+    },
+    {
+        "title": "The Rural Health Transformation Program: trends in projected scores and actual awards",
+        "source_name": "Health Affairs Scholar", "url": "https://academic.oup.com/healthaffairsscholar/article/4/6/qxag055/8539632",
+        "published_date": "2026-03-24", "state": None, "angle": "investigative",
+        "summary": "An academic analysis finding that, after accounting for projected Medicaid-related losses, Republican-leaning states received significantly higher RHTP scores and larger actual FY26 awards than Democratic-leaning states — attributing part of the gap to state-policy factors CMS built into the scoring rubric.",
+    },
+    {
+        "title": "Op-ed: It's the right time for the Rural Health Transformation Program",
+        "source_name": "Rep. Dan Newhouse (R-WA), via Washington Times", "url": "https://newhouse.house.gov/media-center/press-releases/op-ed-its-right-time-rural-health-transformation-program",
+        "published_date": "2026-06-25", "state": None, "angle": "opinion",
+        "summary": "A sitting member of Congress argues the program is a necessary, well-timed federal investment in rural healthcare modernization, citing funding directed to his own district as evidence of practical impact.",
+    },
+    {
+        "title": "Federal Policy Priorities To Strengthen Rural Health and Maximize Rural Health Transformation Program Investments",
+        "source_name": "Bipartisan Policy Center", "url": "https://bipartisanpolicy.org/report/federal-policy-priorities-to-strengthen-rural-health-and-maximize-rural-health-transformation-program-investments/",
+        "published_date": "2026-08-03", "state": None, "angle": "analysis",
+        "summary": "Recommends CMS publish RHTP implementation data via public dashboards, alongside complementary federal action on telehealth flexibility, workforce incentives, and permanent rural hospital payment programs, to help the funding achieve lasting impact.",
+    },
+    {
+        "title": "Critics say Rural Health Transformation Program funds are a Band-Aid that comes with high stakes",
+        "source_name": "Kentucky Health News (via Lexington Times)", "url": "https://lexingtonky.news/2026/08/31/critics-say-rural-health-transformation-program-funds-are-a-band-aid-that-comes/",
+        "published_date": "2026-08-31", "state": "Kentucky", "angle": "investigative",
+        "summary": "Reports that Kentucky's $212.9M award comes with aggressive spending deadlines and clawback risk if benchmarks aren't met, with critics arguing temporary innovation funding can't offset structural damage from Medicaid cuts to rural hospitals.",
+    },
+    {
+        "title": "Rural health is ailing. Is $50 billion enough to heal it?",
+        "source_name": "Managed Healthcare Executive", "url": "https://www.managedhealthcareexecutive.com/view/rural-health-is-ailing-is-50-billion-enough-to-heal-it-",
+        "published_date": "2026-09-01", "state": None, "angle": "analysis",
+        "summary": "Weighs whether $50B is enough given nearly half of rural hospitals are financially distressed, featuring the National Rural Health Association's view that the program funds long-term innovation and was never designed to replace lost Medicaid revenue.",
+    },
 ]
 
 # Editorial, not sourced fact — see ANALYSIS_DISCLAIMER in main.py / the UI.
