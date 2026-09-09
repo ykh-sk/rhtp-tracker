@@ -23,6 +23,8 @@
   --personal-bg: #e8f0f8;
   --federal: #a3392f; /* federal-level (CMS/statute) guidance — a warm brick red, distinct from every stage/accent/warn hue */
   --federal-bg: #f8e2df;
+  --verified: #4a4fb0; /* cross-checked against a live federal API (USASpending.gov) — indigo, distinct from every other tag color */
+  --verified-bg: #eaeaf7;
   --shadow: 0 1px 2px rgba(22, 33, 29, 0.06);
 }
 
@@ -49,6 +51,8 @@
     --personal-bg: #1c2b3a;
     --federal: #e0897c;
     --federal-bg: #3a221e;
+    --verified: #9fa3e8;
+    --verified-bg: #26284a;
     --shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
   }
 }
@@ -75,6 +79,8 @@
   --personal-bg: #1c2b3a;
   --federal: #e0897c;
   --federal-bg: #3a221e;
+  --verified: #9fa3e8;
+  --verified-bg: #26284a;
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
@@ -877,6 +883,37 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outlin
   border-color: var(--accent);
   background: var(--accent-soft);
 }
+
+/* usaspending-mark: a small inline checkmark next to a dollar figure in the
+   table/cards. usaspending-badge: the fuller pill version used in the detail
+   page. Both link out to the specific federal award record they verify. */
+.usaspending-mark {
+  display: inline-block;
+  margin-left: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--verified);
+  text-decoration: none;
+  vertical-align: super;
+}
+
+.usaspending-mark:hover, .usaspending-mark:focus-visible { text-decoration: underline; }
+
+.usaspending-badge {
+  display: inline-block;
+  margin-top: 6px;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--verified);
+  background: var(--verified-bg);
+  text-decoration: none;
+  border-radius: 6px;
+  padding: 4px 8px;
+  white-space: nowrap;
+}
+
+.usaspending-badge:hover, .usaspending-badge:focus-visible { text-decoration: underline; }
 
 .details-link { font-size: 12px; font-weight: 600; text-decoration: none; }
 .details-link:hover { text-decoration: underline; }

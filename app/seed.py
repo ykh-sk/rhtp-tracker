@@ -34,8 +34,8 @@ def seed():
     )
     execute_many(
         conn,
-        """INSERT INTO awards (state, fiscal_year, amount, status, source_url, verified_at, subawards_amount, subawards_label)
-           VALUES (%(state)s, %(fiscal_year)s, %(amount)s, %(status)s, %(source_url)s, %(verified_at)s, %(subawards_amount)s, %(subawards_label)s)""",
+        """INSERT INTO awards (state, fiscal_year, amount, status, source_url, verified_at, subawards_amount, subawards_label, usaspending_url)
+           VALUES (%(state)s, %(fiscal_year)s, %(amount)s, %(status)s, %(source_url)s, %(verified_at)s, %(subawards_amount)s, %(subawards_label)s, %(usaspending_url)s)""",
         AWARDS,
     )
     execute_many(

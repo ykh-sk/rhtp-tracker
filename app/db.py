@@ -19,7 +19,8 @@ CREATE TABLE IF NOT EXISTS awards (
     source_url TEXT NOT NULL,
     verified_at TEXT NOT NULL,
     subawards_amount INTEGER,
-    subawards_label TEXT
+    subawards_label TEXT,
+    usaspending_url TEXT
 );
 
 CREATE TABLE IF NOT EXISTS status_events (
@@ -96,6 +97,10 @@ CREATE TABLE IF NOT EXISTS state_pillars (
 -- application windows, award notifications, the funds-obligation deadline,
 -- reporting cadence. Rendered as its own "Federal guidelines" panel and
 -- cross-referenced from the calendar, distinct from any one state's deadlines.
+-- Added after initial launch: CREATE TABLE IF NOT EXISTS is a no-op against an
+-- existing table, so the column needs its own idempotent migration here too.
+ALTER TABLE awards ADD COLUMN IF NOT EXISTS usaspending_url TEXT;
+
 CREATE TABLE IF NOT EXISTS federal_milestones (
     id SERIAL PRIMARY KEY,
     title TEXT NOT NULL,

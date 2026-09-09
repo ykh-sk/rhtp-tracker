@@ -482,7 +482,7 @@ function renderDashboard() {
           <div class="state-agency">${esc(s.lead_agency)}</div>
         </td>
         <td>${stagePillHtml(s.current_status)}</td>
-        <td class="num amount">${usd(s.total_awarded)}</td>
+        <td class="num amount">${usd(s.total_awarded)}${s.current_award && s.current_award.usaspending_url ? `<a class="usaspending-mark" href="${esc(s.current_award.usaspending_url)}" target="_blank" rel="noopener" title="Cross-checked against the federal award record on USASpending.gov">✓</a>` : ""}</td>
         <td class="num sub${sub != null ? "" : " empty"}">
           ${sub != null ? `${usd(sub)}<span class="sa-label">${esc(s.current_award.subawards_label)}</span>` : "—"}
         </td>
@@ -508,7 +508,7 @@ function renderDashboard() {
         <div class="sc-agency">${esc(s.lead_agency)}</div>
         <div class="sc-stage-row">${stagePillHtml(s.current_status)}</div>
         <div class="sc-amounts">
-          <div class="sc-amount">${usd(s.total_awarded)}</div>
+          <div class="sc-amount">${usd(s.total_awarded)}${s.current_award && s.current_award.usaspending_url ? `<a class="usaspending-mark" href="${esc(s.current_award.usaspending_url)}" target="_blank" rel="noopener" title="Cross-checked against the federal award record on USASpending.gov">✓</a>` : ""}</div>
           <div class="sc-amount-label">FY26 award &middot; verified ${esc((s.current_award || {}).verified_at || "")}</div>
           ${sub != null ? `<div class="sc-sub">${usd(sub)} <span class="sa-label">${esc(s.current_award.subawards_label)}</span></div>` : ""}
         </div>
@@ -773,6 +773,7 @@ function renderDetail(name) {
       <div class="detail-amount">
         <div class="amount">${usd(s.total_awarded)}</div>
         <div class="amount-label">FY26 award &middot; verified ${esc(latest.verified_at || "")}</div>
+        ${latest.usaspending_url ? `<a class="usaspending-badge" href="${esc(latest.usaspending_url)}" target="_blank" rel="noopener" title="This FY26 award amount is cross-checked against the federal award record on USASpending.gov">✓ USASpending-verified</a>` : ""}
         ${latest.subawards_amount ? `<div class="sub">${usd(latest.subawards_amount)} <span class="sa-label">${esc(latest.subawards_label)}</span></div>` : ""}
       </div>
     </div>
@@ -786,6 +787,7 @@ function renderDetail(name) {
         <h2>Sources</h2>
         <a href="${esc(s.official_url)}" target="_blank" rel="noopener">Official program page ↗</a>
         <a href="${esc(latest.source_url)}" target="_blank" rel="noopener">Latest source article ↗</a>
+        ${latest.usaspending_url ? `<a href="${esc(latest.usaspending_url)}" target="_blank" rel="noopener">Federal award record (USASpending.gov) ↗</a>` : ""}
         <h2 class="deadlines-heading">Deadlines</h2>
         ${stateDeadlinesHtml(s.state)}
         <button type="button" class="info-btn info-btn-block" data-open-federal-modal>ⓘ Federal guidelines &amp; deadlines</button>
