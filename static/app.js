@@ -7,6 +7,26 @@ function usd(n) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
 }
 
+// Share of a state's total award reflected in its recorded subawards figure.
+// Shared by the map's "Subawards disbursed" toggle and the progress bar shown
+// next to the subawards figure everywhere else — one calculation, one meaning.
+function disbShare(s) {
+  const a = s.current_award;
+  if (!a || !a.subawards_amount || !s.total_awarded) return null;
+  return a.subawards_amount / s.total_awarded;
+}
+
+// Renders as a plain percentage against the total award — not a claim that
+// the underlying subawards figure itself is a complete, final tally. Where a
+// source's own wording says otherwise ("first round", "Region 7 only", a
+// specific initiative rather than the full award), that scope lives in the
+// subawards_label text shown right next to this bar, not in a separate
+// confidence system that could end up disagreeing with it.
+function disbBarHtml(share) {
+  const pct = Math.round(share * 100);
+  return `<div class="disb-bar" title="${pct}% of the total award reflected in the subawards figure above"><div class="disb-fill" style="width:${pct}%"></div></div><div class="disb-pct">${pct}% of award</div>`;
+}
+
 function esc(str) {
   const d = document.createElement("div");
   d.textContent = str == null ? "" : String(str);
@@ -489,7 +509,7 @@ function renderDashboard() {
         <td>${stagePillHtml(s.current_status)}</td>
         <td class="num amount">${usd(s.total_awarded)}${s.current_award && s.current_award.usaspending_url ? `<a class="usaspending-mark" href="${esc(s.current_award.usaspending_url)}" target="_blank" rel="noopener" title="Award amount certified against the federal award record on USASpending.gov">${USASPENDING_ICON}</a>` : ""}</td>
         <td class="num sub${sub != null ? "" : " empty"}">
-          ${sub != null ? `${usd(sub)}<span class="sa-label">${esc(s.current_award.subawards_label)}</span>` : "—"}
+          ${sub != null ? `${usd(sub)}<span class="sa-label">${esc(s.current_award.subawards_label)}</span>${disbShare(s) != null ? disbBarHtml(disbShare(s)) : ""}` : "—"}
         </td>
         <td class="cell-notes" title="${esc(latestNote(s))}"><span class="cell-notes-inner">${hasFlag ? '<span class="flag-mark">⚑</span>' : ""}${esc(main)}</span></td>
         <td class="cell-links">
@@ -515,7 +535,7 @@ function renderDashboard() {
         <div class="sc-amounts">
           <div class="sc-amount">${usd(s.total_awarded)}${s.current_award && s.current_award.usaspending_url ? `<a class="usaspending-mark" href="${esc(s.current_award.usaspending_url)}" target="_blank" rel="noopener" title="Award amount certified against the federal award record on USASpending.gov">${USASPENDING_ICON}</a>` : ""}</div>
           <div class="sc-amount-label">FY26 award &middot; verified ${esc((s.current_award || {}).verified_at || "")}</div>
-          ${sub != null ? `<div class="sc-sub">${usd(sub)} <span class="sa-label">${esc(s.current_award.subawards_label)}</span></div>` : ""}
+          ${sub != null ? `<div class="sc-sub">${usd(sub)} <span class="sa-label">${esc(s.current_award.subawards_label)}</span>${disbShare(s) != null ? disbBarHtml(disbShare(s)) : ""}</div>` : ""}
         </div>
         <div class="sc-notes">${hasFlag ? '<span class="flag-mark">⚑</span>' : ""}${esc(main)}</div>
         <div class="sc-links">
@@ -549,11 +569,7 @@ async function ensureUsTopo() {
 // 0–100% domain (not the observed min/max) so the scale means the same
 // thing everywhere it's read, not just relative to this batch of states.
 function stateMapValue(s, metric) {
-  if (metric === "sub") {
-    const a = s.current_award;
-    if (!a || !a.subawards_amount || !s.total_awarded) return null;
-    return a.subawards_amount / s.total_awarded;
-  }
+  if (metric === "sub") return disbShare(s);
   return s.total_awarded || null;
 }
 
@@ -779,7 +795,7 @@ function renderDetail(name) {
         <div class="amount">${usd(s.total_awarded)}</div>
         <div class="amount-label">FY26 award &middot; verified ${esc(latest.verified_at || "")}</div>
         ${latest.usaspending_url ? `<a class="usaspending-badge" href="${esc(latest.usaspending_url)}" target="_blank" rel="noopener" title="This FY26 award amount is cross-checked against the federal award record on USASpending.gov">${USASPENDING_ICON} USASpending Certified</a>` : ""}
-        ${latest.subawards_amount ? `<div class="sub">${usd(latest.subawards_amount)} <span class="sa-label">${esc(latest.subawards_label)}</span></div>` : ""}
+        ${latest.subawards_amount ? `<div class="sub">${usd(latest.subawards_amount)} <span class="sa-label">${esc(latest.subawards_label)}</span>${disbShare(s) != null ? disbBarHtml(disbShare(s)) : ""}</div>` : ""}
       </div>
     </div>
     ${overviewHtml}

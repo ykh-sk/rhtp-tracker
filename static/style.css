@@ -836,6 +836,34 @@ td.num.sub .sa-label {
   color: var(--muted);
 }
 
+/* Disbursement progress bar: subawards_amount as a share of the total award.
+   Shared markup/styling across the table, cards, and detail page — one visual
+   language for "how far along is this state, not just which gate did it
+   clear." The percentage is exact; whether the subawards figure itself is a
+   complete tally or just a first round is explained in the sa-label text
+   right above it, not re-litigated here. */
+.disb-bar {
+  margin-top: 4px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border);
+  overflow: hidden;
+}
+
+.disb-fill {
+  height: 100%;
+  background: var(--stage-4);
+  border-radius: 2px;
+}
+
+.disb-pct {
+  margin-top: 2px;
+  font-family: "IBM Plex Sans", sans-serif;
+  font-weight: 400;
+  font-size: 10px;
+  color: var(--muted);
+}
+
 .cell-notes {
   max-width: 460px;
   min-width: 260px;
