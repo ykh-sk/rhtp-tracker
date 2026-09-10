@@ -53,7 +53,7 @@ def api_states():
     overview_by_state = {o["state"]: o for o in overviews}
     pillars_by_state = {}
     for p in pillars:
-        pillars_by_state.setdefault(p["state"], []).append(p["name"])
+        pillars_by_state.setdefault(p["state"], []).append({"name": p["name"], "description": p["description"]})
     changelog_by_state = {}
     for c in changelog:
         changelog_by_state.setdefault(c["state"], []).append(c)

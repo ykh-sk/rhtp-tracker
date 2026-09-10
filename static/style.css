@@ -1053,20 +1053,36 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outlin
   max-width: 60ch;
 }
 
-.pillar-list {
+.pillar-detail-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.pillar-chip {
-  font-size: 12px;
-  padding: 4px 10px;
-  border-radius: 999px;
+.pillar-detail-item {
+  padding: 8px 12px;
+  border-radius: 8px;
   background: var(--surface-2);
   border: 1px solid var(--border);
+}
+
+.pillar-name {
+  font-size: 13px;
+  font-weight: 600;
   color: var(--ink);
 }
+
+.pillar-desc {
+  margin-top: 3px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.pillar-desc-empty { font-style: italic; }
 
 .contact-block { font-size: 13px; line-height: 1.6; }
 .contact-block .contact-name { font-weight: 600; }

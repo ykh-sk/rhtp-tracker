@@ -78,12 +78,13 @@ def seed():
     )
 
     pillar_rows = []
-    for state, names in STATE_PILLARS.items():
-        for i, name in enumerate(names):
-            pillar_rows.append({"state": state, "sort_order": i, "name": name, "source_url": None})
+    for state, items in STATE_PILLARS.items():
+        for i, (name, description) in enumerate(items):
+            pillar_rows.append({"state": state, "sort_order": i, "name": name, "source_url": None, "description": description})
     execute_many(
         conn,
-        "INSERT INTO state_pillars (state, sort_order, name, source_url) VALUES (%(state)s, %(sort_order)s, %(name)s, %(source_url)s)",
+        """INSERT INTO state_pillars (state, sort_order, name, source_url, description)
+           VALUES (%(state)s, %(sort_order)s, %(name)s, %(source_url)s, %(description)s)""",
         pillar_rows,
     )
 

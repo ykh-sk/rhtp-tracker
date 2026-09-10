@@ -470,17 +470,44 @@ STATE_OVERVIEW = {
     },
 }
 
+# Each pillar is (name, description) — description is None where current
+# sources name the pillar but don't explain what it specifically funds; a
+# bare name is displayed rather than a guessed description.
 STATE_PILLARS = {
-    "West Virginia": ["MSCF", "HealthTech Appalachia", "Connected Care Grid", "Health to Prosperity (worksite clinics)"],
-    "Kentucky": ["PoWERing", "Rooted in Health", "Crisis to Care", "Rapid Response to Recovery", "Rural Community Hubs"],
-    "Ohio": ["Health Workforce Ohio"],
+    "West Virginia": [
+        ("MSCF", "Part of WV's first $28.56M funding tranche (April 2026); specific scope not detailed in current sources."),
+        ("HealthTech Appalachia", "Part of WV's first $28.56M funding tranche (April 2026); specific scope not detailed in current sources."),
+        ("Connected Care Grid", "Part of WV's first $28.56M funding tranche (April 2026); specific scope not detailed in current sources."),
+        ("Health to Prosperity (worksite clinics)", "WV's worksite-clinic / employer-based-health initiative — its second subaward round, which made first awards in September 2026 (Spotted Owl Healthcare Organization, CAMC/Vandalia Health, Cabell Huntington Foundation)."),
+    ],
+    "Kentucky": [
+        ("PoWERing", None), ("Rooted in Health", None), ("Crisis to Care", None),
+        ("Rapid Response to Recovery", None), ("Rural Community Hubs", None),
+    ],
+    "Ohio": [("Health Workforce Ohio", "Ohio's first RHTP award ($10M, July 2026) went to Ohio University to fund this workforce program.")],
     "Tennessee": [],
-    "Virginia": ["Digital Productivity Tools"],
-    "North Carolina": ["NC ROOTS hubs", "Rural Health Infrastructure Fund (RHIF)", "Mobile Integrated Health", "NC Minority Diabetes Prevention", "School Health Centers expansion"],
-    "Pennsylvania": ["FQHC onboarding", "EHR/HIO onboarding", "Rapid Response Stabilization"],
-    "Georgia": ["GREAT Health — Phase 1", "GREAT Health — Phase 2"],
-    "Alabama": ["ARHTP (5 of 10 initiatives open)"],
-    "Mississippi": ["EMS Capacity Assessment (unverified lead)", "Psychiatric Emergency Services / Workforce Expansion (unverified lead)"],
+    "Virginia": [("Digital Productivity Tools", None)],
+    "North Carolina": [
+        ("NC ROOTS hubs", "Regional hub infrastructure launched April 2026; specific hub-level activity not yet itemized in current sources."),
+        ("Rural Health Infrastructure Fund (RHIF)", "Launched alongside NC ROOTS hubs in April 2026; RHIF-specific disbursements not yet itemized in current sources."),
+        ("Mobile Integrated Health", "Funded by NC's first subaward: $10M to 39 local EMS agencies (June 2026) for overdose follow-up care, opioid-use-disorder medication delivery, and EMS workforce support."),
+        ("NC Minority Diabetes Prevention", None),
+        ("School Health Centers expansion", None),
+    ],
+    "Pennsylvania": [
+        ("FQHC onboarding", "A separate onboarding round for Federally Qualified Health Centers: $1.8M across 6 awards (deadline Aug 7, 2026) — initially misattributed to the EHR/HIO round below in an earlier entry, corrected September 2026."),
+        ("EHR/HIO onboarding", "A distinct $25M track for electronic health record / health information organization onboarding (window closed Aug 14, 2026); WellSpan Health claims $2.8M received for three hospitals, but PA's own DHS page still lists this track's outcome as unconfirmed."),
+        ("Rapid Response Stabilization", "A facility-stabilization funding track; a second round ($35M) opened Aug 17–24, 2026."),
+    ],
+    "Georgia": [
+        ("GREAT Health — Phase 1", "$12.73M committed June 8, 2026 — the first phase of Georgia's sequential GREAT Health disbursement program."),
+        ("GREAT Health — Phase 2", "$30.6M committed July 16, 2026, bringing GREAT Health's cumulative total to $43.3M at that point (later phases brought Year 1 to full commitment)."),
+    ],
+    "Alabama": [("ARHTP (5 of 10 initiatives open)", "Alabama's umbrella RHTP program: 138 grants totaling $144M have been made across the first 5 of 10 planned initiatives, administered by ADECA. A second set of 5 initiatives is approved but has no announced timeline yet.")],
+    "Mississippi": [
+        ("EMS Capacity Assessment (unverified lead)", None),
+        ("Psychiatric Emergency Services / Workforce Expansion (unverified lead)", None),
+    ],
 }
 
 # One entry per MATERIAL change made to a state's overview/pillars/analysis/

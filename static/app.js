@@ -755,7 +755,12 @@ function renderDetail(name) {
           <div class="overview-field">
             <h3>Pillars / initiative tracks</h3>
             ${pillars.length
-              ? `<div class="pillar-list">${pillars.map(p => `<span class="pillar-chip">${esc(p)}</span>`).join("")}</div>`
+              ? `<ul class="pillar-detail-list">${pillars.map(p => `
+                  <li class="pillar-detail-item">
+                    <div class="pillar-name">${esc(p.name)}</div>
+                    ${p.description ? `<div class="pillar-desc">${esc(p.description)}</div>` : `<div class="pillar-desc pillar-desc-empty">Not yet detailed in current sources.</div>`}
+                  </li>
+                `).join("")}</ul>`
               : `<p>Not yet named in current sources.</p>`}
           </div>
           <div class="overview-field">

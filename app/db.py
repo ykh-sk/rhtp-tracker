@@ -89,8 +89,11 @@ CREATE TABLE IF NOT EXISTS state_pillars (
     state TEXT NOT NULL REFERENCES sources(state),
     sort_order INTEGER NOT NULL,
     name TEXT NOT NULL,
-    source_url TEXT
+    source_url TEXT,
+    description TEXT
 );
+
+ALTER TABLE state_pillars ADD COLUMN IF NOT EXISTS description TEXT;
 
 -- Federal-level (not state-specific) statutory/programmatic milestones for
 -- the Rural Health Transformation Program itself: the law, NOFO release,
