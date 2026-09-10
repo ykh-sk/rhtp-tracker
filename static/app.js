@@ -7,6 +7,13 @@ function usd(n) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
 }
 
+// Abbreviated form ("$9.98B", "$1.23M") for large summary figures where
+// scannability matters more than the exact dollar — every other dollar
+// figure on the site still uses usd() at full precision.
+function usdCompact(n) {
+  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", notation: "compact", maximumFractionDigits: 2 }).format(n);
+}
+
 // Share of a state's total award reflected in its recorded subawards figure.
 // Shared by the map's "Subawards disbursed" toggle and the progress bar shown
 // next to the subawards figure everywhere else — one calculation, one meaning.
@@ -445,7 +452,10 @@ function renderDashboard() {
   const counts = STAGES.map(st => ({ ...st, count: STATES.filter(s => s.current_status === st.key).length }));
 
   document.getElementById("m-states").textContent = STATES.length;
-  document.getElementById("m-total").textContent = usd(STATES.reduce((a, s) => a + s.total_awarded, 0));
+  const totalAwarded = STATES.reduce((a, s) => a + s.total_awarded, 0);
+  const mTotal = document.getElementById("m-total");
+  mTotal.textContent = usdCompact(totalAwarded);
+  mTotal.title = usd(totalAwarded);
 
   document.getElementById("segbar").innerHTML = counts
     .filter(c => c.count > 0)
