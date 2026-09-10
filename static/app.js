@@ -451,11 +451,19 @@ function renderAll() {
 function renderDashboard() {
   const counts = STAGES.map(st => ({ ...st, count: STATES.filter(s => s.current_status === st.key).length }));
 
-  document.getElementById("m-states").textContent = STATES.length;
-  const totalAwarded = STATES.reduce((a, s) => a + s.total_awarded, 0);
+  // When a pipeline-stage filter is active, the two headline metrics reflect
+  // only the filtered states — otherwise "$10B total" stays fixed while the
+  // rest of the page filters down to a handful of states, which reads as if
+  // that whole $10B belongs to just the ones shown.
+  const filtered = currentStatus.length ? STATES.filter(s => currentStatus.includes(s.current_status)) : STATES;
+
+  document.getElementById("m-states").textContent = filtered.length;
+  const totalAwarded = filtered.reduce((a, s) => a + s.total_awarded, 0);
   const mTotal = document.getElementById("m-total");
   mTotal.textContent = usdCompact(totalAwarded);
   mTotal.title = usd(totalAwarded);
+  document.getElementById("m-states-label").textContent = currentStatus.length ? "States in this stage" : "States tracked";
+  document.getElementById("m-total-label").textContent = currentStatus.length ? "Awarded to this stage, FY26" : "Total awarded, FY26";
 
   document.getElementById("segbar").innerHTML = counts
     .filter(c => c.count > 0)
@@ -489,8 +497,7 @@ function renderDashboard() {
     banner.hidden = true;
   }
 
-  const visible = currentStatus.length ? STATES.filter(s => currentStatus.includes(s.current_status)) : STATES;
-  const ordered = sortStates(visible);
+  const ordered = sortStates(filtered);
 
   // Computed once per state and shared by both the desktop table and the
   // mobile card list below, so the two views can never silently drift apart
