@@ -884,23 +884,26 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outlin
   background: var(--accent-soft);
 }
 
-/* usaspending-mark: a small inline checkmark next to a dollar figure in the
+/* usaspending-mark: a small inline seal icon next to a dollar figure in the
    table/cards. usaspending-badge: the fuller pill version used in the detail
-   page. Both link out to the specific federal award record they verify. */
+   page. Both link out to the specific federal award record they verify. The
+   seal glyph (not a checkmark) keeps this visually distinct from the
+   confirmed/unverified sourcing-confidence dots used elsewhere. */
 .usaspending-mark {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
   margin-left: 5px;
-  font-size: 11px;
-  font-weight: 700;
   color: var(--verified);
   text-decoration: none;
-  vertical-align: super;
+  vertical-align: middle;
 }
 
-.usaspending-mark:hover, .usaspending-mark:focus-visible { text-decoration: underline; }
+.usaspending-mark:hover, .usaspending-mark:focus-visible { color: var(--ink); }
 
 .usaspending-badge {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   margin-top: 6px;
   font-family: "IBM Plex Mono", monospace;
   font-size: 10px;
@@ -914,6 +917,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outlin
 }
 
 .usaspending-badge:hover, .usaspending-badge:focus-visible { text-decoration: underline; }
+.usaspending-badge .verified-icon, .usaspending-mark .verified-icon { flex-shrink: 0; }
 
 .details-link { font-size: 12px; font-weight: 600; text-decoration: none; }
 .details-link:hover { text-decoration: underline; }

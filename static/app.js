@@ -1,3 +1,8 @@
+// A small seal/shield glyph for the USASpending-certified mark — deliberately
+// not a checkmark, so it can't be confused with the confirmed/unverified
+// sourcing-confidence dots used everywhere else in the UI.
+const USASPENDING_ICON = '<svg class="verified-icon" viewBox="0 0 16 18" width="12" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M8 1.2 L14.3 3.3 V8.4 C14.3 12.4 11.7 15.5 8 16.8 C4.3 15.5 1.7 12.4 1.7 8.4 V3.3 Z"/></svg>';
+
 function usd(n) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
 }
@@ -482,7 +487,7 @@ function renderDashboard() {
           <div class="state-agency">${esc(s.lead_agency)}</div>
         </td>
         <td>${stagePillHtml(s.current_status)}</td>
-        <td class="num amount">${usd(s.total_awarded)}${s.current_award && s.current_award.usaspending_url ? `<a class="usaspending-mark" href="${esc(s.current_award.usaspending_url)}" target="_blank" rel="noopener" title="Award amount cross-checked against the federal award record on USASpending.gov">✓</a>` : ""}</td>
+        <td class="num amount">${usd(s.total_awarded)}${s.current_award && s.current_award.usaspending_url ? `<a class="usaspending-mark" href="${esc(s.current_award.usaspending_url)}" target="_blank" rel="noopener" title="Award amount certified against the federal award record on USASpending.gov">${USASPENDING_ICON}</a>` : ""}</td>
         <td class="num sub${sub != null ? "" : " empty"}">
           ${sub != null ? `${usd(sub)}<span class="sa-label">${esc(s.current_award.subawards_label)}</span>` : "—"}
         </td>
@@ -508,7 +513,7 @@ function renderDashboard() {
         <div class="sc-agency">${esc(s.lead_agency)}</div>
         <div class="sc-stage-row">${stagePillHtml(s.current_status)}</div>
         <div class="sc-amounts">
-          <div class="sc-amount">${usd(s.total_awarded)}${s.current_award && s.current_award.usaspending_url ? `<a class="usaspending-mark" href="${esc(s.current_award.usaspending_url)}" target="_blank" rel="noopener" title="Award amount cross-checked against the federal award record on USASpending.gov">✓</a>` : ""}</div>
+          <div class="sc-amount">${usd(s.total_awarded)}${s.current_award && s.current_award.usaspending_url ? `<a class="usaspending-mark" href="${esc(s.current_award.usaspending_url)}" target="_blank" rel="noopener" title="Award amount certified against the federal award record on USASpending.gov">${USASPENDING_ICON}</a>` : ""}</div>
           <div class="sc-amount-label">FY26 award &middot; verified ${esc((s.current_award || {}).verified_at || "")}</div>
           ${sub != null ? `<div class="sc-sub">${usd(sub)} <span class="sa-label">${esc(s.current_award.subawards_label)}</span></div>` : ""}
         </div>
@@ -773,7 +778,7 @@ function renderDetail(name) {
       <div class="detail-amount">
         <div class="amount">${usd(s.total_awarded)}</div>
         <div class="amount-label">FY26 award &middot; verified ${esc(latest.verified_at || "")}</div>
-        ${latest.usaspending_url ? `<a class="usaspending-badge" href="${esc(latest.usaspending_url)}" target="_blank" rel="noopener" title="This FY26 award amount is cross-checked against the federal award record on USASpending.gov">✓ Award amount verified via USASpending</a>` : ""}
+        ${latest.usaspending_url ? `<a class="usaspending-badge" href="${esc(latest.usaspending_url)}" target="_blank" rel="noopener" title="This FY26 award amount is cross-checked against the federal award record on USASpending.gov">${USASPENDING_ICON} USASpending Certified</a>` : ""}
         ${latest.subawards_amount ? `<div class="sub">${usd(latest.subawards_amount)} <span class="sa-label">${esc(latest.subawards_label)}</span></div>` : ""}
       </div>
     </div>
