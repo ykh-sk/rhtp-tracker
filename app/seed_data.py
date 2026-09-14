@@ -160,6 +160,13 @@ DEADLINES = [
         "confidence": "unverified",
     },
     {
+        "state": "Pennsylvania", "title": "Quality Investment Program (QIP)",
+        "start_date": "2026-09-01", "end_date": "2026-10-01",
+        "source_url": "https://www.pa.gov/agencies/dhs/programs-services/healthcare/rural-health/rhtp-funding-opportunities",
+        "notes": "New RHTP round, not previously tracked: ~$2.75M total, awards up to $250,000 per facility ($2,500/licensed bed), 48-100 facilities expected to be funded. Eligible: skilled nursing facilities, personal care homes, assisted living facilities, intermediate care facilities. Deadline 7:00 AM. A secondary, non-.gov source cited a conflicting ~$12M figure for what may be the same or a related long-term-care program; that figure could not be corroborated on an official PA page and should be treated as unresolved.",
+        "confidence": "confirmed",
+    },
+    {
         "state": "Ohio", "title": "Workforce RFP window",
         "start_date": "2026-03-10", "end_date": None,
         "source_url": "https://odh.ohio.gov/know-our-programs/rural-health-transformation-program/rural-health-transformation-program",
@@ -437,12 +444,12 @@ STATE_OVERVIEW = {
         "updated_at": "2026-09-08",
     },
     "Pennsylvania": {
-        "emphasis": "Runs multiple narrow, sequential funding rounds, each scoped to a specific technology or service track rather than one broad RFA.",
-        "applicant_profile": "Tracks published so far target FQHCs, health information organizations (HIOs), and facilities eligible for stabilization funding.",
+        "emphasis": "Runs multiple narrow, sequential funding rounds, each scoped to a specific technology or service track rather than one broad RFA — a new Quality Investment Program round (long-term-care facilities, ~$2.75M) opened Sept 1, 2026.",
+        "applicant_profile": "Tracks published so far target FQHCs, health information organizations (HIOs), facilities eligible for stabilization funding, and — newly — skilled nursing/personal care/assisted living/intermediate care facilities under the Quality Investment Program.",
         "contact_name": None,
         "contact_email": None,
         "contact_note": "No public contact email found in sourced materials.",
-        "updated_at": "2026-09-02",
+        "updated_at": "2026-09-13",
     },
     "Georgia": {
         "emphasis": "Disburses under a single branded program (GREAT Health) in sequential phases; as of Phase 4, all Year 1 funds ($218.9M) are now fully committed.",
@@ -531,6 +538,13 @@ STATE_CHANGELOG = [
     {"state": "New York", "changed_at": "2026-09-08", "summary": "Status advanced from 'RFA issued' to 'subawards announced': $76.2M announced across 90 RCHI awards to 56 organizations."},
     {"state": "Oklahoma", "changed_at": "2026-09-08", "summary": "First subaward dollar figure recorded: ~$3.85M across 75+ named Community-Led Wellness Hub microgrant recipients."},
     {"state": "Connecticut", "changed_at": "2026-09-08", "summary": "Status corrected from 'admin structure named' to 'RFA issued': an earlier May 2026 NOFO (Rural Health Transformation IT Program) was found predating the previously-recorded event."},
+    {"state": "Vermont", "changed_at": "2026-09-13", "summary": "Status advanced from 'RFA issued' to 'subawards announced': first subaward round, $11.7M ($9M tuition benefits + $2.7M nursing homes/LNA training)."},
+    {"state": "Rhode Island", "changed_at": "2026-09-13", "summary": "Status advanced from 'RFA issued' to 'subawards announced': first subaward, $5.48M for healthcare CTE pathways at 14 schools."},
+    {"state": "Idaho", "changed_at": "2026-09-13", "summary": "Status advanced from 'RFA issued' to 'subawards announced': first named recipient, Comagine Health (dollar amount undisclosed)."},
+    {"state": "Alaska", "changed_at": "2026-09-13", "summary": "Subaward total updated from ~$160M to ~$207M: a 5th rolling round ($25.8M/32 projects) confirmed."},
+    {"state": "Indiana", "changed_at": "2026-09-13", "summary": "Subaward total updated from $13.1M to $112.4M: all 8 GROW regional coalitions now itemized."},
+    {"state": "Louisiana", "changed_at": "2026-09-13", "summary": "Subaward total updated from $2.1M to $4.2M: a second named recipient, University of Louisiana Lafayette, confirmed."},
+    {"state": "Pennsylvania", "changed_at": "2026-09-13", "summary": "New funding round added: the Quality Investment Program (~$2.75M for long-term-care facilities), open Sept 1 - Oct 1, 2026."},
 ]
 
 # Federal-level (not state-specific) statutory/programmatic milestones for the
@@ -714,13 +728,17 @@ STATE_PILLARS.update(NEW_PILLARS)
 _UPDATED_AT_OVERRIDES = {
     "Hawaii": "2026-09-07",
     "Delaware": "2026-09-07",
-    "Indiana": "2026-09-08",
-    "Louisiana": "2026-09-08",
+    "Indiana": "2026-09-13",
+    "Louisiana": "2026-09-13",
     "Nevada": "2026-09-08",
     "New Hampshire": "2026-09-08",
     "New York": "2026-09-08",
     "Oklahoma": "2026-09-08",
     "Connecticut": "2026-09-08",
+    "Vermont": "2026-09-13",
+    "Rhode Island": "2026-09-13",
+    "Idaho": "2026-09-13",
+    "Alaska": "2026-09-13",
 }
 
 for _state, _fields in NEW_OVERVIEW.items():
