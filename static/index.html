@@ -43,15 +43,19 @@
           <a href="#" data-tab="dashboard">Dashboard</a>
           <a href="#view=calendar" data-tab="calendar">Calendar</a>
           <a href="#view=commentary" data-tab="commentary">Commentary</a>
-          <span class="tab-divider" aria-hidden="true"></span>
-          <a href="#view=health-systems" data-tab="health-systems" class="tab-map">
-            <svg class="tab-map-icon" viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true">
-              <path d="M8 15C8 15 13 10.2 13 6.5C13 3.5 10.8 1.5 8 1.5C5.2 1.5 3 3.5 3 6.5C3 10.2 8 15 8 15Z" />
-              <circle cx="8" cy="6.4" r="1.7" fill="currentColor" stroke="none" />
-            </svg>
-            Health Systems
-          </a>
         </nav>
+        <!-- Deliberately its own element, not a fourth segment in the tabs
+             pill above: those three are views of one dataset (the RHTP
+             tracker); this launches a separate tool — a live map pulling in
+             outside federal data — so it gets its own button shape/color
+             rather than blending into that set. -->
+        <a href="#view=health-systems" data-tab="health-systems" id="health-systems-link" class="hs-launch">
+          <svg class="hs-launch-icon" viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true">
+            <path d="M8 15C8 15 13 10.2 13 6.5C13 3.5 10.8 1.5 8 1.5C5.2 1.5 3 3.5 3 6.5C3 10.2 8 15 8 15Z" />
+            <circle cx="8" cy="6.4" r="1.7" fill="currentColor" stroke="none" />
+          </svg>
+          Health Systems Map
+        </a>
         <div class="stamp" id="stamp">10 states &middot; FY26</div>
         <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">🌙</button>
       </div>

@@ -442,7 +442,7 @@ function renderAll() {
   currentState = state;
   currentView = state ? null : view;
 
-  document.querySelectorAll("nav.tabs a").forEach(a => {
+  document.querySelectorAll("[data-tab]").forEach(a => {
     const tab = a.dataset.tab;
     const active = !currentState && (tab === currentView || (tab === "dashboard" && !currentView));
     a.classList.toggle("active", active);
