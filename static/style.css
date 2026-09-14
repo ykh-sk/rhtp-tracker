@@ -118,6 +118,14 @@ header.masthead {
   gap: 14px;
 }
 
+.brand-link {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  text-decoration: none;
+  color: inherit;
+}
+
 .brand-icon {
   flex: none;
   width: 72px;
@@ -181,13 +189,6 @@ h1 {
 :root[data-theme="dark"] .brand-icon-light { display: none; }
 :root[data-theme="dark"] .wordmark-dark,
 :root[data-theme="dark"] .brand-icon-dark { display: block; }
-
-.title-row-main {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
 
 .last-updated {
   font: inherit;
