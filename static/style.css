@@ -591,6 +591,12 @@ nav.tabs a.active {
   margin-right: auto;
 }
 
+/* The 60ch cap above is right for a short one-liner, but it force-wraps a
+   longer sentence into a narrow, multi-line centered block — the opposite
+   of "one long line." Dropping the cap lets it use the section's actual
+   width, so it only wraps where it genuinely has to (narrow/phone widths). */
+.map-caption-wide { max-width: none; }
+
 /* ---- health systems map ---- */
 .hs-toggle-row {
   display: flex;
