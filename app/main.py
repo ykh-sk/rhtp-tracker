@@ -212,5 +212,13 @@ def add_federal_milestone():
     return jsonify({"ok": True}), 201
 
 
+@app.route("/api/health_systems")
+def api_health_systems():
+    conn = get_connection()
+    rows = rows_to_dicts(query(conn, "SELECT * FROM health_systems ORDER BY hospital_count DESC"))
+    conn.close()
+    return jsonify(rows)
+
+
 if __name__ == "__main__":
     app.run(debug=True, port=5050)

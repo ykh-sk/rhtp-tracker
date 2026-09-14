@@ -16,6 +16,7 @@
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="stylesheet" href="/static/style.css" />
 </head>
 <body>
@@ -42,6 +43,7 @@
           <a href="#" data-tab="dashboard">Dashboard</a>
           <a href="#view=calendar" data-tab="calendar">Calendar</a>
           <a href="#view=commentary" data-tab="commentary">Commentary</a>
+          <a href="#view=health-systems" data-tab="health-systems">Health Systems</a>
         </nav>
         <div class="stamp" id="stamp">10 states &middot; FY26</div>
         <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">🌙</button>
@@ -150,6 +152,47 @@
       <div class="cal-list" id="commentary-list"></div>
     </div>
 
+    <div id="health-systems" hidden>
+      <p class="cal-caption">
+        The business landscape behind rural health transformation. Two layers on one zoomable map: notable
+        hospital/health-system <strong>operators</strong> (curated, sourced — the companies), and every individual
+        <strong>hospital</strong> facility pulled live from HIFLD/FEMA's public federal dataset. Zoom in on an area
+        and click any marker to see it right on the map.
+      </p>
+
+      <div class="hs-toggle-row">
+        <div class="map-toggle" id="hs-layer-toggle">
+          <button type="button" data-layer="operators" class="active">Operators</button>
+          <button type="button" data-layer="facilities" class="active">Live hospitals</button>
+        </div>
+        <div class="map-toggle" id="hs-tier-toggle">
+          <button type="button" data-tier="all" class="active">All tiers</button>
+          <button type="button" data-tier="major">Major</button>
+          <button type="button" data-tier="large">Large</button>
+          <button type="button" data-tier="mid">Mid</button>
+          <button type="button" data-tier="small">Small</button>
+        </div>
+        <div class="map-toggle" id="hs-ownership-toggle">
+          <button type="button" data-ownership="all" class="active">All ownership</button>
+          <button type="button" data-ownership="nonprofit">Nonprofit</button>
+          <button type="button" data-ownership="for-profit">For-profit</button>
+        </div>
+      </div>
+
+      <div class="map-section">
+        <div id="hs-map"></div>
+        <div class="hs-legend" id="hs-legend"></div>
+        <p class="map-caption" id="hs-zoom-hint">Zoom in on an area to load individual hospitals from HIFLD (a
+          federal, FEMA-maintained open dataset) — click any marker for details. Operator bubbles (sized by
+          hospital count, colored by ownership) stay visible at every zoom level.</p>
+        <p class="map-caption">Live facility data: <a href="https://hifld-geoplatform.hub.arcgis.com/datasets/geoplatform::hospitals" target="_blank" rel="noopener">HIFLD Hospitals</a>,
+          queried directly from Esri/FEMA's public feature service — not stored on this site, so it reflects
+          whatever HIFLD currently publishes. Basemap &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors.</p>
+      </div>
+
+      <div class="hs-list" id="hs-list"></div>
+    </div>
+
     <footer class="site-footer">
       <p class="disclaimer">Independent, unofficial tracker — not affiliated with or endorsed by HHS, CMS, or any
         state agency named here. Data is compiled from public sources (cited throughout) and may contain errors or
@@ -194,6 +237,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="/static/app.js"></script>
 </body>
 </html>

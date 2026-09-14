@@ -80,11 +80,14 @@ let STATES = [];
 let DEADLINES = [];
 let COMMENTARY = [];
 let FEDERAL_MILESTONES = [];
+let HEALTH_SYSTEMS = [];
 let SEARCH_INDEX = [];
 let currentStatus = [];
 let currentState = null;
 let currentView = null;
 let currentSort = "stage";
+let hsTierFilter = "all";
+let hsOwnershipFilter = "all";
 
 function stageVar(status) {
   const s = STAGES.find(s => s.key === status);
@@ -120,11 +123,12 @@ function goStatus(status) {
 }
 
 async function boot() {
-  const [statesRes, deadlinesRes, commentaryRes, federalRes] = await Promise.all([
+  const [statesRes, deadlinesRes, commentaryRes, federalRes, healthSystemsRes] = await Promise.all([
     fetch("/api/states").then(r => r.json()),
     fetch("/api/deadlines").then(r => r.json()),
     fetch("/api/commentary").then(r => r.json()),
     fetch("/api/federal_milestones").then(r => r.json()).catch(() => []),
+    fetch("/api/health_systems").then(r => r.json()).catch(() => []),
   ]);
 
   STAGES = statesRes.status_taxonomy.map((key, i) => ({ key, order: i + 1, var: `--stage-${i + 1}` }));
@@ -132,6 +136,7 @@ async function boot() {
   DEADLINES = deadlinesRes;
   COMMENTARY = commentaryRes;
   FEDERAL_MILESTONES = federalRes;
+  HEALTH_SYSTEMS = healthSystemsRes;
   SEARCH_INDEX = buildSearchIndex();
 
   document.getElementById("stamp").textContent = `${STATES.length} states · FY26`;
@@ -160,6 +165,30 @@ async function boot() {
     mapMetric = btn.dataset.metric;
     document.querySelectorAll("#map-toggle button").forEach(b => b.classList.toggle("active", b === btn));
     renderMap();
+  });
+  document.getElementById("hs-layer-toggle").addEventListener("click", e => {
+    const btn = e.target.closest("button[data-layer]");
+    if (!btn) return;
+    btn.classList.toggle("active");
+    if (btn.dataset.layer === "operators") hsShowOperators = btn.classList.contains("active");
+    if (btn.dataset.layer === "facilities") hsShowFacilities = btn.classList.contains("active");
+    renderOperatorLayer();
+    updateHsZoomHint();
+    scheduleFacilityFetch();
+  });
+  document.getElementById("hs-tier-toggle").addEventListener("click", e => {
+    const btn = e.target.closest("button[data-tier]");
+    if (!btn) return;
+    hsTierFilter = btn.dataset.tier;
+    document.querySelectorAll("#hs-tier-toggle button").forEach(b => b.classList.toggle("active", b === btn));
+    refreshHsOperators();
+  });
+  document.getElementById("hs-ownership-toggle").addEventListener("click", e => {
+    const btn = e.target.closest("button[data-ownership]");
+    if (!btn) return;
+    hsOwnershipFilter = btn.dataset.ownership;
+    document.querySelectorAll("#hs-ownership-toggle button").forEach(b => b.classList.toggle("active", b === btn));
+    refreshHsOperators();
   });
   document.getElementById("sort-select").addEventListener("change", e => {
     currentSort = e.target.value;
@@ -423,6 +452,7 @@ function renderAll() {
   document.getElementById("detail").hidden = true;
   document.getElementById("calendar").hidden = true;
   document.getElementById("commentary").hidden = true;
+  document.getElementById("health-systems").hidden = true;
 
   if (currentState) {
     document.getElementById("detail").hidden = false;
@@ -439,6 +469,12 @@ function renderAll() {
   if (currentView === "commentary") {
     document.getElementById("commentary").hidden = false;
     renderCommentary();
+    return;
+  }
+
+  if (currentView === "health-systems") {
+    document.getElementById("health-systems").hidden = false;
+    renderHealthSystems();
     return;
   }
 
@@ -698,6 +734,281 @@ async function renderMap() {
   document.getElementById("map-caption").textContent = mapMetric === "sub"
     ? "Colored by percentage of the total award disbursed as subawards, where a source states a figure — not the raw dollar amount, so states with different-sized awards compare fairly. Light-gray tracked states have no subawards figure yet. Untracked states are neutral gray."
     : "Colored by total FY26 award, scaled to the range actually observed among tracked states (not from $0) so relative differences are visible. Untracked states are neutral gray.";
+}
+
+// ---- health systems map ----
+// Two Leaflet layers on one real pan/zoom tile map: a small curated layer of
+// health-system OPERATORS (companies — from our own sourced dataset, shown
+// at every zoom level since there are only a couple dozen) and a live layer
+// of individual hospital FACILITIES queried straight from HIFLD/FEMA's
+// public ArcGIS feature service for whatever's in view — nothing about the
+// live layer is stored on this site, so it's only ever as current as HIFLD.
+
+const HIFLD_HOSPITALS_URL = "https://services2.arcgis.com/FiaPA4ga0iQKduv3/arcgis/rest/services/Hospitals/FeatureServer/0/query";
+const HS_FACILITY_MIN_ZOOM = 8; // roughly city/county level — below this a bbox can cover several states and risk the 500-result cap in dense regions
+
+let hsMap = null;
+let hsOperatorLayer = null;
+let hsFacilityLayer = null;
+let hsShowOperators = true;
+let hsShowFacilities = true;
+let hsFacilityFetchTimer = null;
+let hsFacilityFetchToken = 0; // lets a stale in-flight fetch recognize it's been superseded by a later pan/zoom
+
+function tierRadius(tier) {
+  return { small: 5, mid: 8, large: 12, major: 17 }[tier] || 6;
+}
+
+// Reuses the pipeline's 5-hue stage palette for the tier badge/legend, just
+// borrowing hues rather than any pipeline meaning: gray→purple reads as a
+// small→major size ramp the same way it already reads as early→late stage.
+function tierColorVar(tier) {
+  return { small: "--stage-1", mid: "--stage-2", large: "--stage-3", major: "--stage-5" }[tier] || "--stage-1";
+}
+
+function ownershipColorVar(ownership) {
+  return ownership === "for-profit" ? "--warn" : "--accent";
+}
+
+// HIFLD's OWNER field is a free-ish text taxonomy (NON-PROFIT, PROPRIETARY,
+// GOVERNMENT - STATE/FEDERAL/..., NOT AVAILABLE) — coarser-matched here into
+// the same three-way split used elsewhere on the map/legend.
+function facilityOwnerColorVar(owner) {
+  const o = (owner || "").toUpperCase();
+  if (o.includes("NON-PROFIT") || o.includes("NONPROFIT")) return "--accent";
+  if (o.includes("PROPRIETARY")) return "--warn";
+  if (o.includes("GOVERNMENT")) return "--federal";
+  return "--muted";
+}
+
+function facilityRadius(beds) {
+  const b = Math.max(0, Number(beds) || 0); // HIFLD uses -999 as a "no data" sentinel, not a real bed count
+  return Math.max(4, Math.min(13, 3 + Math.sqrt(b) * 0.8));
+}
+
+function currentFilteredOperators() {
+  return HEALTH_SYSTEMS.filter(h =>
+    (hsTierFilter === "all" || h.tier === hsTierFilter) &&
+    (hsOwnershipFilter === "all" || h.ownership_type === hsOwnershipFilter)
+  );
+}
+
+function ensureHsMap() {
+  if (hsMap || typeof L === "undefined") return;
+  // scrollWheelZoom starts off so scrolling the page past the map doesn't
+  // hijack the wheel — a click (or the +/- control, which works regardless)
+  // arms it, the same pattern most embedded maps use.
+  hsMap = L.map("hs-map", { scrollWheelZoom: false, worldCopyJump: true }).setView([39.5, -98.35], 4);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 18,
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors',
+  }).addTo(hsMap);
+  hsMap.once("click", () => hsMap.scrollWheelZoom.enable());
+
+  hsOperatorLayer = L.layerGroup().addTo(hsMap);
+  hsFacilityLayer = L.layerGroup().addTo(hsMap);
+
+  hsMap.on("moveend zoomend", () => { updateHsZoomHint(); scheduleFacilityFetch(); });
+}
+
+function operatorPopupHtml(h) {
+  return `
+    <div class="hs-popup">
+      <div class="hs-popup-title">${esc(h.name)}</div>
+      <div>${titleCase(h.tier)} operator · ${h.ownership_type === "for-profit" ? "For-profit" : "Nonprofit"}</div>
+      <div>${h.hospital_count} hospitals · HQ ${esc(h.hq_city)}, ${esc(h.hq_state)}</div>
+      ${h.confidence === "approximate" ? `<div class="hs-popup-caution">Approximate count</div>` : ""}
+      <a href="${esc(h.source_url)}" target="_blank" rel="noopener">Source ↗</a>
+    </div>
+  `;
+}
+
+function renderOperatorLayer() {
+  if (!hsOperatorLayer) return;
+  hsOperatorLayer.clearLayers();
+  if (!hsShowOperators) return;
+  currentFilteredOperators().forEach(h => {
+    L.circleMarker([h.hq_lat, h.hq_lon], {
+      radius: tierRadius(h.tier),
+      color: "var(--surface)",
+      weight: 1.5,
+      fillColor: `var(${ownershipColorVar(h.ownership_type)})`,
+      fillOpacity: 0.8,
+    })
+      .bindPopup(operatorPopupHtml(h))
+      .addTo(hsOperatorLayer);
+  });
+}
+
+// HIFLD leaves plenty of fields blank per facility — text fields as the
+// literal string "NOT AVAILABLE", numeric fields (BEDS, TTL_STAFF) as a
+// -999 sentinel — each line below is only shown when the source actually
+// has that value, rather than padding the popup with placeholders.
+function facilityPopupHtml(p) {
+  const na = v => v && String(v).toUpperCase() !== "NOT AVAILABLE";
+  const num = v => (Number.isFinite(v) && v >= 0 ? v : null); // filters the -999 "no data" sentinel
+  const address = [p.ADDRESS, `${p.CITY || ""}, ${p.STATE || ""}${na(p.COUNTY) ? ` (${p.COUNTY} County)` : ""}`]
+    .filter(Boolean).join(", ");
+  const phoneDigits = na(p.TELEPHONE) ? String(p.TELEPHONE).replace(/[^\d+]/g, "") : null;
+  const website = na(p.WEBSITE) ? (/^https?:\/\//.test(p.WEBSITE) ? p.WEBSITE : "https://" + p.WEBSITE) : null;
+  const sourceDate = na(p.SOURCEDATE) ? fmtDate(String(p.SOURCEDATE).slice(0, 10)) : null;
+
+  return `
+    <div class="hs-popup">
+      <div class="hs-popup-title">${esc(p.NAME || "Unnamed facility")}</div>
+      <div>${esc(titleCase(p.TYPE || "Hospital"))} · ${esc(titleCase((p.OWNER || "Ownership not available").replace(/\s*-\s*/g, " ")))}</div>
+      <div>${address}</div>
+      <div>${[
+        num(p.BEDS) ? `${p.BEDS} beds` : null,
+        num(p.TTL_STAFF) ? `${p.TTL_STAFF} staff` : null,
+        na(p.TRAUMA) ? `Trauma level ${p.TRAUMA}` : null,
+        String(p.HELIPAD).toUpperCase() === "Y" ? "Helipad" : null,
+      ].filter(Boolean).map(esc).join(" · ")}</div>
+      ${phoneDigits ? `<div><a href="tel:${esc(phoneDigits)}">${esc(p.TELEPHONE)}</a></div>` : ""}
+      ${website ? `<div><a href="${esc(website)}" target="_blank" rel="noopener">Website ↗</a></div>` : ""}
+      ${sourceDate ? `<div class="hs-popup-caution">HIFLD source data as of ${esc(sourceDate)}</div>` : ""}
+    </div>
+  `;
+}
+
+function updateHsZoomHint(message) {
+  const hint = document.getElementById("hs-zoom-hint");
+  if (!hint || !hsMap) return;
+  if (message) { hint.textContent = message; return; }
+  if (!hsShowFacilities) {
+    hint.textContent = "Live hospital layer is off — turn on “Live hospitals” above to load individual facilities as you zoom in.";
+  } else if (hsMap.getZoom() < HS_FACILITY_MIN_ZOOM) {
+    hint.textContent = "Zoom in on an area (state/metro level or closer) to load individual hospitals from HIFLD — click any marker for details.";
+  } else {
+    hint.textContent = "Loading hospitals in view…";
+  }
+}
+
+function scheduleFacilityFetch() {
+  clearTimeout(hsFacilityFetchTimer);
+  if (!hsMap || !hsShowFacilities || hsMap.getZoom() < HS_FACILITY_MIN_ZOOM) {
+    if (hsFacilityLayer) hsFacilityLayer.clearLayers();
+    return;
+  }
+  // Debounced so a drag/zoom gesture doesn't fire a request per frame — the
+  // public HIFLD service is shared infrastructure, not ours to hammer.
+  hsFacilityFetchTimer = setTimeout(fetchFacilitiesInView, 450);
+}
+
+async function fetchFacilitiesInView() {
+  const token = ++hsFacilityFetchToken;
+  const b = hsMap.getBounds();
+  const params = new URLSearchParams({
+    where: "STATUS='OPEN'",
+    geometry: [b.getWest(), b.getSouth(), b.getEast(), b.getNorth()].join(","),
+    geometryType: "esriGeometryEnvelope",
+    inSR: "4326",
+    spatialRel: "esriSpatialRelIntersects",
+    outFields: "NAME,ADDRESS,CITY,STATE,COUNTY,TELEPHONE,BEDS,TTL_STAFF,OWNER,TYPE,TRAUMA,HELIPAD,WEBSITE,SOURCEDATE",
+    resultRecordCount: "500",
+    f: "geojson",
+  });
+
+  let data;
+  try {
+    const res = await fetch(`${HIFLD_HOSPITALS_URL}?${params}`);
+    data = await res.json();
+  } catch {
+    if (token === hsFacilityFetchToken) updateHsZoomHint("Couldn't reach HIFLD's live hospital data right now — the operator layer above is still unaffected.");
+    return;
+  }
+  if (token !== hsFacilityFetchToken) return; // superseded by a later pan/zoom
+
+  // A handful of HIFLD rows carry null/placeholder geometry (unmapped
+  // facilities) — skip those rather than hand Leaflet a NaN center, which
+  // renders as a broken SVG path.
+  const features = (data.features || []).filter(f => {
+    const c = f.geometry && f.geometry.coordinates;
+    return Array.isArray(c) && Number.isFinite(c[0]) && Number.isFinite(c[1]);
+  });
+  hsFacilityLayer.clearLayers();
+  features.forEach(f => {
+    const p = f.properties || {};
+    const [lon, lat] = f.geometry.coordinates;
+    L.circleMarker([lat, lon], {
+      radius: facilityRadius(p.BEDS),
+      color: "var(--surface)",
+      weight: 1,
+      fillColor: `var(${facilityOwnerColorVar(p.OWNER)})`,
+      fillOpacity: 0.75,
+    })
+      .bindPopup(facilityPopupHtml(p))
+      .addTo(hsFacilityLayer);
+  });
+
+  const capped = features.length >= 500;
+  updateHsZoomHint(`Showing ${features.length}${capped ? "+" : ""} hospital${features.length === 1 ? "" : "s"} in view (live from HIFLD). Pan or zoom to load more.`);
+}
+
+function renderHsLegend() {
+  document.getElementById("hs-legend").innerHTML = `
+    <div class="hs-legend-group">
+      <span class="hs-legend-title">Operator size = hospital count</span>
+      ${["small", "mid", "large", "major"].map(t => `
+        <span class="hs-legend-item">
+          <svg width="${tierRadius("major") * 2 + 4}" height="${tierRadius("major") * 2 + 4}">
+            <circle cx="${tierRadius("major") + 2}" cy="${tierRadius("major") + 2}" r="${tierRadius(t)}" fill="var(--muted)" fill-opacity="0.5"/>
+          </svg>
+          ${titleCase(t)}
+        </span>
+      `).join("")}
+    </div>
+    <div class="hs-legend-group">
+      <span class="hs-legend-title">Color = ownership</span>
+      <span class="hs-legend-item"><span class="hs-dot" style="background:var(--accent)"></span>Nonprofit</span>
+      <span class="hs-legend-item"><span class="hs-dot" style="background:var(--warn)"></span>For-profit</span>
+      <span class="hs-legend-item"><span class="hs-dot" style="background:var(--federal)"></span>Government (live layer only)</span>
+    </div>
+  `;
+}
+
+// Tier/ownership filters only touch the curated operator layer — refresh
+// just that (and the list) rather than re-checking the map/live layer too.
+function refreshHsOperators() {
+  renderHealthSystemsList(currentFilteredOperators());
+  renderOperatorLayer();
+}
+
+function renderHealthSystems() {
+  renderHealthSystemsList(currentFilteredOperators());
+  renderHsLegend();
+
+  if (typeof L === "undefined") {
+    document.getElementById("hs-map").innerHTML = `<p style="text-align:center; color:var(--muted); font-size:12px;">Map library unavailable right now.</p>`;
+    return;
+  }
+
+  ensureHsMap();
+  if (!hsMap) return;
+  hsMap.invalidateSize(); // the container may have been display:none while on another tab
+  renderOperatorLayer();
+  updateHsZoomHint();
+  scheduleFacilityFetch();
+}
+
+function renderHealthSystemsList(list) {
+  const sorted = [...list].sort((a, b) => b.hospital_count - a.hospital_count);
+  document.getElementById("hs-list").innerHTML = sorted.map(h => `
+    <div class="hs-card" id="hs-row-${h.id}">
+      <div class="hs-card-head">
+        <span class="stage-pill" style="--stage-color:var(${tierColorVar(h.tier)})">${titleCase(h.tier)}</span>
+        <h3>${esc(h.name)}</h3>
+        <span class="stage-pill" style="--stage-color:var(${ownershipColorVar(h.ownership_type)})">${h.ownership_type === "for-profit" ? "For-profit" : "Nonprofit"}</span>
+        ${h.confidence === "approximate" ? `<span class="caution-tag">Approximate count</span>` : ""}
+      </div>
+      <div class="hs-card-body">
+        <span>${h.hospital_count} hospitals</span>
+        <span>HQ: ${esc(h.hq_city)}, ${esc(h.hq_state)}</span>
+      </div>
+      ${h.notes ? `<p class="hs-notes">${esc(h.notes)}</p>` : ""}
+      <a class="tl-source" href="${esc(h.source_url)}" target="_blank" rel="noopener">Source ↗</a>
+    </div>
+  `).join("") || `<p style="text-align:center; color:var(--muted); padding:24px 0;">No systems match this filter.</p>`;
 }
 
 function latestConfirmedEvent(s) {

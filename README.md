@@ -28,6 +28,11 @@ python3 app/main.py   # serves the dashboard at http://localhost:5050
   profile, contact). `contact_email` is left `NULL` with a `contact_note` explaining why whenever a
   state hasn't published one — never guessed or constructed from a name.
 - `state_changelog` — see "Update policy" below.
+- `health_systems` — the "Health Systems" tab's data: a curated (not bulk-imported) list of notable
+  hospital/health-system operators, sized small/mid/large/major by hospital count, each with a
+  `source_url` and a `confidence` of `confirmed` or `approximate`. See
+  `app/health_systems_data.py` for the sourced dataset — extend it the same way you'd extend
+  `seed_data.py`.
 
 ## Update policy
 

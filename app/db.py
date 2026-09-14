@@ -114,6 +114,26 @@ CREATE TABLE IF NOT EXISTS federal_milestones (
     notes TEXT,
     confidence TEXT NOT NULL DEFAULT 'confirmed' CHECK (confidence IN ('confirmed', 'unverified', 'personal'))
 );
+
+-- Hospital/health-system OPERATORS (the businesses that own and run
+-- hospitals) — a curated "business landscape" layer distinct from the
+-- per-state RHTP funding data above. Sized small/mid/large/major by
+-- hospital_count; see app/health_systems_data.py for the sourced dataset.
+CREATE TABLE IF NOT EXISTS health_systems (
+    id SERIAL PRIMARY KEY,
+    name TEXT NOT NULL,
+    tier TEXT NOT NULL CHECK (tier IN ('small', 'mid', 'large', 'major')),
+    ownership_type TEXT NOT NULL CHECK (ownership_type IN ('nonprofit', 'for-profit')),
+    hq_city TEXT NOT NULL,
+    hq_state TEXT NOT NULL,
+    hq_lat DOUBLE PRECISION NOT NULL,
+    hq_lon DOUBLE PRECISION NOT NULL,
+    hospital_count INTEGER NOT NULL,
+    notes TEXT,
+    source_url TEXT NOT NULL,
+    verified_at TEXT NOT NULL,
+    confidence TEXT NOT NULL DEFAULT 'confirmed' CHECK (confidence IN ('confirmed', 'approximate'))
+);
 """
 
 

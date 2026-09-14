@@ -10,12 +10,14 @@ from seed_data import (
     SOURCES, AWARDS, STATUS_EVENTS, DEADLINES, ANALYSIS, COMMENTARY,
     STATE_OVERVIEW, STATE_PILLARS, STATE_CHANGELOG, FEDERAL_MILESTONES,
 )
+from health_systems_data import HEALTH_SYSTEMS
 
 
 def seed():
     init_db()
     conn = get_connection()
 
+    execute(conn, "DELETE FROM health_systems")
     execute(conn, "DELETE FROM federal_milestones")
     execute(conn, "DELETE FROM state_changelog")
     execute(conn, "DELETE FROM state_pillars")
@@ -103,13 +105,22 @@ def seed():
             FEDERAL_MILESTONES,
         )
 
+    execute_many(
+        conn,
+        """INSERT INTO health_systems
+           (name, tier, ownership_type, hq_city, hq_state, hq_lat, hq_lon, hospital_count, notes, source_url, verified_at, confidence)
+           VALUES (%(name)s, %(tier)s, %(ownership_type)s, %(hq_city)s, %(hq_state)s, %(hq_lat)s, %(hq_lon)s,
+                   %(hospital_count)s, %(notes)s, %(source_url)s, %(verified_at)s, %(confidence)s)""",
+        HEALTH_SYSTEMS,
+    )
+
     conn.commit()
     conn.close()
     print(
         f"Seeded {len(SOURCES)} sources, {len(AWARDS)} awards, {len(STATUS_EVENTS)} status events, "
         f"{len(DEADLINES)} deadlines, {len(COMMENTARY)} commentary links, {len(analysis_rows)} analysis rows, "
         f"{len(overview_rows)} overviews, {len(pillar_rows)} pillars, {len(STATE_CHANGELOG)} changelog entries, "
-        f"{len(FEDERAL_MILESTONES)} federal milestones."
+        f"{len(FEDERAL_MILESTONES)} federal milestones, {len(HEALTH_SYSTEMS)} health systems."
     )
 
 
