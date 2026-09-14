@@ -256,6 +256,24 @@ nav.tabs a.active {
   box-shadow: var(--shadow);
 }
 
+/* Separates the funding-tracker views (Dashboard/Calendar/Commentary) from
+   the Health Systems map, which is a different kind of thing — an
+   exploratory tool pulling in live outside data, not another tracker page. */
+.tab-divider {
+  width: 1px;
+  align-self: stretch;
+  margin: 2px 2px;
+  background: var(--border);
+}
+
+nav.tabs a.tab-map {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tab-map-icon { flex: none; }
+
 .stamp {
   font-family: "IBM Plex Mono", monospace;
   font-size: 12px;
