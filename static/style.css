@@ -26,6 +26,17 @@
   --verified: #4a4fb0; /* cross-checked against a live federal API (USASpending.gov) — indigo, distinct from every other tag color */
   --verified-bg: #eaeaf7;
   --shadow: 0 1px 2px rgba(22, 33, 29, 0.06);
+  /* Health Systems map markers, by ownership type. Deliberately NOT
+     theme-swapped like the rest of the palette: these sit on top of OSM tile
+     imagery, which stays light-colored regardless of the site's own
+     light/dark theme, so the muted --accent/--warn/--federal hues (tuned to
+     read against page chrome) washed out against map greens/tans/blues.
+     Saturated and mutually distinct instead, so the circles pop in both
+     themes. */
+  --owner-nonprofit: #15803d;
+  --owner-forprofit: #ea580c;
+  --owner-government: #1d4ed8;
+  --owner-unknown: #57606a;
 }
 
 @media (prefers-color-scheme: dark) {

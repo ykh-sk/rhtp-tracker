@@ -767,7 +767,7 @@ function tierColorVar(tier) {
 }
 
 function ownershipColorVar(ownership) {
-  return ownership === "for-profit" ? "--warn" : "--accent";
+  return ownership === "for-profit" ? "--owner-forprofit" : "--owner-nonprofit";
 }
 
 // HIFLD's OWNER field is a free-ish text taxonomy (NON-PROFIT, PROPRIETARY,
@@ -775,10 +775,10 @@ function ownershipColorVar(ownership) {
 // the same three-way split used elsewhere on the map/legend.
 function facilityOwnerColorVar(owner) {
   const o = (owner || "").toUpperCase();
-  if (o.includes("NON-PROFIT") || o.includes("NONPROFIT")) return "--accent";
-  if (o.includes("PROPRIETARY")) return "--warn";
-  if (o.includes("GOVERNMENT")) return "--federal";
-  return "--muted";
+  if (o.includes("NON-PROFIT") || o.includes("NONPROFIT")) return "--owner-nonprofit";
+  if (o.includes("PROPRIETARY")) return "--owner-forprofit";
+  if (o.includes("GOVERNMENT")) return "--owner-government";
+  return "--owner-unknown";
 }
 
 function facilityRadius(beds) {
@@ -831,9 +831,9 @@ function renderOperatorLayer() {
     L.circleMarker([h.hq_lat, h.hq_lon], {
       radius: tierRadius(h.tier),
       color: "var(--surface)",
-      weight: 1.5,
+      weight: 2,
       fillColor: `var(${ownershipColorVar(h.ownership_type)})`,
-      fillOpacity: 0.8,
+      fillOpacity: 0.92,
     })
       .bindPopup(operatorPopupHtml(h))
       .addTo(hsOperatorLayer);
@@ -933,9 +933,9 @@ async function fetchFacilitiesInView() {
     L.circleMarker([lat, lon], {
       radius: facilityRadius(p.BEDS),
       color: "var(--surface)",
-      weight: 1,
+      weight: 1.5,
       fillColor: `var(${facilityOwnerColorVar(p.OWNER)})`,
-      fillOpacity: 0.75,
+      fillOpacity: 0.88,
     })
       .bindPopup(facilityPopupHtml(p))
       .addTo(hsFacilityLayer);
@@ -960,9 +960,9 @@ function renderHsLegend() {
     </div>
     <div class="hs-legend-group">
       <span class="hs-legend-title">Color = ownership</span>
-      <span class="hs-legend-item"><span class="hs-dot" style="background:var(--accent)"></span>Nonprofit</span>
-      <span class="hs-legend-item"><span class="hs-dot" style="background:var(--warn)"></span>For-profit</span>
-      <span class="hs-legend-item"><span class="hs-dot" style="background:var(--federal)"></span>Government (live layer only)</span>
+      <span class="hs-legend-item"><span class="hs-dot" style="background:var(--owner-nonprofit)"></span>Nonprofit</span>
+      <span class="hs-legend-item"><span class="hs-dot" style="background:var(--owner-forprofit)"></span>For-profit</span>
+      <span class="hs-legend-item"><span class="hs-dot" style="background:var(--owner-government)"></span>Government (live layer only)</span>
     </div>
   `;
 }
