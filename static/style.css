@@ -660,6 +660,7 @@ nav.tabs a.active {
 }
 
 .hs-legend-item svg { flex-shrink: 0; }
+.hs-legend-range { opacity: 0.75; }
 
 .hs-dot {
   display: inline-block;

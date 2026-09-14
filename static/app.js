@@ -945,24 +945,30 @@ async function fetchFacilitiesInView() {
   updateHsZoomHint(`Showing ${features.length}${capped ? "+" : ""} hospital${features.length === 1 ? "" : "s"} in view (live from HIFLD). Pan or zoom to load more.`);
 }
 
+// Same cutoffs documented in app/health_systems_data.py — kept here as the
+// single source of truth for how the legend labels its own tier bubbles.
+function tierRangeLabel(tier) {
+  return { small: "under 15", mid: "15–39", large: "40–89", major: "90+" }[tier] || "";
+}
+
 function renderHsLegend() {
   document.getElementById("hs-legend").innerHTML = `
     <div class="hs-legend-group">
       <span class="hs-legend-title">Operator size = hospital count</span>
       ${["small", "mid", "large", "major"].map(t => `
-        <span class="hs-legend-item">
+        <span class="hs-legend-item" title="${titleCase(t)}: ${tierRangeLabel(t)} hospitals">
           <svg width="${tierRadius("major") * 2 + 4}" height="${tierRadius("major") * 2 + 4}">
             <circle cx="${tierRadius("major") + 2}" cy="${tierRadius("major") + 2}" r="${tierRadius(t)}" fill="var(--muted)" fill-opacity="0.5"/>
           </svg>
-          ${titleCase(t)}
+          ${titleCase(t)} <span class="hs-legend-range">(${tierRangeLabel(t)})</span>
         </span>
       `).join("")}
     </div>
     <div class="hs-legend-group">
       <span class="hs-legend-title">Color = ownership</span>
-      <span class="hs-legend-item"><span class="hs-dot" style="background:var(--owner-nonprofit)"></span>Nonprofit</span>
-      <span class="hs-legend-item"><span class="hs-dot" style="background:var(--owner-forprofit)"></span>For-profit</span>
-      <span class="hs-legend-item"><span class="hs-dot" style="background:var(--owner-government)"></span>Government (live layer only)</span>
+      <span class="hs-legend-item" title="Tax-exempt / mission-driven operator, as reported by the source"><span class="hs-dot" style="background:var(--owner-nonprofit)"></span>Nonprofit</span>
+      <span class="hs-legend-item" title="Investor- or privately-owned operator, as reported by the source"><span class="hs-dot" style="background:var(--owner-forprofit)"></span>For-profit</span>
+      <span class="hs-legend-item" title="Federal, state, or county-run facility — appears only in the live per-facility layer, since none of the curated operators above are government agencies"><span class="hs-dot" style="background:var(--owner-government)"></span>Government (live layer only)</span>
     </div>
   `;
 }
