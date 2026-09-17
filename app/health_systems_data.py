@@ -37,7 +37,7 @@ HEALTH_SYSTEMS = [
     {
         "name": "Ascension", "tier": "major", "ownership_type": "nonprofit",
         "hq_city": "St. Louis", "hq_state": "Missouri", "hq_lat": 38.6270, "hq_lon": -90.1994,
-        "hospital_count": 119, "notes": "One of the largest nonprofit Catholic health systems in the US.",
+        "hospital_count": 119, "notes": "One of the largest nonprofit Catholic health systems in the US. Its own find-care.ascension.org location search caps out broken nationwide/all-distance queries at ~14 results, so the hospital_roster entry for this operator (81 hospitals) was built with per-city, radius-limited searches across its actual 9-state footprint (FL, IL, IN, KS, MD, OK, TN, TX, WI) — Michigan, sometimes cited in older references, was fully divested. Coverage searched 1-3 major metros per state at up to 100mi, so some smaller or more rural facilities further out (especially in IL, IN, and TX) may be missing.",
         "source_url": "https://about.ascension.org/news/2026/03/ascension-named-fifth-largest-health-system-in-the-nation-reflecting-strategic-mission-aligned-growth",
         "verified_at": "2026-09-14", "confidence": "confirmed",
     },
@@ -129,9 +129,9 @@ HEALTH_SYSTEMS = [
     {
         "name": "Kaiser Permanente", "tier": "large", "ownership_type": "nonprofit",
         "hq_city": "Oakland", "hq_state": "California", "hq_lat": 37.8044, "hq_lon": -122.2712,
-        "hospital_count": 40, "notes": "Integrated payer-provider model, concentrated in a handful of states.",
-        "source_url": "https://en.wikipedia.org/wiki/Kaiser_Permanente",
-        "verified_at": "2026-09-14", "confidence": "approximate",
+        "hospital_count": 40, "notes": "Integrated payer-provider model, concentrated in a handful of states; relies on contracted/affiliate hospitals (not owned) in Colorado, Georgia, and the Mid-Atlantic. The hospital_roster entry for this operator (40 hospitals, region-by-region via its own location filters) matches this count almost exactly.",
+        "source_url": "https://healthy.kaiserpermanente.org",
+        "verified_at": "2026-09-17", "confidence": "confirmed",
     },
     # --- mid (15-39 hospitals) ---
     {
@@ -144,9 +144,9 @@ HEALTH_SYSTEMS = [
     {
         "name": "Intermountain Health", "tier": "mid", "ownership_type": "nonprofit",
         "hq_city": "Salt Lake City", "hq_state": "Utah", "hq_lat": 40.7608, "hq_lon": -111.8910,
-        "hospital_count": 34, "notes": None,
+        "hospital_count": 34, "notes": "The hospital_roster entry for this operator (29 hospitals, via its location-search API) found no owned hospitals in NV, KS, or WY despite dedicated searches, which may mean the 34-hospital figure counts a broader clinic/affiliate footprint rather than owned hospitals in all 7 states — treated as unconfirmed absence, not verified zero, for those 3 states.",
         "source_url": "https://www.beckershospitalreview.com/rankings-and-ratings/100-of-the-largest-hospitals-and-health-systems-in-the-us-2026/",
-        "verified_at": "2026-09-14", "confidence": "approximate",
+        "verified_at": "2026-09-17", "confidence": "approximate",
     },
     {
         "name": "Banner Health", "tier": "mid", "ownership_type": "nonprofit",
