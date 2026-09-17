@@ -58,6 +58,10 @@ function fmtDate(iso) {
   return new Date(iso + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
 
+function fmtDateTime(d) {
+  return d.toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+}
+
 function daysUntil(iso) {
   const ms = new Date(iso + "T00:00:00") - new Date(new Date().toDateString());
   return Math.round(ms / 86400000);
@@ -199,6 +203,11 @@ async function boot() {
     hsCompanyFilter = e.target.value;
     applyFacilityFilter();
   });
+  document.getElementById("hs-compare-btn").addEventListener("click", openCompareModal);
+  document.getElementById("hs-compare-close").addEventListener("click", closeCompareModal);
+  document.getElementById("hs-compare-overlay").addEventListener("click", e => {
+    if (e.target.id === "hs-compare-overlay") closeCompareModal();
+  });
   document.getElementById("sort-select").addEventListener("change", e => {
     currentSort = e.target.value;
     renderDashboard();
@@ -234,6 +243,7 @@ async function boot() {
     if (e.key !== "Escape") return;
     closeFederalModal();
     closeWhatsNewModal();
+    closeCompareModal();
   });
 
   initSiteSearch();
@@ -765,6 +775,7 @@ let hsShowFacilities = true;
 let hsFacilitiesLoaded = false;
 let hsFacilitiesLoading = false;
 let hsFacilitiesCount = 0;
+let hsFetchedAt = null; // when the live HIFLD pull last completed, for an on-page "as of" timestamp
 let hsAllFacilityMarkers = []; // every live marker, built once; filtering re-adds a subset rather than re-fetching
 let ROSTER_BY_CITY_STATE = {}; // "STATE|CITY" -> [{company, name, city, state, source_url, verified_at, tokens}]
 let ROSTER_COMPANIES = [];
@@ -836,6 +847,7 @@ function operatorPopupHtml(h) {
       <div>${titleCase(h.tier)} operator · ${h.ownership_type === "for-profit" ? "For-profit" : "Nonprofit"}</div>
       <div>${h.hospital_count} hospitals · HQ ${esc(h.hq_city)}, ${esc(h.hq_state)}</div>
       ${h.confidence === "approximate" ? `<div class="hs-popup-caution">Approximate count</div>` : ""}
+      <div class="hs-popup-meta">Verified ${esc(h.verified_at || "date unknown")}</div>
       <a href="${esc(h.source_url)}" target="_blank" rel="noopener">Source ↗</a>
     </div>
   `;
@@ -892,14 +904,18 @@ function buildRosterIndex() {
 function matchParentCompany(name, city, state) {
   const candidates = ROSTER_BY_CITY_STATE[`${normalizeMatchText(state)}|${normalizeMatchText(city)}`];
   if (!candidates || !candidates.length) return null;
-  if (candidates.length === 1) return candidates[0];
+  // Even with a single roster candidate for this city+state, still require at
+  // least one shared name token before accepting the match — many towns have
+  // more than one hospital, and a roster listing only one of them there is
+  // not evidence the live facility we're looking at is that one. Better to
+  // fall through to "not identified" than mislabel an unrelated hospital.
   const targetTokens = new Set(nameTokens(name));
-  let best = candidates[0], bestScore = -1;
+  let best = null, bestScore = 0;
   candidates.forEach(c => {
     const score = c.tokens.filter(t => targetTokens.has(t)).length;
     if (score > bestScore) { bestScore = score; best = c; }
   });
-  return best;
+  return bestScore > 0 ? best : null;
 }
 
 function populateCompanyFilter() {
@@ -928,7 +944,7 @@ function facilityPopupHtml(p, match) {
   // never silently omitted, so absence of a match reads as "not identified"
   // rather than "not part of anything."
   const parentLine = match
-    ? `<div>Part of <strong>${esc(match.company)}</strong> · <a href="${esc(match.source_url)}" target="_blank" rel="noopener">Source</a></div>`
+    ? `<div>Part of <strong>${esc(match.company)}</strong> (roster verified ${esc(match.verified_at || "date unknown")}) · <a href="${esc(match.source_url)}" target="_blank" rel="noopener">Source</a></div>`
     : `<div class="hs-popup-caution">Parent operator not identified</div>`;
 
   return `
@@ -960,7 +976,8 @@ function offFacilitiesMessage() {
 }
 
 function loadedFacilitiesMessage() {
-  return `Showing all ${hsFacilitiesCount.toLocaleString()} open U.S. hospitals from HIFLD, clustered — zoom in to split a cluster apart, click any marker for details.`;
+  const fetched = hsFetchedAt ? ` Fetched live from HIFLD just now, at ${fmtDateTime(hsFetchedAt)}.` : "";
+  return `Showing all ${hsFacilitiesCount.toLocaleString()} open U.S. hospitals from HIFLD, clustered — zoom in to split a cluster apart, click any marker for details.${fetched}`;
 }
 
 // Fetches the full nationwide dataset once (paginating through HIFLD's own
@@ -1016,6 +1033,7 @@ async function ensureFacilitiesLoaded() {
         fillOpacity: 0.88,
       }).bindPopup(facilityPopupHtml(p, match));
       marker.companyKey = match ? match.company : "unmatched";
+      marker.beds = Number.isFinite(p.BEDS) && p.BEDS >= 0 ? p.BEDS : 0; // -999 sentinel already excluded
       return marker;
     });
 
@@ -1023,8 +1041,10 @@ async function ensureFacilitiesLoaded() {
   hsFacilitiesCount = markers.length;
   hsFacilitiesLoaded = true;
   hsFacilitiesLoading = false;
+  hsFetchedAt = new Date();
   applyFacilityFilter();
   updateHsStatus(hsShowFacilities ? loadedFacilitiesMessage() : offFacilitiesMessage());
+  if (!document.getElementById("hs-compare-overlay").hidden) renderCompareModalBody(); // fill in live columns if the modal was opened before the fetch finished
 }
 
 // Re-populates the cluster group from the already-loaded marker set — no
@@ -1090,9 +1110,82 @@ function refreshHsOperators() {
   renderOperatorLayer();
 }
 
+// ---- compare-operators modal ----
+// "Live matched" columns are computed on the spot from whatever HIFLD data
+// is already loaded (or being loaded) for the live layer — not a stored
+// figure — so they're always as current as that layer, and read as "—"
+// rather than 0 until the fetch finishes.
+function operatorLiveStats(name) {
+  if (!hsFacilitiesLoaded) return null;
+  const matched = hsAllFacilityMarkers.filter(m => m.companyKey === name);
+  return { count: matched.length, beds: matched.reduce((sum, m) => sum + (m.beds || 0), 0) };
+}
+
+function renderCompareModalBody() {
+  const wrap = document.getElementById("hs-compare-table-wrap");
+  if (!wrap) return;
+  const sorted = [...HEALTH_SYSTEMS].sort((a, b) => b.hospital_count - a.hospital_count);
+  const liveNote = hsFacilitiesLoaded ? "" : " (loading…)";
+  wrap.innerHTML = `
+    <table class="hs-compare-table">
+      <thead>
+        <tr>
+          <th>Operator</th>
+          <th>Tier</th>
+          <th>Curated hospital count</th>
+          <th>Matched on live map${liveNote}</th>
+          <th>Live matched beds${liveNote}</th>
+          <th>Verified</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${sorted.map(h => {
+          const live = operatorLiveStats(h.name);
+          return `
+            <tr>
+              <td><span class="hs-dot" style="background:var(${ownershipColorVar(h.ownership_type)})"></span>${esc(h.name)}</td>
+              <td>${titleCase(h.tier)}</td>
+              <td>${h.hospital_count}${h.confidence === "approximate" ? ` <span class="hs-compare-muted">(approx.)</span>` : ""}</td>
+              <td>${live ? live.count.toLocaleString() : "—"}</td>
+              <td>${live && live.beds ? live.beds.toLocaleString() : "—"}</td>
+              <td>${esc(h.verified_at || "—")}</td>
+            </tr>
+          `;
+        }).join("")}
+      </tbody>
+    </table>
+  `;
+}
+
+function openCompareModal() {
+  renderCompareModalBody();
+  document.getElementById("hs-compare-overlay").hidden = false;
+  document.body.classList.add("modal-open");
+  if (!hsFacilitiesLoaded && !hsFacilitiesLoading) ensureFacilitiesLoaded();
+}
+
+function closeCompareModal() {
+  document.getElementById("hs-compare-overlay").hidden = true;
+  document.body.classList.remove("modal-open");
+}
+
+// The 26 curated operators are re-checked individually, not on one schedule,
+// so this reports the actual spread of verified_at dates rather than a
+// single "as of" date that would imply every entry was just re-checked.
+function renderCuratedFreshness() {
+  const dates = HEALTH_SYSTEMS.map(h => h.verified_at).filter(Boolean).sort();
+  const el = document.getElementById("hs-curated-freshness");
+  if (!el || !dates.length) return;
+  const oldest = fmtDate(dates[0]), newest = fmtDate(dates[dates.length - 1]);
+  el.textContent = oldest === newest
+    ? `Curated operator list: every entry verified ${newest}.`
+    : `Curated operator list: entries verified between ${oldest} and ${newest} — each has its own date, see "Compare operator size" or a card's source link.`;
+}
+
 function renderHealthSystems() {
   renderHealthSystemsList(currentFilteredOperators());
   renderHsLegend();
+  renderCuratedFreshness();
 
   if (typeof L === "undefined") {
     document.getElementById("hs-map").innerHTML = `<p style="text-align:center; color:var(--muted); font-size:12px;">Map library unavailable right now.</p>`;
@@ -1119,6 +1212,7 @@ function renderHealthSystemsList(list) {
       <div class="hs-card-body">
         <span>${h.hospital_count} hospitals</span>
         <span>HQ: ${esc(h.hq_city)}, ${esc(h.hq_state)}</span>
+        <span>Verified ${esc(h.verified_at || "date unknown")}</span>
       </div>
       ${h.notes ? `<p class="hs-notes">${esc(h.notes)}</p>` : ""}
       <a class="tl-source" href="${esc(h.source_url)}" target="_blank" rel="noopener">Source ↗</a>

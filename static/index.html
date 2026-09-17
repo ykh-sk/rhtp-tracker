@@ -196,12 +196,14 @@
             <option value="all">All hospitals</option>
           </select>
         </label>
+        <button type="button" id="hs-compare-btn" class="hs-compare-btn">Compare operator size ⤢</button>
       </div>
 
       <div class="map-section">
         <div id="hs-map"></div>
         <div class="hs-legend" id="hs-legend"></div>
         <p class="map-caption map-caption-wide">Ownership reflects each source's own reporting; "Government" appears only in the live per-facility layer below, since none of the curated operators above are government agencies.</p>
+        <p class="map-caption" id="hs-curated-freshness"></p>
         <p class="map-caption" id="hs-status">Loading hospitals from HIFLD…</p>
         <p class="map-caption">Live facility data: <a href="https://hifld-geoplatform.hub.arcgis.com/datasets/geoplatform::hospitals" target="_blank" rel="noopener">HIFLD Hospitals</a>,
           queried directly from Esri/FEMA's public feature service — not stored on this site, so it reflects
@@ -250,6 +252,21 @@
         audit trail, not a notice of every wording tweak. Click a state to see the full history behind the change.
       </p>
       <div class="cal-list" id="whatsnew-modal-body"></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="hs-compare-overlay" hidden>
+    <div class="modal modal-wide" role="dialog" aria-modal="true" aria-labelledby="hs-compare-title">
+      <button type="button" class="modal-close" id="hs-compare-close" aria-label="Close">&times;</button>
+      <h2 id="hs-compare-title">Compare operators by size</h2>
+      <p class="modal-caption">
+        Curated hospital counts come from each operator's own source (right-most column). "Matched on live map" and
+        "live matched beds" are computed here, right now, by tying HIFLD's live per-facility layer back to each
+        operator's roster — so they reflect today's HIFLD data, not a stored figure. A patient-volume column isn't
+        included: no public source reports annual patient counts per operator in a comparable, verifiable way, so bed
+        capacity is used as the closest sourceable proxy for size instead of guessing.
+      </p>
+      <div class="hs-compare-table-wrap" id="hs-compare-table-wrap"></div>
     </div>
   </div>
 

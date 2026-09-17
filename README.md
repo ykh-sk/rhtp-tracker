@@ -33,12 +33,17 @@ python3 app/main.py   # serves the dashboard at http://localhost:5050
   `source_url` and a `confidence` of `confirmed` or `approximate`. See
   `app/health_systems_data.py` for the sourced dataset — extend it the same way you'd extend
   `seed_data.py`.
-- `hospital_roster` — one row per hospital in a curated operator's own official location directory
-  (currently HCA Healthcare and CommonSpirit Health; more to come). Used client-side to tag an
-  individual hospital on the live HIFLD map layer as "part of `<company>`" by matching
-  name/city/state — a hospital with no match reads as "parent operator not identified," never
-  guessed. See `app/health_system_rosters_data.py` for the sourced roster and how to add more
-  operators or states to it.
+- `hospital_roster` — one row per hospital in a curated operator's own official location directory.
+  Used client-side to tag an individual hospital on the live HIFLD map layer as "part of
+  `<company>`" by matching name/city/state — matching requires at least one shared, non-generic
+  name token even when only one roster hospital shares that city+state (a city having exactly one
+  *rostered* hospital doesn't mean it only has one hospital), so a weak or absent match reads as
+  "parent operator not identified" rather than guessing. The Health Systems tab's "Compare operator
+  size" button opens a table of every curated operator sorted by size, with a live-computed count of
+  matched hospitals and total beds from today's HIFLD pull next to each operator's own reported
+  count — patient volume isn't shown there, since no public source reports it per-operator in a
+  comparable, verifiable way. See `app/health_system_rosters_data.py` for the sourced roster and how
+  to add more operators or states to it.
 
 ## How this data stays current
 
@@ -56,6 +61,33 @@ is which:
   expose a stable public API, so building it out (more operators, fuller state coverage) means
   re-running the same manual gathering process against each company's official directory and
   bumping `verified_at` — not an automated refresh.
+
+### Keeping the 26 operators current
+
+There's no single "as of" date for this dataset — each operator was verified independently, and the
+Health Systems tab's "Compare operator size" popup and each entry's own card show that date rather than
+implying a site-wide refresh happened. A realistic cadence: re-run the same per-company gathering
+process roughly **quarterly**, prioritized by how likely an operator is to have actually changed
+(divestitures/mergers — ScionHealth and Sanford both needed mid-cycle corrections in 2026 — matter more
+than a stale-but-unchanged roster). There's no cheap way to detect drift automatically, since the
+underlying source is each operator's own website, not an API with a last-modified date; a changed
+`hospital_count` on an operator's own site, noticed on a manual spot-check, is usually what triggers a
+re-check rather than a fixed schedule catching it first.
+
+### What the 26 operators don't cover
+
+This list is explicitly **notable multi-state/regional operators**, not the whole hospital ownership
+landscape. All 26 entries have 10+ hospitals; the two smallest (Essentia Health, Baptist Health
+Kentucky) still have 10–14. Small regional systems in the 4–5 hospital range, and the much larger
+population of single-hospital independents, aren't represented here at all — and there are hundreds of
+the former and thousands of the latter nationally. Every one of them still shows up as an individual
+pin on the live HIFLD layer; they just read as "parent operator not identified" rather than being tied
+to a named company, which is accurate (no roster claims them) rather than a bug. Extending curated
+coverage down to that tier isn't a scaled-up version of the current per-company approach — at 4–5
+hospitals apiece it would take hundreds more individually-researched operators — so it would need either
+a bulk system-affiliation dataset (e.g. AHA Annual Survey or a CMS ownership crosswalk, most of which
+require a paid license) or accepting that "not identified" will always cover a meaningful share of the
+live layer.
 
 ## Update policy
 

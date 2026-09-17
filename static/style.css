@@ -623,6 +623,19 @@ nav.tabs a.active {
   max-width: 220px;
 }
 
+.hs-compare-btn {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11.5px;
+  color: var(--ink);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 7px 12px;
+  cursor: pointer;
+}
+
+.hs-compare-btn:hover { border-color: var(--accent); color: var(--accent); }
+
 #hs-map {
   width: 100%;
   height: 520px;
@@ -649,6 +662,7 @@ nav.tabs a.active {
 .hs-popup { font-size: 12.5px; line-height: 1.5; }
 .hs-popup-title { font-weight: 600; margin-bottom: 2px; }
 .hs-popup-caution { color: var(--warn); }
+.hs-popup-meta { color: var(--muted); font-size: 11.5px; }
 .hs-popup a { color: var(--accent); }
 
 .leaflet-control-attribution {
@@ -1809,6 +1823,38 @@ body.modal-open { overflow: hidden; }
 }
 
 .modal-close:hover { color: var(--ink); border-color: var(--accent); }
+
+.modal-wide { max-width: 900px; }
+
+.hs-compare-table-wrap { max-height: 60vh; overflow: auto; }
+
+.hs-compare-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.hs-compare-table th, .hs-compare-table td {
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.hs-compare-table th {
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+  color: var(--muted);
+  font-weight: 500;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.hs-compare-table td:first-child { display: flex; align-items: center; gap: 6px; white-space: normal; }
+.hs-compare-table tbody tr:hover { background: var(--surface-2); }
+.hs-compare-table .hs-compare-muted { color: var(--muted); }
 
 /* ---- state-detail deadlines sidebar ---- */
 .deadlines-heading { margin-top: 8px; }

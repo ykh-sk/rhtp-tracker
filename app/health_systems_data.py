@@ -51,7 +51,7 @@ HEALTH_SYSTEMS = [
     {
         "name": "Trinity Health", "tier": "major", "ownership_type": "nonprofit",
         "hq_city": "Livonia", "hq_state": "Michigan", "hq_lat": 42.3684, "hq_lon": -83.3527,
-        "hospital_count": 92, "notes": "Among the nation's three largest nonprofit Catholic health systems.",
+        "hospital_count": 92, "notes": "Among the nation's three largest nonprofit Catholic health systems. Its corporate site's own location API is broken (returns zero results); the hospital_roster entry for this operator (58 hospitals) was built region-by-region from its ~10 separate regional-brand sites instead, so some states in its 23-state community footprint (e.g. AL, NC, MN, SD, CA, NJ) have no confirmed hospital and may be PACE/hospice/senior-living-only presence there.",
         "source_url": "https://www.beckershospitalreview.com/rankings-and-ratings/100-of-the-largest-hospitals-and-health-systems-in-the-us-2026/",
         "verified_at": "2026-09-14", "confidence": "confirmed",
     },
@@ -59,7 +59,7 @@ HEALTH_SYSTEMS = [
     {
         "name": "Advocate Health", "tier": "large", "ownership_type": "nonprofit",
         "hq_city": "Charlotte", "hq_state": "North Carolina", "hq_lat": 35.2271, "hq_lon": -80.8431,
-        "hospital_count": 69, "notes": "Formed by the 2022 merger of Advocate Aurora Health and Atrium Health.",
+        "hospital_count": 69, "notes": "Formed by the 2022 merger of Advocate Aurora Health and Atrium Health. Its Carolinas/Georgia/Alabama Atrium Health brand blocks automated access to its own location directory, so the hospital_roster entry for this operator (55 hospitals) is complete for Illinois and Wisconsin but likely missing some smaller Atrium-branded facilities.",
         "source_url": "https://en.wikipedia.org/wiki/Advocate_Health",
         "verified_at": "2026-09-14", "confidence": "confirmed",
     },
