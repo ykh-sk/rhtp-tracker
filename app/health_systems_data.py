@@ -42,11 +42,11 @@ HEALTH_SYSTEMS = [
         "verified_at": "2026-09-14", "confidence": "confirmed",
     },
     {
-        "name": "ScionHealth", "tier": "major", "ownership_type": "for-profit",
+        "name": "ScionHealth", "tier": "large", "ownership_type": "for-profit",
         "hq_city": "Louisville", "hq_state": "Kentucky", "hq_lat": 38.2527, "hq_lon": -85.7585,
-        "hospital_count": 94, "notes": None,
-        "source_url": "https://www.beckershospitalreview.com/rankings-and-ratings/100-of-the-largest-hospitals-and-health-systems-in-the-us-2026/",
-        "verified_at": "2026-09-14", "confidence": "confirmed",
+        "hospital_count": 68, "notes": "Divested 8 community hospitals to LifePoint Health in a deal that closed March 2026; count reflects their own site's current total (62 specialty + 6 community hospitals).",
+        "source_url": "https://www.scionhealth.com/find-a-location",
+        "verified_at": "2026-09-17", "confidence": "confirmed",
     },
     {
         "name": "Trinity Health", "tier": "major", "ownership_type": "nonprofit",
