@@ -173,8 +173,7 @@ async function boot() {
     if (btn.dataset.layer === "operators") hsShowOperators = btn.classList.contains("active");
     if (btn.dataset.layer === "facilities") hsShowFacilities = btn.classList.contains("active");
     renderOperatorLayer();
-    updateHsZoomHint();
-    scheduleFacilityFetch();
+    updateFacilityVisibility();
   });
   document.getElementById("hs-tier-toggle").addEventListener("click", e => {
     const btn = e.target.closest("button[data-tier]");
@@ -740,20 +739,22 @@ async function renderMap() {
 // Two Leaflet layers on one real pan/zoom tile map: a small curated layer of
 // health-system OPERATORS (companies — from our own sourced dataset, shown
 // at every zoom level since there are only a couple dozen) and a live layer
-// of individual hospital FACILITIES queried straight from HIFLD/FEMA's
-// public ArcGIS feature service for whatever's in view — nothing about the
-// live layer is stored on this site, so it's only ever as current as HIFLD.
+// of every individual hospital FACILITY nationwide, queried straight from
+// HIFLD/FEMA's public ArcGIS feature service and clustered so all ~7,100 of
+// them stay usable at every zoom level — nothing about the live layer is
+// stored on this site, so it's only ever as current as HIFLD.
 
 const HIFLD_HOSPITALS_URL = "https://services2.arcgis.com/FiaPA4ga0iQKduv3/arcgis/rest/services/Hospitals/FeatureServer/0/query";
-const HS_FACILITY_MIN_ZOOM = 8; // roughly city/county level — below this a bbox can cover several states and risk the 500-result cap in dense regions
+const HIFLD_PAGE_SIZE = 2000; // the service's own maxRecordCount — paged through fully, once, rather than per pan/zoom
 
 let hsMap = null;
 let hsOperatorLayer = null;
-let hsFacilityLayer = null;
+let hsFacilityLayer = null; // an L.markerClusterGroup once the plugin loads, else a plain layerGroup
 let hsShowOperators = true;
 let hsShowFacilities = true;
-let hsFacilityFetchTimer = null;
-let hsFacilityFetchToken = 0; // lets a stale in-flight fetch recognize it's been superseded by a later pan/zoom
+let hsFacilitiesLoaded = false;
+let hsFacilitiesLoading = false;
+let hsFacilitiesCount = 0;
 
 function tierRadius(tier) {
   return { small: 5, mid: 8, large: 12, major: 17 }[tier] || 6;
@@ -806,9 +807,13 @@ function ensureHsMap() {
   hsMap.once("click", () => hsMap.scrollWheelZoom.enable());
 
   hsOperatorLayer = L.layerGroup().addTo(hsMap);
-  hsFacilityLayer = L.layerGroup().addTo(hsMap);
-
-  hsMap.on("moveend zoomend", () => { updateHsZoomHint(); scheduleFacilityFetch(); });
+  // Clusters into count bubbles that split apart on zoom — the only way to
+  // keep ~7,100 individual hospital markers responsive at every zoom level,
+  // including the whole-country view. Falls back to a plain (unclustered)
+  // layer if the plugin failed to load, so the map still works either way.
+  hsFacilityLayer = typeof L.markerClusterGroup === "function"
+    ? L.markerClusterGroup({ maxClusterRadius: 45, disableClusteringAtZoom: 16 })
+    : L.layerGroup();
 }
 
 function operatorPopupHtml(h) {
@@ -871,78 +876,94 @@ function facilityPopupHtml(p) {
   `;
 }
 
-function updateHsZoomHint(message) {
-  const hint = document.getElementById("hs-zoom-hint");
-  if (!hint || !hsMap) return;
-  if (message) { hint.textContent = message; return; }
-  if (!hsShowFacilities) {
-    hint.textContent = "Live hospital layer is off — turn on “Live hospitals” above to load individual facilities as you zoom in.";
-  } else if (hsMap.getZoom() < HS_FACILITY_MIN_ZOOM) {
-    hint.textContent = "Zoom in on an area (state/metro level or closer) to load individual hospitals from HIFLD — click any marker for details.";
-  } else {
-    hint.textContent = "Loading hospitals in view…";
-  }
+function updateHsStatus(message) {
+  const el = document.getElementById("hs-status");
+  if (el) el.textContent = message;
 }
 
-function scheduleFacilityFetch() {
-  clearTimeout(hsFacilityFetchTimer);
-  if (!hsMap || !hsShowFacilities || hsMap.getZoom() < HS_FACILITY_MIN_ZOOM) {
-    if (hsFacilityLayer) hsFacilityLayer.clearLayers();
-    return;
-  }
-  // Debounced so a drag/zoom gesture doesn't fire a request per frame — the
-  // public HIFLD service is shared infrastructure, not ours to hammer.
-  hsFacilityFetchTimer = setTimeout(fetchFacilitiesInView, 450);
+function offFacilitiesMessage() {
+  return `Live hospital layer is off — turn on “Live hospitals” above to show all ${hsFacilitiesCount ? hsFacilitiesCount.toLocaleString() + " " : ""}U.S. hospitals, clustered.`;
 }
 
-async function fetchFacilitiesInView() {
-  const token = ++hsFacilityFetchToken;
-  const b = hsMap.getBounds();
-  const params = new URLSearchParams({
-    where: "STATUS='OPEN'",
-    geometry: [b.getWest(), b.getSouth(), b.getEast(), b.getNorth()].join(","),
-    geometryType: "esriGeometryEnvelope",
-    inSR: "4326",
-    spatialRel: "esriSpatialRelIntersects",
-    outFields: "NAME,ADDRESS,CITY,STATE,COUNTY,TELEPHONE,BEDS,TTL_STAFF,OWNER,TYPE,TRAUMA,HELIPAD,WEBSITE,SOURCEDATE",
-    resultRecordCount: "500",
-    f: "geojson",
-  });
+function loadedFacilitiesMessage() {
+  return `Showing all ${hsFacilitiesCount.toLocaleString()} open U.S. hospitals from HIFLD, clustered — zoom in to split a cluster apart, click any marker for details.`;
+}
 
-  let data;
+// Fetches the full nationwide dataset once (paginating through HIFLD's own
+// 2,000-record page size) and hands it all to the cluster group in one
+// batch, rather than re-fetching a viewport slice on every pan/zoom — the
+// clustering plugin is what makes rendering all of them at once workable.
+async function ensureFacilitiesLoaded() {
+  if (hsFacilitiesLoaded || hsFacilitiesLoading || !hsFacilityLayer) return;
+  hsFacilitiesLoading = true;
+
+  const allFeatures = [];
+  let offset = 0;
   try {
-    const res = await fetch(`${HIFLD_HOSPITALS_URL}?${params}`);
-    data = await res.json();
+    for (;;) {
+      updateHsStatus(`Loading hospitals from HIFLD… (${allFeatures.length.toLocaleString()} so far)`);
+      const params = new URLSearchParams({
+        where: "STATUS='OPEN'",
+        outFields: "NAME,ADDRESS,CITY,STATE,COUNTY,TELEPHONE,BEDS,TTL_STAFF,OWNER,TYPE,TRAUMA,HELIPAD,WEBSITE,SOURCEDATE",
+        resultOffset: String(offset),
+        resultRecordCount: String(HIFLD_PAGE_SIZE),
+        f: "geojson",
+      });
+      const res = await fetch(`${HIFLD_HOSPITALS_URL}?${params}`);
+      const data = await res.json();
+      const page = data.features || [];
+      allFeatures.push(...page);
+      if (page.length < HIFLD_PAGE_SIZE) break; // last page
+      offset += HIFLD_PAGE_SIZE;
+    }
   } catch {
-    if (token === hsFacilityFetchToken) updateHsZoomHint("Couldn't reach HIFLD's live hospital data right now — the operator layer above is still unaffected.");
+    hsFacilitiesLoading = false;
+    updateHsStatus("Couldn't reach HIFLD's live hospital data right now — the operator layer above is still unaffected.");
     return;
   }
-  if (token !== hsFacilityFetchToken) return; // superseded by a later pan/zoom
 
   // A handful of HIFLD rows carry null/placeholder geometry (unmapped
   // facilities) — skip those rather than hand Leaflet a NaN center, which
   // renders as a broken SVG path.
-  const features = (data.features || []).filter(f => {
-    const c = f.geometry && f.geometry.coordinates;
-    return Array.isArray(c) && Number.isFinite(c[0]) && Number.isFinite(c[1]);
-  });
-  hsFacilityLayer.clearLayers();
-  features.forEach(f => {
-    const p = f.properties || {};
-    const [lon, lat] = f.geometry.coordinates;
-    L.circleMarker([lat, lon], {
-      radius: facilityRadius(p.BEDS),
-      color: "var(--surface)",
-      weight: 1.5,
-      fillColor: `var(${facilityOwnerColorVar(p.OWNER)})`,
-      fillOpacity: 0.88,
+  const markers = allFeatures
+    .filter(f => {
+      const c = f.geometry && f.geometry.coordinates;
+      return Array.isArray(c) && Number.isFinite(c[0]) && Number.isFinite(c[1]);
     })
-      .bindPopup(facilityPopupHtml(p))
-      .addTo(hsFacilityLayer);
-  });
+    .map(f => {
+      const p = f.properties || {};
+      const [lon, lat] = f.geometry.coordinates;
+      return L.circleMarker([lat, lon], {
+        radius: facilityRadius(p.BEDS),
+        color: "var(--surface)",
+        weight: 1.5,
+        fillColor: `var(${facilityOwnerColorVar(p.OWNER)})`,
+        fillOpacity: 0.88,
+      }).bindPopup(facilityPopupHtml(p));
+    });
 
-  const capped = features.length >= 500;
-  updateHsZoomHint(`Showing ${features.length}${capped ? "+" : ""} hospital${features.length === 1 ? "" : "s"} in view (live from HIFLD). Pan or zoom to load more.`);
+  if (typeof hsFacilityLayer.addLayers === "function") {
+    hsFacilityLayer.addLayers(markers); // markercluster's bulk-add — much faster than adding one at a time
+  } else {
+    markers.forEach(m => m.addTo(hsFacilityLayer));
+  }
+
+  hsFacilitiesCount = markers.length;
+  hsFacilitiesLoaded = true;
+  hsFacilitiesLoading = false;
+  updateHsStatus(hsShowFacilities ? loadedFacilitiesMessage() : offFacilitiesMessage());
+}
+
+function updateFacilityVisibility() {
+  if (!hsMap || !hsFacilityLayer) return;
+  if (hsShowFacilities) {
+    if (!hsMap.hasLayer(hsFacilityLayer)) hsFacilityLayer.addTo(hsMap);
+    if (hsFacilitiesLoaded) updateHsStatus(loadedFacilitiesMessage());
+    else if (!hsFacilitiesLoading) ensureFacilitiesLoaded();
+  } else {
+    if (hsMap.hasLayer(hsFacilityLayer)) hsMap.removeLayer(hsFacilityLayer);
+    updateHsStatus(offFacilitiesMessage());
+  }
 }
 
 // Same cutoffs documented in app/health_systems_data.py — kept here as the
@@ -993,8 +1014,7 @@ function renderHealthSystems() {
   if (!hsMap) return;
   hsMap.invalidateSize(); // the container may have been display:none while on another tab
   renderOperatorLayer();
-  updateHsZoomHint();
-  scheduleFacilityFetch();
+  updateFacilityVisibility();
 }
 
 function renderHealthSystemsList(list) {
