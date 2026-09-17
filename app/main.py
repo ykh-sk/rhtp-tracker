@@ -220,5 +220,13 @@ def api_health_systems():
     return jsonify(rows)
 
 
+@app.route("/api/hospital_roster")
+def api_hospital_roster():
+    conn = get_connection()
+    rows = rows_to_dicts(query(conn, "SELECT * FROM hospital_roster ORDER BY company, state, city"))
+    conn.close()
+    return jsonify(rows)
+
+
 if __name__ == "__main__":
     app.run(debug=True, port=5050)

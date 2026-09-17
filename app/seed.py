@@ -11,12 +11,14 @@ from seed_data import (
     STATE_OVERVIEW, STATE_PILLARS, STATE_CHANGELOG, FEDERAL_MILESTONES,
 )
 from health_systems_data import HEALTH_SYSTEMS
+from health_system_rosters_data import HOSPITAL_ROSTERS
 
 
 def seed():
     init_db()
     conn = get_connection()
 
+    execute(conn, "DELETE FROM hospital_roster")
     execute(conn, "DELETE FROM health_systems")
     execute(conn, "DELETE FROM federal_milestones")
     execute(conn, "DELETE FROM state_changelog")
@@ -114,13 +116,26 @@ def seed():
         HEALTH_SYSTEMS,
     )
 
+    roster_rows = [
+        {"company": r["company"], "source_url": r["source_url"], "verified_at": r["verified_at"], **h}
+        for r in HOSPITAL_ROSTERS
+        for h in r["hospitals"]
+    ]
+    execute_many(
+        conn,
+        """INSERT INTO hospital_roster (company, name, city, state, source_url, verified_at)
+           VALUES (%(company)s, %(name)s, %(city)s, %(state)s, %(source_url)s, %(verified_at)s)""",
+        roster_rows,
+    )
+
     conn.commit()
     conn.close()
     print(
         f"Seeded {len(SOURCES)} sources, {len(AWARDS)} awards, {len(STATUS_EVENTS)} status events, "
         f"{len(DEADLINES)} deadlines, {len(COMMENTARY)} commentary links, {len(analysis_rows)} analysis rows, "
         f"{len(overview_rows)} overviews, {len(pillar_rows)} pillars, {len(STATE_CHANGELOG)} changelog entries, "
-        f"{len(FEDERAL_MILESTONES)} federal milestones, {len(HEALTH_SYSTEMS)} health systems."
+        f"{len(FEDERAL_MILESTONES)} federal milestones, {len(HEALTH_SYSTEMS)} health systems, "
+        f"{len(roster_rows)} hospital roster rows across {len(HOSPITAL_ROSTERS)} operators."
     )
 
 

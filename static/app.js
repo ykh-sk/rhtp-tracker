@@ -81,6 +81,7 @@ let DEADLINES = [];
 let COMMENTARY = [];
 let FEDERAL_MILESTONES = [];
 let HEALTH_SYSTEMS = [];
+let HOSPITAL_ROSTER = [];
 let SEARCH_INDEX = [];
 let currentStatus = [];
 let currentState = null;
@@ -88,6 +89,7 @@ let currentView = null;
 let currentSort = "stage";
 let hsTierFilter = "all";
 let hsOwnershipFilter = "all";
+let hsCompanyFilter = "all";
 
 function stageVar(status) {
   const s = STAGES.find(s => s.key === status);
@@ -123,12 +125,13 @@ function goStatus(status) {
 }
 
 async function boot() {
-  const [statesRes, deadlinesRes, commentaryRes, federalRes, healthSystemsRes] = await Promise.all([
+  const [statesRes, deadlinesRes, commentaryRes, federalRes, healthSystemsRes, hospitalRosterRes] = await Promise.all([
     fetch("/api/states").then(r => r.json()),
     fetch("/api/deadlines").then(r => r.json()),
     fetch("/api/commentary").then(r => r.json()),
     fetch("/api/federal_milestones").then(r => r.json()).catch(() => []),
     fetch("/api/health_systems").then(r => r.json()).catch(() => []),
+    fetch("/api/hospital_roster").then(r => r.json()).catch(() => []),
   ]);
 
   STAGES = statesRes.status_taxonomy.map((key, i) => ({ key, order: i + 1, var: `--stage-${i + 1}` }));
@@ -137,6 +140,9 @@ async function boot() {
   COMMENTARY = commentaryRes;
   FEDERAL_MILESTONES = federalRes;
   HEALTH_SYSTEMS = healthSystemsRes;
+  HOSPITAL_ROSTER = hospitalRosterRes;
+  buildRosterIndex();
+  populateCompanyFilter();
   SEARCH_INDEX = buildSearchIndex();
 
   document.getElementById("stamp").textContent = `${STATES.length} states · FY26`;
@@ -188,6 +194,10 @@ async function boot() {
     hsOwnershipFilter = btn.dataset.ownership;
     document.querySelectorAll("#hs-ownership-toggle button").forEach(b => b.classList.toggle("active", b === btn));
     refreshHsOperators();
+  });
+  document.getElementById("hs-company-filter").addEventListener("change", e => {
+    hsCompanyFilter = e.target.value;
+    applyFacilityFilter();
   });
   document.getElementById("sort-select").addEventListener("change", e => {
     currentSort = e.target.value;
@@ -755,6 +765,9 @@ let hsShowFacilities = true;
 let hsFacilitiesLoaded = false;
 let hsFacilitiesLoading = false;
 let hsFacilitiesCount = 0;
+let hsAllFacilityMarkers = []; // every live marker, built once; filtering re-adds a subset rather than re-fetching
+let ROSTER_BY_CITY_STATE = {}; // "STATE|CITY" -> [{company, name, city, state, source_url, verified_at, tokens}]
+let ROSTER_COMPANIES = [];
 
 function tierRadius(tier) {
   return { small: 5, mid: 8, large: 12, major: 17 }[tier] || 6;
@@ -845,11 +858,65 @@ function renderOperatorLayer() {
   });
 }
 
+// ---- parent-operator matching ----
+// Ties an individual live HIFLD facility back to a curated operator roster
+// (app/health_system_rosters_data.py) by normalized city+state, then — when
+// more than one roster entry shares that city+state — by name-token overlap
+// to pick the closer match. City+state alone is usually decisive since two
+// different rostered operators rarely share an exact town.
+const ROSTER_STOPWORDS = new Set([
+  "HOSPITAL", "HOSPITALS", "MEDICAL", "CENTER", "CENTERS", "HEALTH", "HEALTHCARE",
+  "SYSTEM", "CAMPUS", "THE", "OF", "AND", "REGIONAL", "GENERAL", "INC", "CARE",
+]);
+
+function normalizeMatchText(s) {
+  return (s || "").toUpperCase().replace(/[^A-Z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
+}
+
+function nameTokens(s) {
+  return normalizeMatchText(s).split(" ").filter(t => t && !ROSTER_STOPWORDS.has(t));
+}
+
+function buildRosterIndex() {
+  ROSTER_BY_CITY_STATE = {};
+  const companies = new Set();
+  HOSPITAL_ROSTER.forEach(row => {
+    companies.add(row.company);
+    const key = `${normalizeMatchText(row.state)}|${normalizeMatchText(row.city)}`;
+    const entry = { ...row, tokens: nameTokens(row.name) };
+    (ROSTER_BY_CITY_STATE[key] = ROSTER_BY_CITY_STATE[key] || []).push(entry);
+  });
+  ROSTER_COMPANIES = [...companies].sort();
+}
+
+function matchParentCompany(name, city, state) {
+  const candidates = ROSTER_BY_CITY_STATE[`${normalizeMatchText(state)}|${normalizeMatchText(city)}`];
+  if (!candidates || !candidates.length) return null;
+  if (candidates.length === 1) return candidates[0];
+  const targetTokens = new Set(nameTokens(name));
+  let best = candidates[0], bestScore = -1;
+  candidates.forEach(c => {
+    const score = c.tokens.filter(t => targetTokens.has(t)).length;
+    if (score > bestScore) { bestScore = score; best = c; }
+  });
+  return best;
+}
+
+function populateCompanyFilter() {
+  const select = document.getElementById("hs-company-filter");
+  if (!select) return;
+  const current = select.value || "all";
+  select.innerHTML = `<option value="all">All hospitals</option>`
+    + ROSTER_COMPANIES.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join("")
+    + `<option value="unmatched">Parent not identified</option>`;
+  if ([...select.options].some(o => o.value === current)) select.value = current;
+}
+
 // HIFLD leaves plenty of fields blank per facility — text fields as the
 // literal string "NOT AVAILABLE", numeric fields (BEDS, TTL_STAFF) as a
 // -999 sentinel — each line below is only shown when the source actually
 // has that value, rather than padding the popup with placeholders.
-function facilityPopupHtml(p) {
+function facilityPopupHtml(p, match) {
   const na = v => v && String(v).toUpperCase() !== "NOT AVAILABLE";
   const num = v => (Number.isFinite(v) && v >= 0 ? v : null); // filters the -999 "no data" sentinel
   const address = [p.ADDRESS, `${p.CITY || ""}, ${p.STATE || ""}${na(p.COUNTY) ? ` (${p.COUNTY} County)` : ""}`]
@@ -857,6 +924,12 @@ function facilityPopupHtml(p) {
   const phoneDigits = na(p.TELEPHONE) ? String(p.TELEPHONE).replace(/[^\d+]/g, "") : null;
   const website = na(p.WEBSITE) ? (/^https?:\/\//.test(p.WEBSITE) ? p.WEBSITE : "https://" + p.WEBSITE) : null;
   const sourceDate = na(p.SOURCEDATE) ? fmtDate(String(p.SOURCEDATE).slice(0, 10)) : null;
+  // "Cite it when we can't link it" — an explicit, visible line either way,
+  // never silently omitted, so absence of a match reads as "not identified"
+  // rather than "not part of anything."
+  const parentLine = match
+    ? `<div>Part of <strong>${esc(match.company)}</strong> · <a href="${esc(match.source_url)}" target="_blank" rel="noopener">Source</a></div>`
+    : `<div class="hs-popup-caution">Parent operator not identified</div>`;
 
   return `
     <div class="hs-popup">
@@ -869,6 +942,7 @@ function facilityPopupHtml(p) {
         na(p.TRAUMA) ? `Trauma level ${p.TRAUMA}` : null,
         String(p.HELIPAD).toUpperCase() === "Y" ? "Helipad" : null,
       ].filter(Boolean).map(esc).join(" · ")}</div>
+      ${parentLine}
       ${phoneDigits ? `<div><a href="tel:${esc(phoneDigits)}">${esc(p.TELEPHONE)}</a></div>` : ""}
       ${website ? `<div><a href="${esc(website)}" target="_blank" rel="noopener">Website ↗</a></div>` : ""}
       ${sourceDate ? `<div class="hs-popup-caution">HIFLD source data as of ${esc(sourceDate)}</div>` : ""}
@@ -933,32 +1007,47 @@ async function ensureFacilitiesLoaded() {
     .map(f => {
       const p = f.properties || {};
       const [lon, lat] = f.geometry.coordinates;
-      return L.circleMarker([lat, lon], {
+      const match = matchParentCompany(p.NAME, p.CITY, p.STATE);
+      const marker = L.circleMarker([lat, lon], {
         radius: facilityRadius(p.BEDS),
         color: "var(--surface)",
         weight: 1.5,
         fillColor: `var(${facilityOwnerColorVar(p.OWNER)})`,
         fillOpacity: 0.88,
-      }).bindPopup(facilityPopupHtml(p));
+      }).bindPopup(facilityPopupHtml(p, match));
+      marker.companyKey = match ? match.company : "unmatched";
+      return marker;
     });
 
-  if (typeof hsFacilityLayer.addLayers === "function") {
-    hsFacilityLayer.addLayers(markers); // markercluster's bulk-add — much faster than adding one at a time
-  } else {
-    markers.forEach(m => m.addTo(hsFacilityLayer));
-  }
-
+  hsAllFacilityMarkers = markers;
   hsFacilitiesCount = markers.length;
   hsFacilitiesLoaded = true;
   hsFacilitiesLoading = false;
+  applyFacilityFilter();
   updateHsStatus(hsShowFacilities ? loadedFacilitiesMessage() : offFacilitiesMessage());
+}
+
+// Re-populates the cluster group from the already-loaded marker set — no
+// re-fetch — whenever the parent-operator dropdown or the layer toggle
+// changes which subset should be visible.
+function applyFacilityFilter() {
+  if (!hsFacilityLayer || !hsFacilitiesLoaded) return;
+  hsFacilityLayer.clearLayers();
+  const filtered = hsCompanyFilter === "all"
+    ? hsAllFacilityMarkers
+    : hsAllFacilityMarkers.filter(m => m.companyKey === hsCompanyFilter);
+  if (typeof hsFacilityLayer.addLayers === "function") {
+    hsFacilityLayer.addLayers(filtered); // markercluster's bulk-add — much faster than adding one at a time
+  } else {
+    filtered.forEach(m => m.addTo(hsFacilityLayer));
+  }
 }
 
 function updateFacilityVisibility() {
   if (!hsMap || !hsFacilityLayer) return;
   if (hsShowFacilities) {
     if (!hsMap.hasLayer(hsFacilityLayer)) hsFacilityLayer.addTo(hsMap);
-    if (hsFacilitiesLoaded) updateHsStatus(loadedFacilitiesMessage());
+    if (hsFacilitiesLoaded) { applyFacilityFilter(); updateHsStatus(loadedFacilitiesMessage()); }
     else if (!hsFacilitiesLoading) ensureFacilitiesLoaded();
   } else {
     if (hsMap.hasLayer(hsFacilityLayer)) hsMap.removeLayer(hsFacilityLayer);

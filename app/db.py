@@ -134,6 +134,23 @@ CREATE TABLE IF NOT EXISTS health_systems (
     verified_at TEXT NOT NULL,
     confidence TEXT NOT NULL DEFAULT 'confirmed' CHECK (confidence IN ('confirmed', 'approximate'))
 );
+
+-- One row per hospital in a curated operator's own official location
+-- directory — lets the live Health Systems map tag an individual HIFLD
+-- facility as "part of <company>" by matching name/city/state. A snapshot
+-- (see app/health_system_rosters_data.py for the sourced list and how it's
+-- kept current), not a live feed — deliberately partial: only the operators
+-- listed here get tagged, everyone else on the live map reads as
+-- unidentified rather than silently guessed.
+CREATE TABLE IF NOT EXISTS hospital_roster (
+    id SERIAL PRIMARY KEY,
+    company TEXT NOT NULL,
+    name TEXT NOT NULL,
+    city TEXT NOT NULL,
+    state TEXT NOT NULL,
+    source_url TEXT NOT NULL,
+    verified_at TEXT NOT NULL
+);
 """
 
 

@@ -33,6 +33,29 @@ python3 app/main.py   # serves the dashboard at http://localhost:5050
   `source_url` and a `confidence` of `confirmed` or `approximate`. See
   `app/health_systems_data.py` for the sourced dataset — extend it the same way you'd extend
   `seed_data.py`.
+- `hospital_roster` — one row per hospital in a curated operator's own official location directory
+  (currently HCA Healthcare and CommonSpirit Health; more to come). Used client-side to tag an
+  individual hospital on the live HIFLD map layer as "part of `<company>`" by matching
+  name/city/state — a hospital with no match reads as "parent operator not identified," never
+  guessed. See `app/health_system_rosters_data.py` for the sourced roster and how to add more
+  operators or states to it.
+
+## How this data stays current
+
+Two very different freshness models live on this site, and it's worth being explicit about which
+is which:
+
+- **Live, not stored**: the Health Systems tab's per-facility map layer queries HIFLD/FEMA's public
+  ArcGIS feature service directly from the visitor's browser every time the page loads. Nothing
+  about individual hospitals (location, beds, ownership type) is stored here, so it's always exactly
+  as current as HIFLD's own data — this site does no work to keep it fresh.
+- **Curated snapshots, re-checked manually**: everything else — the RHTP funding data, the
+  `health_systems` operator list, and the `hospital_roster` parent-operator rosters — is a dated,
+  sourced snapshot, the same as the rest of this site's data (see "Update policy" below). The
+  `hospital_roster` in particular can't be fetched live: most operators' own site directories don't
+  expose a stable public API, so building it out (more operators, fuller state coverage) means
+  re-running the same manual gathering process against each company's official directory and
+  bumping `verified_at` — not an automated refresh.
 
 ## Update policy
 
