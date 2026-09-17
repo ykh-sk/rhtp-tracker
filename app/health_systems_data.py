@@ -66,7 +66,7 @@ HEALTH_SYSTEMS = [
     {
         "name": "Christus Health", "tier": "large", "ownership_type": "nonprofit",
         "hq_city": "Irving", "hq_state": "Texas", "hq_lat": 32.8140, "hq_lon": -96.9489,
-        "hospital_count": 66, "notes": None,
+        "hospital_count": 66, "notes": "Includes long-term care facilities and international hospitals (Mexico, Chile, Colombia); their own site's US-only hospital directory (TX/LA/NM) lists 32.",
         "source_url": "https://www.beckershospitalreview.com/rankings-and-ratings/100-of-the-largest-hospitals-and-health-systems-in-the-us-2026/",
         "verified_at": "2026-09-14", "confidence": "confirmed",
     },
@@ -80,9 +80,9 @@ HEALTH_SYSTEMS = [
     {
         "name": "Sanford Health", "tier": "large", "ownership_type": "nonprofit",
         "hq_city": "Sioux Falls", "hq_state": "South Dakota", "hq_lat": 43.5460, "hq_lon": -96.7313,
-        "hospital_count": 59, "notes": "Largest rural-focused nonprofit health system in the US; count reflects the Jan 2025 merger with Marshfield Clinic Health System (WI/MI).",
-        "source_url": "https://www.fiercehealthcare.com/providers/sanford-health-marshfield-clinic-finalize-10b-health-system-merger",
-        "verified_at": "2026-09-14", "confidence": "approximate",
+        "hospital_count": 45, "notes": "Largest rural-focused nonprofit health system in the US, including former Marshfield Clinic Health System (WI/MI) hospitals post-merger (Jan 2025); count is their own site's current hospital location listing, below the ~59 figure reported at merger time.",
+        "source_url": "https://www.sanfordhealth.org/locations",
+        "verified_at": "2026-09-17", "confidence": "confirmed",
     },
     {
         "name": "AdventHealth", "tier": "large", "ownership_type": "nonprofit",
