@@ -77,17 +77,22 @@ re-check rather than a fixed schedule catching it first.
 ### What the 26 operators don't cover
 
 This list is explicitly **notable multi-state/regional operators**, not the whole hospital ownership
-landscape. All 26 entries have 10+ hospitals; the two smallest (Essentia Health, Baptist Health
-Kentucky) still have 10–14. Small regional systems in the 4–5 hospital range, and the much larger
-population of single-hospital independents, aren't represented here at all — and there are hundreds of
-the former and thousands of the latter nationally. Every one of them still shows up as an individual
-pin on the live HIFLD layer; they just read as "parent operator not identified" rather than being tied
-to a named company, which is accurate (no roster claims them) rather than a bug. Extending curated
-coverage down to that tier isn't a scaled-up version of the current per-company approach — at 4–5
-hospitals apiece it would take hundreds more individually-researched operators — so it would need either
-a bulk system-affiliation dataset (e.g. AHA Annual Survey or a CMS ownership crosswalk, most of which
-require a paid license) or accepting that "not identified" will always cover a meaningful share of the
-live layer.
+landscape — and there's no stated hospital-count floor for inclusion; the `tier` cutoffs (major ≥90,
+large 40–89, mid 15–39, small <15) are a labeling scheme applied to whatever got picked, not a
+selection gate. It so happens the two smallest entries (Essentia Health, Baptist Health Kentucky) have
+10–14 hospitals each, but that's a byproduct of how the list was built — from name-recognition sources
+(Becker's "100 largest" rankings, Wikipedia) plus targeted follow-ups on rural-relevant systems — not a
+rule that excluded anything smaller. A genuinely small (4–5 hospital) system that's locally notable,
+especially in one of the states this tracker follows, is in scope; it just hasn't been looked up yet.
+Small regional systems in that range, and the much larger population of single-hospital independents,
+aren't represented here at all — and there are hundreds of the former and thousands of the latter
+nationally. Every one of them still shows up as an individual pin on the live HIFLD layer; they just
+read as "parent operator not identified" rather than being tied to a named company, which is accurate
+(no roster claims them) rather than a bug. Extending curated coverage down to that tier isn't a
+scaled-up version of the current per-company approach — at 4–5 hospitals apiece it would take hundreds
+more individually-researched operators — so it would need either a bulk system-affiliation dataset (e.g.
+AHA Annual Survey or a CMS ownership crosswalk, most of which require a paid license) or accepting that
+"not identified" will always cover a meaningful share of the live layer.
 
 ## Update policy
 

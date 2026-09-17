@@ -1,9 +1,18 @@
-"""Curated dataset for the Health Systems map: notable multi-state and regional
-hospital/health-system OPERATORS (the businesses that own and run hospitals),
-sized small/mid/large/major by hospital count. This is a hand-picked, sourced
-starting set — like seed_data.py, not a bulk import — focused on operators
-active in the states this tracker follows, especially rural-relevant regional
-systems. Extend it the same way: add a row with a real source_url.
+"""Curated dataset for the Health Systems map: notable hospital/health-system
+OPERATORS (the businesses that own and run hospitals), sized small/mid/large/major
+by hospital count. This is a hand-picked, sourced starting set — like seed_data.py,
+not a bulk import. There is no hospital-count floor for inclusion; the tier cutoffs
+below are a labeling scheme applied to whatever's picked, not a selection gate.
+
+Originally built from big multi-state chains (via Becker's "largest health systems"
+rankings), then extended state-by-state to cover single-state/regional flagship
+systems too — the goal is real coverage across all 50 states, not just the ones
+this tracker's RHTP funding data follows, though rural-relevant systems get
+priority attention. A state with no entry here doesn't mean none exists — it means
+no operator was both found and verifiable; skip a state rather than force a weak or
+unsourced entry into it (see Alaska, Kansas, Montana, Wyoming, deliberately absent
+as of the state-flagship pass below). Extend this the same way: add a row with a
+real source_url.
 
 Tiers are cut by hospital_count: major >=90, large 40-89, mid 15-39, small <15.
 `confidence` follows the same convention as status_events/deadlines: 'confirmed'
@@ -197,5 +206,335 @@ HEALTH_SYSTEMS = [
         "hospital_count": 10, "notes": "Founded 1924; not affiliated with the similarly-named Baptist Health systems in Florida or Arkansas.",
         "source_url": "https://en.wikipedia.org/wiki/Baptist_Health_(Kentucky_and_Southern_Indiana)",
         "verified_at": "2026-09-14", "confidence": "confirmed",
+    },
+    # --- state-flagship additions (single-state/regional, not just multi-state chains) ---
+    {
+        "name": 'MaineHealth', "tier": 'small', "ownership_type": 'nonprofit',
+        "hq_city": 'Portland', "hq_state": 'Maine', "hq_lat": 43.6591, "hq_lon": -70.2568,
+        "hospital_count": 11, "notes": "Maine's dominant health system and largest private employer; flagship Maine Medical Center is a Level I trauma/teaching hospital.",
+        "source_url": 'https://en.wikipedia.org/wiki/MaineHealth',
+        "verified_at": '2026-09-17', "confidence": 'approximate',
+    },
+    {
+        "name": 'Dartmouth Health', "tier": 'small', "ownership_type": 'nonprofit',
+        "hq_city": 'Lebanon', "hq_state": 'New Hampshire', "hq_lat": 43.6424, "hq_lon": -72.2518,
+        "hospital_count": 8, "notes": "NH/VT's dominant academic health system, anchored by Dartmouth-Hitchcock Medical Center.",
+        "source_url": 'https://www.dartmouth-health.org/',
+        "verified_at": '2026-09-17', "confidence": 'approximate',
+    },
+    {
+        "name": 'University of Vermont Health Network', "tier": 'small', "ownership_type": 'nonprofit',
+        "hq_city": 'Burlington', "hq_state": 'Vermont', "hq_lat": 44.4759, "hq_lon": -73.2121,
+        "hospital_count": 6, "notes": "Vermont's dominant health system, also serving northern New York; academic flagship affiliated with UVM's Larner College of Medicine.",
+        "source_url": 'https://www.uvmhealth.org/about-the-uvm-health-network/the-uvm-health-network-hospitals',
+        "verified_at": '2026-09-17', "confidence": 'confirmed',
+    },
+    {
+        "name": 'Mass General Brigham', "tier": 'small', "ownership_type": 'nonprofit',
+        "hq_city": 'Boston', "hq_state": 'Massachusetts', "hq_lat": 42.3467, "hq_lon": -71.0828,
+        "hospital_count": 14, "notes": 'New England\'s largest health system, formed from the 1994 merger of Massachusetts General Hospital and Brigham and Women\'s Hospital (as "Partners HealthCare," renamed 2019).',
+        "source_url": 'https://www.massgeneralbrigham.org/en/patient-care/services-and-specialties/find-a-location/our-hospitals',
+        "verified_at": '2026-09-17', "confidence": 'confirmed',
+    },
+    {
+        "name": 'Brown University Health', "tier": 'small', "ownership_type": 'nonprofit',
+        "hq_city": 'Providence', "hq_state": 'Rhode Island', "hq_lat": 41.824, "hq_lon": -71.4128,
+        "hospital_count": 7, "notes": "Rhode Island's largest hospital owner; formerly Lifespan, renamed in 2024. A full merger with Care New England (a distinct, smaller RI nonprofit) was blocked by regulators in 2022 and has not since closed.",
+        "source_url": 'https://www.brownhealth.org/about',
+        "verified_at": '2026-09-17', "confidence": 'confirmed',
+    },
+    {
+        "name": 'Yale New Haven Health System', "tier": 'small', "ownership_type": 'nonprofit',
+        "hq_city": 'New Haven', "hq_state": 'Connecticut', "hq_lat": 41.3083, "hq_lon": -72.9279,
+        "hospital_count": 5, "notes": "Connecticut's largest, most academically prominent health system, anchored by its Yale School of Medicine partnership. Hartford HealthCare (Hartford, CT; ~7 hospitals) is a comparably notable in-state alternate.",
+        "source_url": 'https://en.wikipedia.org/wiki/Yale_New_Haven_Health_System',
+        "verified_at": '2026-09-17', "confidence": 'approximate',
+    },
+    {
+        "name": 'Northwell Health', "tier": 'mid', "ownership_type": 'nonprofit',
+        "hq_city": 'New Hyde Park', "hq_state": 'New York', "hq_lat": 40.7412, "hq_lon": -73.6849,
+        "hospital_count": 28, "notes": "New York State's largest healthcare provider and private employer; count reflects its May 2025 merger with Nuvance Health. NewYork-Presbyterian, Mount Sinai Health System, and Montefiore are also major, distinct NY systems.",
+        "source_url": 'https://en.wikipedia.org/wiki/Northwell_Health',
+        "verified_at": '2026-09-17', "confidence": 'confirmed',
+    },
+    {
+        "name": 'RWJBarnabas Health', "tier": 'mid', "ownership_type": 'nonprofit',
+        "hq_city": 'West Orange', "hq_state": 'New Jersey', "hq_lat": 40.7987, "hq_lon": -74.2391,
+        "hospital_count": 15, "notes": "New Jersey's largest academic health system (12 acute-care + 3 children's hospitals), formed by a 2016 merger; partnered with Rutgers University in 2018.",
+        "source_url": 'https://www.rwjbh.org/why-rwjbarnabas-health-/facts-figures/',
+        "verified_at": '2026-09-17', "confidence": 'confirmed',
+    },
+    {
+        "name": 'Jefferson Health', "tier": 'mid', "ownership_type": 'nonprofit',
+        "hq_city": 'Philadelphia', "hq_state": 'Pennsylvania', "hq_lat": 39.9526, "hq_lon": -75.1652,
+        "hospital_count": 32, "notes": 'Major Philadelphia-based system, distinct from UPMC (Pittsburgh) and Universal Health Services already in this dataset; grew substantially via its August 2024 merger with Lehigh Valley Health Network. Exact count varies by source (30-36) post-merger.',
+        "source_url": 'https://en.wikipedia.org/wiki/Jefferson_Health',
+        "verified_at": '2026-09-17', "confidence": 'approximate',
+    },
+    {
+        "name": 'ChristianaCare', "tier": 'small', "ownership_type": 'nonprofit',
+        "hq_city": 'Wilmington', "hq_state": 'Delaware', "hq_lat": 39.7391, "hq_lon": -75.5398,
+        "hospital_count": 3, "notes": "Delaware's largest health system and private employer; one of its three hospitals (Union Hospital) is just over the state line in Elkton, Maryland.",
+        "source_url": 'https://en.wikipedia.org/wiki/ChristianaCare',
+        "verified_at": '2026-09-17', "confidence": 'confirmed',
+    },
+    {
+        "name": 'Johns Hopkins Medicine', "tier": 'small', "ownership_type": 'nonprofit',
+        "hq_city": 'Baltimore', "hq_state": 'Maryland', "hq_lat": 39.2904, "hq_lon": -76.6122,
+        "hospital_count": 6, "notes": 'World-renowned academic medical system anchored by Johns Hopkins Hospital/University. University of Maryland Medical System (also Baltimore) owns more hospitals (~11-13) but has less brand recognition.',
+        "source_url": 'https://en.wikipedia.org/wiki/Johns_Hopkins_Medicine',
+        "verified_at": '2026-09-17', "confidence": 'approximate',
+    },
+    {
+        "name": 'Sentara Health', "tier": 'small', "ownership_type": 'nonprofit',
+        "hq_city": 'Norfolk', "hq_state": 'Virginia', "hq_lat": 36.8508, "hq_lon": -76.2859,
+        "hospital_count": 12, "notes": "Virginia's largest nonprofit health system, operating in VA and northeastern NC. A proposed 2020 merger with Cone Health was called off in 2021 and never completed.",
+        "source_url": 'https://en.wikipedia.org/wiki/Sentara_Health',
+        "verified_at": '2026-09-17', "confidence": 'confirmed',
+    },
+    {
+        "name": 'WVU Medicine', "tier": 'mid', "ownership_type": 'nonprofit',
+        "hq_city": 'Morgantown', "hq_state": 'West Virginia', "hq_lat": 39.6295, "hq_lon": -79.9559,
+        "hospital_count": 25, "notes": "West Virginia's largest health system and largest private employer; count is a fast-moving, acquisition-heavy figure spanning WV, OH, PA, and MD as of mid/late 2025.",
+        "source_url": 'https://en.wikipedia.org/wiki/West_Virginia_University_Health_System',
+        "verified_at": '2026-09-17', "confidence": 'approximate',
+    },
+    {
+        "name": 'Duke Health', "tier": 'small', "ownership_type": 'nonprofit',
+        "hq_city": 'Durham', "hq_state": 'North Carolina', "hq_lat": 35.994, "hq_lon": -78.8986,
+        "hospital_count": 5, "notes": 'Elite academic medical system tied to Duke University. UNM Health-sized comparison aside, UNC Health (Chapel Hill, ~11 hospitals, state-owned) is a larger, also-distinct NC academic system worth knowing about.',
+        "source_url": 'https://en.wikipedia.org/wiki/Duke_University_Health_System',
+        "verified_at": '2026-09-17', "confidence": 'confirmed',
+    },
+    {
+        "name": 'Prisma Health', "tier": 'mid', "ownership_type": 'nonprofit',
+        "hq_city": 'Greenville', "hq_state": 'South Carolina', "hq_lat": 34.8526, "hq_lon": -82.394,
+        "hospital_count": 18, "notes": "South Carolina's largest nonprofit health system, formed in 2017 by the merger of Palmetto Health and Greenville Health System.",
+        "source_url": 'https://en.wikipedia.org/wiki/Prisma_Health',
+        "verified_at": '2026-09-17', "confidence": 'approximate',
+    },
+    {
+        "name": 'Piedmont Healthcare', "tier": 'mid', "ownership_type": 'nonprofit',
+        "hq_city": 'Atlanta', "hq_state": 'Georgia', "hq_lat": 33.749, "hq_lon": -84.388,
+        "hospital_count": 26, "notes": "Georgia's largest health system; hospital count varies notably by source and date (16/26/28) as it has grown quickly via acquisition.",
+        "source_url": 'https://en.wikipedia.org/wiki/Piedmont_Healthcare',
+        "verified_at": '2026-09-17', "confidence": 'approximate',
+    },
+    {
+        "name": 'Orlando Health', "tier": 'mid', "ownership_type": 'nonprofit',
+        "hq_city": 'Orlando', "hq_state": 'Florida', "hq_lat": 28.5383, "hq_lon": -81.3792,
+        "hospital_count": 25, "notes": "Florida's second-largest health system, distinct from AdventHealth (also Florida-HQ'd, already in this dataset); flagship houses Central Florida's only Level I trauma center.",
+        "source_url": 'https://en.wikipedia.org/wiki/Orlando_Health',
+        "verified_at": '2026-09-17', "confidence": 'confirmed',
+    },
+    {
+        "name": 'UAB Medicine', "tier": 'mid', "ownership_type": 'nonprofit',
+        "hq_city": 'Birmingham', "hq_state": 'Alabama', "hq_lat": 33.5186, "hq_lon": -86.8104,
+        "hospital_count": 16, "notes": 'Public academic health system affiliated with the University of Alabama at Birmingham; flagship UAB Hospital is among the largest hospitals in the nation.',
+        "source_url": 'https://en.wikipedia.org/wiki/UAB_Medicine',
+        "verified_at": '2026-09-17', "confidence": 'approximate',
+    },
+    {
+        "name": 'North Mississippi Health Services', "tier": 'small', "ownership_type": 'nonprofit',
+        "hq_city": 'Tupelo', "hq_state": 'Mississippi', "hq_lat": 34.2576, "hq_lon": -88.7034,
+        "hospital_count": 8, "notes": 'The most notable system actually headquartered in Mississippi (as opposed to Memphis-based Baptist Memorial Health Care, which also operates MS hospitals); serves 24 counties across north MS and northwest AL.',
+        "source_url": 'https://www.nmhs.net/about-us',
+        "verified_at": '2026-09-17', "confidence": 'confirmed',
+    },
+    {
+        "name": 'Baptist Memorial Health Care (Tennessee)', "tier": 'mid', "ownership_type": 'nonprofit',
+        "hq_city": 'Memphis', "hq_state": 'Tennessee', "hq_lat": 35.1495, "hq_lon": -90.049,
+        "hospital_count": 22, "notes": 'Memphis-based; serves TN, MS, and AR. Unrelated to Baptist Health (Kentucky, already in this dataset), Baptist Health (Arkansas, added separately below), or the similarly-named Baptist systems in Florida and Alabama — disambiguated by name here deliberately.',
+        "source_url": 'https://en.wikipedia.org/wiki/Baptist_Memorial_Health_Care',
+        "verified_at": '2026-09-17', "confidence": 'approximate',
+    },
+    {
+        "name": 'University Hospitals', "tier": 'mid', "ownership_type": 'nonprofit',
+        "hq_city": 'Cleveland', "hq_state": 'Ohio', "hq_lat": 41.4993, "hq_lon": -81.6944,
+        "hospital_count": 21, "notes": 'Academic nonprofit system affiliated with Case Western Reserve, distinct from Cleveland Clinic and Bon Secours Mercy Health (both already in this dataset, also Ohio-based).',
+        "source_url": 'https://www.uhhospitals.org/about-uh',
+        "verified_at": '2026-09-17', "confidence": 'confirmed',
+    },
+    {
+        "name": 'Corewell Health', "tier": 'mid', "ownership_type": 'nonprofit',
+        "hq_city": 'Grand Rapids', "hq_state": 'Michigan', "hq_lat": 42.9634, "hq_lon": -85.6681,
+        "hospital_count": 22, "notes": "Formed by the 2022 merger of Beaumont Health (SE Michigan) and Spectrum Health (West Michigan); now the largest Michigan-based health system, distinct from Trinity Health (also Michigan-HQ'd, already in this dataset).",
+        "source_url": 'https://en.wikipedia.org/wiki/Corewell_Health',
+        "verified_at": '2026-09-17', "confidence": 'approximate',
+    },
+    {
+        "name": 'Indiana University Health', "tier": 'mid', "ownership_type": 'nonprofit',
+        "hq_city": 'Indianapolis', "hq_state": 'Indiana', "hq_lat": 39.7684, "hq_lon": -86.1581,
+        "hospital_count": 16, "notes": "Indiana's largest and most comprehensive health system; academic affiliate of the IU School of Medicine.",
+        "source_url": 'https://en.wikipedia.org/wiki/Indiana_University_Health',
+        "verified_at": '2026-09-17', "confidence": 'approximate',
+    },
+    {
+        "name": 'Northwestern Medicine', "tier": 'small', "ownership_type": 'nonprofit',
+        "hq_city": 'Chicago', "hq_state": 'Illinois', "hq_lat": 41.8781, "hq_lon": -87.6298,
+        "hospital_count": 11, "notes": "Nationally-ranked academic system anchored by Northwestern Memorial Hospital, distinct from CommonSpirit Health (also Chicago-HQ'd, already in this dataset).",
+        "source_url": 'https://www.nm.org/about-us',
+        "verified_at": '2026-09-17', "confidence": 'confirmed',
+    },
+    {
+        "name": 'OSF HealthCare', "tier": 'mid', "ownership_type": 'nonprofit',
+        "hq_city": 'Peoria', "hq_state": 'Illinois', "hq_lat": 40.6936, "hq_lon": -89.589,
+        "hospital_count": 16, "notes": 'Catholic nonprofit system spanning IL and MI (10 acute-care + 5 critical-access + 1 continuing-care hospital) — rural-relevant footprint distinct from Chicago-based Northwestern Medicine and CommonSpirit.',
+        "source_url": 'https://www.osfhealthcare.org/about/facts/',
+        "verified_at": '2026-09-17', "confidence": 'confirmed',
+    },
+    {
+        "name": 'Froedtert ThedaCare Health', "tier": 'mid', "ownership_type": 'nonprofit',
+        "hq_city": 'Milwaukee', "hq_state": 'Wisconsin', "hq_lat": 43.0389, "hq_lon": -87.9065,
+        "hospital_count": 18, "notes": 'Formed Jan. 2024 by the merger of Froedtert Health (Milwaukee) and ThedaCare (Appleton/Neenah); now the largest Wisconsin-based system. Marshfield Clinic Health System, once a WI candidate, merged into Sanford Health (already in this dataset) in Jan. 2025 and is no longer independent.',
+        "source_url": 'https://en.wikipedia.org/wiki/ThedaCare%E2%80%93Froedtert_Health',
+        "verified_at": '2026-09-17', "confidence": 'confirmed',
+    },
+    {
+        "name": 'Mayo Clinic Health System', "tier": 'mid', "ownership_type": 'nonprofit',
+        "hq_city": 'Rochester', "hq_state": 'Minnesota', "hq_lat": 44.0121, "hq_lon": -92.4802,
+        "hospital_count": 16, "notes": "Mayo Clinic's regional MN/IA/WI hospital network — a dated (2022) figure, separate from its flagship Rochester campus and its Arizona/Florida destination-medicine campuses; distinct from Essentia Health (also MN-HQ'd, already in this dataset).",
+        "source_url": 'https://en.wikipedia.org/wiki/Mayo_Clinic_Health_System',
+        "verified_at": '2026-09-17', "confidence": 'approximate',
+    },
+    {
+        "name": 'UnityPoint Health', "tier": 'mid', "ownership_type": 'nonprofit',
+        "hq_city": 'West Des Moines', "hq_state": 'Iowa', "hq_lat": 41.5772, "hq_lon": -93.7113,
+        "hospital_count": 35, "notes": "Operates across IA, IL, and WI; distinct from MercyOne, which is already inside this dataset's Trinity Health roster. Count is UnityPoint's own current site figure — sources disagree by several hospitals.",
+        "source_url": 'https://www.unitypoint.org/about-unitypoint-health/our-organization/our-hospitals-and-locations',
+        "verified_at": '2026-09-17', "confidence": 'approximate',
+    },
+    {
+        "name": 'Mercy (Missouri)', "tier": 'large', "ownership_type": 'nonprofit',
+        "hq_city": 'Chesterfield', "hq_state": 'Missouri', "hq_lat": 38.6631, "hq_lon": -90.5771,
+        "hospital_count": 50, "notes": 'Officially named just "Mercy" — labeled with its state here to distinguish it from Bon Secours Mercy Health (Ohio-HQ\'d) and Ascension (also St. Louis-based), both already in this dataset. Founded 1871; operates in MO, IL, AR, OK, and KS. Mercy\'s own materials cite both 50 and 55 hospitals in different places.',
+        "source_url": 'https://www.mercy.net/newsroom/mercy-quick-facts/',
+        "verified_at": '2026-09-17', "confidence": 'approximate',
+    },
+    {
+        "name": 'Bryan Health', "tier": 'small', "ownership_type": 'nonprofit',
+        "hq_city": 'Lincoln', "hq_state": 'Nebraska', "hq_lat": 40.8136, "hq_lon": -96.7026,
+        "hospital_count": 6, "notes": "Nebraska's most notable independently-headquartered multi-hospital system, centered on Lincoln with expanded operations in Crete, Grand Island, Merrick County, and Kearney.",
+        "source_url": 'https://en.wikipedia.org/wiki/Bryan_Health',
+        "verified_at": '2026-09-17', "confidence": 'confirmed',
+    },
+    {
+        "name": 'Norton Healthcare', "tier": 'small', "ownership_type": 'nonprofit',
+        "hq_city": 'Louisville', "hq_state": 'Kentucky', "hq_lat": 38.2527, "hq_lon": -85.7585,
+        "hospital_count": 9, "notes": "Louisville's dominant nonprofit system (6 in Louisville metro + 3 in southern Indiana); distinct from ScionHealth (for-profit, also Louisville-HQ'd) and Baptist Health (Kentucky), both already in this dataset.",
+        "source_url": 'https://en.wikipedia.org/wiki/Norton_Healthcare',
+        "verified_at": '2026-09-17', "confidence": 'confirmed',
+    },
+    {
+        "name": 'INTEGRIS Health', "tier": 'mid', "ownership_type": 'nonprofit',
+        "hq_city": 'Oklahoma City', "hq_state": 'Oklahoma', "hq_lat": 35.4676, "hq_lon": -97.5164,
+        "hospital_count": 16, "notes": 'Oklahoma\'s largest nonprofit health system; other pages cite a larger "24 campuses" figure that includes specialty/community sites beyond hospitals.',
+        "source_url": 'https://en.wikipedia.org/wiki/INTEGRIS_Health',
+        "verified_at": '2026-09-17', "confidence": 'approximate',
+    },
+    {
+        "name": 'Baptist Health (Arkansas)', "tier": 'small', "ownership_type": 'nonprofit',
+        "hq_city": 'Little Rock', "hq_state": 'Arkansas', "hq_lat": 34.7465, "hq_lon": -92.2896,
+        "hospital_count": 11, "notes": 'Largest not-for-profit health system in Arkansas; unrelated to Baptist Health (Kentucky, already in this dataset), Baptist Memorial Health Care (Tennessee, added separately above), or Baptist systems in Florida — disambiguated by name here deliberately.',
+        "source_url": 'https://www.baptist-health.com/about-baptist-health-arkansas/',
+        "verified_at": '2026-09-17', "confidence": 'confirmed',
+    },
+    {
+        "name": 'Ochsner Health', "tier": 'large', "ownership_type": 'nonprofit',
+        "hq_city": 'New Orleans', "hq_state": 'Louisiana', "hq_lat": 29.9309, "hq_lon": -90.1093,
+        "hospital_count": 47, "notes": "Louisiana's largest nonprofit system. The 47-hospital figure (2025, Wikipedia) likely blends wholly-owned hospitals with the broader Ochsner Health Network's managed/affiliated hospitals rather than counting owned hospitals alone.",
+        "source_url": 'https://en.wikipedia.org/wiki/Ochsner_Health',
+        "verified_at": '2026-09-17', "confidence": 'approximate',
+    },
+    {
+        "name": 'Trinity Health (Minot, ND)', "tier": 'small', "ownership_type": 'nonprofit',
+        "hq_city": 'Minot', "hq_state": 'North Dakota', "hq_lat": 48.2325, "hq_lon": -101.2963,
+        "hospital_count": 3, "notes": 'A small, entirely separate organization from Trinity Health (Livonia, Michigan, already in this dataset) that happens to share the same name — Wikipedia itself flags the collision. Runs 3 hospitals in and around Minot, ND.',
+        "source_url": 'https://en.wikipedia.org/wiki/Trinity_Health_(Minot,_North_Dakota)',
+        "verified_at": '2026-09-17', "confidence": 'confirmed',
+    },
+    {
+        "name": 'Monument Health', "tier": 'small', "ownership_type": 'nonprofit',
+        "hq_city": 'Rapid City', "hq_state": 'South Dakota', "hq_lat": 44.0805, "hq_lon": -103.231,
+        "hospital_count": 5, "notes": 'Formerly Rapid City Regional Hospital system; dominant system in the Black Hills region, distinct from Avera Health and Sanford Health (both already in this dataset, also SD-based).',
+        "source_url": 'https://monument.health/about-us/',
+        "verified_at": '2026-09-17', "confidence": 'confirmed',
+    },
+    {
+        "name": 'UCHealth', "tier": 'mid', "ownership_type": 'nonprofit',
+        "hq_city": 'Aurora', "hq_state": 'Colorado', "hq_lat": 39.7294, "hq_lon": -104.8319,
+        "hospital_count": 15, "notes": 'Operates acute-care hospitals across CO, WY, and western NE. Centura Health, a former CO candidate, was fully dissolved and split between CommonSpirit and AdventHealth by 2024 and no longer exists as an independent operator.',
+        "source_url": 'https://en.wikipedia.org/wiki/UCHealth',
+        "verified_at": '2026-09-17', "confidence": 'confirmed',
+    },
+    {
+        "name": 'Presbyterian Healthcare Services', "tier": 'small', "ownership_type": 'nonprofit',
+        "hq_city": 'Albuquerque', "hq_state": 'New Mexico', "hq_lat": 35.0844, "hq_lon": -106.6504,
+        "hospital_count": 9, "notes": "New Mexico's largest locally-owned, not-for-profit integrated health system, combining hospitals with its own health plan.",
+        "source_url": 'https://www.phs.org/locations/hospitals',
+        "verified_at": '2026-09-17', "confidence": 'confirmed',
+    },
+    {
+        "name": 'HonorHealth', "tier": 'small', "ownership_type": 'nonprofit',
+        "hq_city": 'Scottsdale', "hq_state": 'Arizona', "hq_lat": 33.4942, "hq_lon": -111.9261,
+        "hospital_count": 9, "notes": "Formed by a 2013 merger; Phoenix-area system distinct from Banner Health (also Arizona-HQ'd, already in this dataset).",
+        "source_url": 'https://www.honorhealth.com/company',
+        "verified_at": '2026-09-17', "confidence": 'approximate',
+    },
+    {
+        "name": 'University of Utah Health', "tier": 'small', "ownership_type": 'nonprofit',
+        "hq_city": 'Salt Lake City', "hq_state": 'Utah', "hq_lat": 40.7608, "hq_lon": -111.891,
+        "hospital_count": 5, "notes": "The Mountain West's only academic health system, part of the University of Utah; distinct in mission and governance from Intermountain Health (already in this dataset, also Utah-HQ'd).",
+        "source_url": 'https://healthcare.utah.edu/about',
+        "verified_at": '2026-09-17', "confidence": 'approximate',
+    },
+    {
+        "name": 'Renown Health', "tier": 'small', "ownership_type": 'nonprofit',
+        "hq_city": 'Reno', "hq_state": 'Nevada', "hq_lat": 39.5296, "hq_lon": -119.8138,
+        "hospital_count": 4, "notes": 'The only large locally-owned nonprofit health system in Northern Nevada.',
+        "source_url": 'https://www.renown.org/About',
+        "verified_at": '2026-09-17', "confidence": 'approximate',
+    },
+    {
+        "name": "St. Luke's Health System", "tier": 'small', "ownership_type": 'nonprofit',
+        "hq_city": 'Boise', "hq_state": 'Idaho', "hq_lat": 43.615, "hq_lon": -116.2023,
+        "hospital_count": 8, "notes": "Idaho's only locally-governed, physician-led nonprofit health system and the state's largest employer; distinct from Saint Alphonsus (already inside this dataset's Trinity Health roster).",
+        "source_url": 'https://teamiha.org/hospitals/st-lukes-health-system/',
+        "verified_at": '2026-09-17', "confidence": 'approximate',
+    },
+    {
+        "name": 'MultiCare Health System', "tier": 'small', "ownership_type": 'nonprofit',
+        "hq_city": 'Tacoma', "hq_state": 'Washington', "hq_lat": 47.2529, "hq_lon": -122.4443,
+        "hospital_count": 11, "notes": 'Tacoma-founded (1882) system that has grown via recent mergers (Yakima Memorial 2023, Overlake Medical Center 2024); distinct from Providence (already in this dataset, also WA-based).',
+        "source_url": 'https://en.wikipedia.org/wiki/MultiCare_Health_System',
+        "verified_at": '2026-09-17', "confidence": 'confirmed',
+    },
+    {
+        "name": 'Legacy Health', "tier": 'small', "ownership_type": 'nonprofit',
+        "hq_city": 'Portland', "hq_state": 'Oregon', "hq_lat": 45.5152, "hq_lon": -122.6784,
+        "hospital_count": 7, "notes": "Oregon's largest Oregon-based nonprofit health system; a planned full integration with Oregon Health & Science University was announced in 2024 and called off in May 2025.",
+        "source_url": 'https://en.wikipedia.org/wiki/Legacy_Health',
+        "verified_at": '2026-09-17', "confidence": 'confirmed',
+    },
+    {
+        "name": 'Sutter Health', "tier": 'mid', "ownership_type": 'nonprofit',
+        "hq_city": 'Sacramento', "hq_state": 'California', "hq_lat": 38.5816, "hq_lon": -121.4944,
+        "hospital_count": 25, "notes": 'Large nonprofit system in Northern/Central California, distinct from Kaiser Permanente (already in this dataset, also CA-based); long a subject of state antitrust scrutiny over pricing.',
+        "source_url": 'https://en.wikipedia.org/wiki/Sutter_Health',
+        "verified_at": '2026-09-17', "confidence": 'approximate',
+    },
+    {
+        "name": 'Adventist Health', "tier": 'mid', "ownership_type": 'nonprofit',
+        "hq_city": 'Roseville', "hq_state": 'California', "hq_lat": 38.7521, "hq_lon": -121.288,
+        "hospital_count": 27, "notes": "Serves the West Coast and Hawaii. Despite the very similar name, this is a completely separate company from AdventHealth (Florida-HQ'd, already in this dataset) — both trace to the Seventh-day Adventist Church but are independently governed.",
+        "source_url": 'https://en.wikipedia.org/wiki/Adventist_Health',
+        "verified_at": '2026-09-17', "confidence": 'confirmed',
+    },
+    {
+        "name": "The Queen's Health Systems", "tier": 'small', "ownership_type": 'nonprofit',
+        "hq_city": 'Honolulu', "hq_state": 'Hawaii', "hq_lat": 21.3069, "hq_lon": -157.8583,
+        "hospital_count": 6, "notes": "Hawaii's oldest hospital system, tracing to 1859; larger by hospital count than the also-notable Hawaii Pacific Health (Honolulu, 4 hospitals).",
+        "source_url": 'https://www.queens.org/about/',
+        "verified_at": '2026-09-17', "confidence": 'confirmed',
     },
 ]
