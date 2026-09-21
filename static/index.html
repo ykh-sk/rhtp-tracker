@@ -169,14 +169,14 @@
       <p class="cal-caption">
         The business landscape behind rural health transformation. Two layers on one zoomable map: notable
         hospital/health-system <strong>operators</strong> (curated, sourced — the companies), and every individual
-        <strong>hospital</strong> nationwide, pulled live from HIFLD/FEMA's public federal dataset and clustered by
-        location. Click a cluster to zoom in, or any single marker to see it right on the map.
+        <strong>hospital</strong> nationwide from HIFLD/FEMA's public federal dataset (note: an older snapshot — see the
+        date caution under the map), clustered by location. Click a cluster to zoom in, or any single marker to see it right on the map.
       </p>
 
       <div class="hs-toggle-row">
         <div class="map-toggle" id="hs-layer-toggle">
           <button type="button" data-layer="operators" class="active">Operators</button>
-          <button type="button" data-layer="facilities" class="active">Live hospitals</button>
+          <button type="button" data-layer="facilities" class="active">All hospitals (HIFLD)</button>
         </div>
         <div class="map-toggle" id="hs-tier-toggle">
           <button type="button" data-tier="all" class="active">All tiers</button>
@@ -191,7 +191,7 @@
           <button type="button" data-ownership="for-profit">For-profit</button>
         </div>
         <label class="hs-company-filter-wrap">
-          <span class="hs-legend-title">Find a parent operator (live layer)</span>
+          <span class="hs-legend-title">Find a parent operator (hospital layer)</span>
           <select id="hs-company-filter">
             <option value="all">All hospitals</option>
           </select>
@@ -202,12 +202,13 @@
       <div class="map-section">
         <div id="hs-map"></div>
         <div class="hs-legend" id="hs-legend"></div>
-        <p class="map-caption map-caption-wide">Ownership reflects each source's own reporting; "Government" appears only in the live per-facility layer below, since none of the curated operators above are government agencies.</p>
+        <p class="map-caption map-caption-wide">Ownership reflects each source's own reporting; "Government" appears only in the per-facility hospital layer below, since none of the curated operators above are government agencies.</p>
         <p class="map-caption" id="hs-curated-freshness"></p>
         <p class="map-caption" id="hs-status">Loading hospitals from HIFLD…</p>
-        <p class="map-caption">Live facility data: <a href="https://hifld-geoplatform.hub.arcgis.com/datasets/geoplatform::hospitals" target="_blank" rel="noopener">HIFLD Hospitals</a>,
-          queried directly from Esri/FEMA's public feature service — not stored on this site, so it reflects
-          whatever HIFLD currently publishes. Basemap &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors.</p>
+        <p class="map-caption">Facility data: <a href="https://hifld-geoplatform.hub.arcgis.com/datasets/geoplatform::hospitals" target="_blank" rel="noopener">HIFLD Hospitals</a>,
+          fetched directly from Esri/FEMA's public feature service each time this page loads — but "fetched now" is not
+          "current now": the layer itself hasn't been refreshed by its publisher in years (see the date caution above), so
+          it is only as current as that last update. Basemap &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors.</p>
       </div>
 
       <div class="hs-list" id="hs-list"></div>
@@ -260,9 +261,10 @@
       <button type="button" class="modal-close" id="hs-compare-close" aria-label="Close">&times;</button>
       <h2 id="hs-compare-title">Compare operators by size</h2>
       <p class="modal-caption">
-        Curated hospital counts come from each operator's own source (right-most column). "Matched on live map" and
-        "live matched beds" are computed here, right now, by tying HIFLD's live per-facility layer back to each
-        operator's roster — so they reflect today's HIFLD data, not a stored figure. A patient-volume column isn't
+        Curated hospital counts come from each operator's own source (right-most column). "Matched on map" and
+        "matched beds" are computed here, right now, by tying HIFLD's per-facility hospital layer back to each
+        operator's roster — that layer is an older snapshot (see the date caution under the map), so treat these as
+        approximate; renamed or newly built hospitals won't match. A patient-volume column isn't
         included: no public source reports annual patient counts per operator in a comparable, verifiable way, so bed
         capacity is used as the closest sourceable proxy for size instead of guessing.
       </p>

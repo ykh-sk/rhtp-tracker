@@ -646,7 +646,7 @@ nav.tabs a.active {
 }
 
 @media (max-width: 640px) {
-  #hs-map { height: 380px; }
+  #hs-map { height: 460px; }
 }
 
 /* Leaflet renders its own inline chrome (tiles, zoom control, attribution) —
@@ -659,7 +659,15 @@ nav.tabs a.active {
 
 .leaflet-container a.leaflet-popup-close-button { color: var(--muted); }
 
-.hs-popup { font-size: 12.5px; line-height: 1.5; }
+/* Capped relative to the viewport so a popup always fits inside the map with
+   room left for the zoom control (see HS_POPUP_OPTIONS in app.js); without
+   this a long facility name/address made it wider than a phone-width map. */
+.hs-popup {
+  font-size: 12.5px;
+  line-height: 1.5;
+  max-width: clamp(160px, calc(100vw - 160px), 260px);
+  overflow-wrap: anywhere;
+}
 .hs-popup-title { font-weight: 600; margin-bottom: 2px; }
 .hs-popup-caution { color: var(--warn); }
 .hs-popup-meta { color: var(--muted); font-size: 11.5px; }

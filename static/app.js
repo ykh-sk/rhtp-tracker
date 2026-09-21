@@ -776,6 +776,7 @@ let hsFacilitiesLoaded = false;
 let hsFacilitiesLoading = false;
 let hsFacilitiesCount = 0;
 let hsFetchedAt = null; // when the live HIFLD pull last completed, for an on-page "as of" timestamp
+let hsNewestSourceDate = null; // newest per-record SOURCEDATE in the pull — HIFLD's hospital layer is a frozen snapshot, so "fetched live" says nothing about how current it is
 let hsAllFacilityMarkers = []; // every live marker, built once; filtering re-adds a subset rather than re-fetching
 let ROSTER_BY_CITY_STATE = {}; // "STATE|CITY" -> [{company, name, city, state, source_url, verified_at, tokens}]
 let ROSTER_COMPANIES = [];
@@ -830,6 +831,11 @@ function ensureHsMap() {
   }).addTo(hsMap);
   hsMap.once("click", () => hsMap.scrollWheelZoom.enable());
 
+  // Cluster bubbles live in Leaflet's marker pane (z 600), which would hide
+  // the operator HQ dots drawn in the default overlay pane (z 400) — give
+  // operators their own pane above the clusters so they stay visible and
+  // clickable. Popups (z 700) still sit above both.
+  hsMap.createPane("operators").style.zIndex = 620;
   hsOperatorLayer = L.layerGroup().addTo(hsMap);
   // Clusters into count bubbles that split apart on zoom — the only way to
   // keep ~7,100 individual hospital markers responsive at every zoom level,
@@ -839,6 +845,10 @@ function ensureHsMap() {
     ? L.markerClusterGroup({ maxClusterRadius: 45, disableClusteringAtZoom: 16 })
     : L.layerGroup();
 }
+
+// Keeps an opened popup panned clear of the zoom control (top-left) and the
+// map edges instead of letting it sit underneath them.
+const HS_POPUP_OPTIONS = { autoPanPaddingTopLeft: [50, 12], autoPanPaddingBottomRight: [12, 12] };
 
 function operatorPopupHtml(h) {
   return `
@@ -864,8 +874,9 @@ function renderOperatorLayer() {
       weight: 2,
       fillColor: `var(${ownershipColorVar(h.ownership_type)})`,
       fillOpacity: 0.92,
+      pane: "operators",
     })
-      .bindPopup(operatorPopupHtml(h))
+      .bindPopup(operatorPopupHtml(h), HS_POPUP_OPTIONS)
       .addTo(hsOperatorLayer);
   });
 }
@@ -972,12 +983,15 @@ function updateHsStatus(message) {
 }
 
 function offFacilitiesMessage() {
-  return `Live hospital layer is off — turn on “Live hospitals” above to show all ${hsFacilitiesCount ? hsFacilitiesCount.toLocaleString() + " " : ""}U.S. hospitals, clustered.`;
+  return `Live hospital layer is off — turn on “All hospitals (HIFLD)” above to show all ${hsFacilitiesCount ? hsFacilitiesCount.toLocaleString() + " " : ""}U.S. hospitals, clustered.`;
 }
 
 function loadedFacilitiesMessage() {
-  const fetched = hsFetchedAt ? ` Fetched live from HIFLD just now, at ${fmtDateTime(hsFetchedAt)}.` : "";
-  return `Showing all ${hsFacilitiesCount.toLocaleString()} open U.S. hospitals from HIFLD, clustered — zoom in to split a cluster apart, click any marker for details.${fetched}`;
+  const newest = hsNewestSourceDate
+    ? ` Caution: the newest record in this dataset is dated ${fmtDate(hsNewestSourceDate)} — hospitals that have opened, closed, or been renamed or sold since then aren't reflected.`
+    : "";
+  const fetched = hsFetchedAt ? ` (Retrieved from HIFLD ${fmtDateTime(hsFetchedAt)}.)` : "";
+  return `Showing ${hsFacilitiesCount.toLocaleString()} hospitals from HIFLD's federal hospital layer, clustered — zoom in to split a cluster apart, click any marker for details.${newest}${fetched}`;
 }
 
 // Fetches the full nationwide dataset once (paginating through HIFLD's own
@@ -1009,7 +1023,7 @@ async function ensureFacilitiesLoaded() {
     }
   } catch {
     hsFacilitiesLoading = false;
-    updateHsStatus("Couldn't reach HIFLD's live hospital data right now — the operator layer above is still unaffected.");
+    updateHsStatus("Couldn't reach HIFLD's hospital data right now — the operator layer above is still unaffected.");
     return;
   }
 
@@ -1031,12 +1045,16 @@ async function ensureFacilitiesLoaded() {
         weight: 1.5,
         fillColor: `var(${facilityOwnerColorVar(p.OWNER)})`,
         fillOpacity: 0.88,
-      }).bindPopup(facilityPopupHtml(p, match));
+      }).bindPopup(facilityPopupHtml(p, match), HS_POPUP_OPTIONS);
       marker.companyKey = match ? match.company : "unmatched";
       marker.beds = Number.isFinite(p.BEDS) && p.BEDS >= 0 ? p.BEDS : 0; // -999 sentinel already excluded
       return marker;
     });
 
+  hsNewestSourceDate = allFeatures
+    .map(f => String((f.properties || {}).SOURCEDATE || "").slice(0, 10))
+    .filter(s => /^\d{4}-\d{2}-\d{2}$/.test(s))
+    .sort().pop() || null;
   hsAllFacilityMarkers = markers;
   hsFacilitiesCount = markers.length;
   hsFacilitiesLoaded = true;
@@ -1098,7 +1116,7 @@ function renderHsLegend() {
       <span class="hs-legend-title">Color = ownership</span>
       <span class="hs-legend-item" title="Tax-exempt / mission-driven operator, as reported by the source"><span class="hs-dot" style="background:var(--owner-nonprofit)"></span>Nonprofit</span>
       <span class="hs-legend-item" title="Investor- or privately-owned operator, as reported by the source"><span class="hs-dot" style="background:var(--owner-forprofit)"></span>For-profit</span>
-      <span class="hs-legend-item" title="Federal, state, or county-run facility — appears only in the live per-facility layer, since none of the curated operators above are government agencies"><span class="hs-dot" style="background:var(--owner-government)"></span>Government (live layer only)</span>
+      <span class="hs-legend-item" title="Federal, state, or county-run facility — appears only in the per-facility hospital layer, since none of the curated operators above are government agencies"><span class="hs-dot" style="background:var(--owner-government)"></span>Government (hospital layer only)</span>
     </div>
   `;
 }
@@ -1133,8 +1151,8 @@ function renderCompareModalBody() {
           <th>Operator</th>
           <th>Tier</th>
           <th>Curated hospital count</th>
-          <th>Matched on live map${liveNote}</th>
-          <th>Live matched beds${liveNote}</th>
+          <th>Matched on map${liveNote}</th>
+          <th>Matched beds${liveNote}</th>
           <th>Verified</th>
         </tr>
       </thead>

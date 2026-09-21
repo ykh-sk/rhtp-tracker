@@ -50,10 +50,18 @@ python3 app/main.py   # serves the dashboard at http://localhost:5050
 Two very different freshness models live on this site, and it's worth being explicit about which
 is which:
 
-- **Live, not stored**: the Health Systems tab's per-facility map layer queries HIFLD/FEMA's public
-  ArcGIS feature service directly from the visitor's browser every time the page loads. Nothing
-  about individual hospitals (location, beds, ownership type) is stored here, so it's always exactly
-  as current as HIFLD's own data — this site does no work to keep it fresh.
+- **Fetched live, but not current**: the Health Systems tab's per-facility map layer queries HIFLD/FEMA's
+  public ArcGIS feature service directly from the visitor's browser every time the page loads, and
+  nothing about individual hospitals is stored here. But "fetched live" describes the *retrieval*, not the
+  *data's age*: as of 2026-09-21 the HIFLD Hospitals layer's own last-edit date is 2018-02-05, and the
+  newest per-record `SOURCEDATE` among its 7,109 open hospitals is March 2017 (most are 2016–early 2017;
+  validation dates run 2013–2017). So it's a frozen snapshot: hospitals that closed, opened, were renamed
+  or were sold since then aren't reflected, which also hurts roster matching (a 2026 roster name won't
+  match a hospital HIFLD still lists under its 2016 name). The map's status line computes and shows the
+  newest record date from the data itself so this can't silently go stale in the UI. A current
+  replacement would be CMS's Hospital General Information dataset (5,419 Medicare-registered hospitals,
+  updated regularly, no coordinates or bed counts — would need server-side geocoding, e.g. the free Census
+  batch geocoder, and a stored table rather than a live browser fetch, since CMS's API sends no CORS headers).
 - **Curated snapshots, re-checked manually**: everything else — the RHTP funding data, the
   `health_systems` operator list, and the `hospital_roster` parent-operator rosters — is a dated,
   sourced snapshot, the same as the rest of this site's data (see "Update policy" below). The
