@@ -30,7 +30,7 @@ AWARDS = [
     {"state": "Pennsylvania", "fiscal_year": "FY26", "amount": 193294054, "status": "subawards announced", "source_url": "https://www.pa.gov/agencies/dhs/programs-services/healthcare/rural-health/rhtp-funding-opportunities", "verified_at": "2026-09-02", "subawards_amount": 1800000, "subawards_label": "6 awards, FQHC track", "usaspending_url": "https://www.usaspending.gov/award/ASST_NON_RHTCMS332052_075"},
     {"state": "Georgia", "fiscal_year": "FY26", "amount": 218862169, "status": "subawards announced", "source_url": "https://allongeorgia.com/chattooga-local-news/georgia-reaches-major-milestone-with-all-year-1-great-health-awards-fully-committed", "verified_at": "2026-09-07", "subawards_amount": 218862169, "subawards_label": "Year 1 fully committed across 4 phases", "usaspending_url": "https://www.usaspending.gov/award/ASST_NON_RHTCMS332046_075"},
     {"state": "Alabama", "fiscal_year": "FY26", "amount": 203404327, "status": "subawards announced", "source_url": "https://governor.alabama.gov/newsroom/2026/08/governor-ivey-announces-first-grants-in-major-new-rural-healthcare-program-totaling-more-than-144-million/", "verified_at": "2026-09-02", "subawards_amount": 144000000, "subawards_label": "138 grants, 5 of 10 initiatives", "usaspending_url": "https://www.usaspending.gov/award/ASST_NON_RHTCMS332060_075"},
-    {"state": "Mississippi", "fiscal_year": "FY26", "amount": 205907220, "status": "RFA issued", "source_url": "https://mississippirhtp.com/", "verified_at": "2026-09-02", "subawards_amount": None, "subawards_label": None, "usaspending_url": "https://www.usaspending.gov/award/ASST_NON_RHTCMS332063_075"},
+    {"state": "Mississippi", "fiscal_year": "FY26", "amount": 205907220, "status": "subawards announced", "source_url": "https://governorreeves.ms.gov/governor-reeves-announces-167-rural-health-transformation-program-awards-totaling-more-than-104-million/", "verified_at": "2026-09-21", "subawards_amount": 104115146, "subawards_label": "167 grants across the first 3 of 5 Year One programs (Sept 14 2026)", "usaspending_url": "https://www.usaspending.gov/award/ASST_NON_RHTCMS332063_075"},
 ]
 
 # `confidence` is 'confirmed' (default) or 'unverified'. Unverified entries are
@@ -43,6 +43,7 @@ STATUS_EVENTS = [
     {"state": "West Virginia", "status": "subawards announced", "source_url": "https://governor.wv.gov/article/governor-morrisey-announces-first-2856-million-rural-health-transformation-funding", "event_date": "2026-04-28", "notes": "First $28.56M tranche opened for MSCF, HealthTech Appalachia, Connected Care Grid. FLAG: WV Dept of Health page cites $199M award; a hospital-association source cited $233.5M — needs reconciliation, do not treat as resolved.", "confidence": "confirmed"},
     {"state": "West Virginia", "status": "subawards announced", "source_url": "https://governor.wv.gov/article/governor-morrisey-announces-first-2856-million-rural-health-transformation-funding", "event_date": "2026-09-02", "notes": "Re-check on the $199M/$233.5M discrepancy above: an extensive search found no current source citing $233.5M. All live official sources (governor.wv.gov, health.wv.gov) and the WV Hospital Association consistently cite $199M (one figure specifies $199,476,098.72). Origin of the $233.5M figure could not be traced — the discrepancy is not resolved, but the weight of current evidence favors $199M.", "confidence": "confirmed"},
     {"state": "West Virginia", "status": "subawards announced", "source_url": "https://wvpublic.org/story/government/2-4-million-awarded-to-help-w-va-residents-stay-healthy-working/", "event_date": "2026-09-04", "notes": "Second subaward round: ~$2.4M in first implementation awards under the worksite-clinic/employer-based-health initiative (announced as an open solicitation June 24, 2026) — Spotted Owl Healthcare Organization ($1,174,000), CAMC/Vandalia Health ($612,000), Cabell Huntington Foundation ($612,000). Governor's office says more announcements are planned over the next 60 days to distribute the remaining balance of the ~$199M award.", "confidence": "confirmed"},
+    {"state": "West Virginia", "status": "subawards announced", "source_url": "https://governor.wv.gov/article/governor-morrisey-announces-855400-award-strengthen-statewide-health-data-infrastructure", "event_date": "2026-09-17", "notes": "Gov. Morrisey announced an $855,400 award to the West Virginia Health Information Network (WVHIN) under the Connected Care Grid initiative, to expand participation in the statewide health information exchange and increase the number of healthcare organizations able to fully exchange information across systems. Connected Care Grid is one of the three programs already in the first $28.56M tranche opened in April 2026, so this names a recipient within that tranche and is NOT added to the cumulative subaward total above (which would double-count it). The governor's page says additional RHTP awards will be announced as implementation continues.", "confidence": "confirmed"},
     {"state": "Kentucky", "status": "RFA issued", "source_url": "https://www.kentuckytoday.com/news/kentuckys-rural-health-transformation-plan-secures-212-9m-in-federal-funding/article_2adc2281-3461-4430-995d-07f6a6973df4.html", "event_date": "2025-12-29", "notes": "5 branded initiatives (PoWERing, Rooted in Health, Crisis to Care, Rapid Response to Recovery, Rural Community Hubs) via \"A3 Team\".", "confidence": "confirmed"},
     {"state": "Ohio", "status": "subawards announced", "source_url": "https://governor.ohio.gov/media/news-and-media/governor-dewine-announces-first-rural-health-transformation-program-award-to-ohio-university-for-10-million", "event_date": "2026-07-01", "notes": "First award: $10M to Ohio University for workforce (\"Health Workforce Ohio\").", "confidence": "confirmed"},
     {"state": "Tennessee", "status": "RFA issued", "source_url": "https://www.tn.gov/health/news/2026/5/15/tennessee-to-release-1st-grant-funding-opportunity-of-rural-health-transformation-program.html", "event_date": "2026-05-15", "notes": "Rolling RFAs released weekly through July 10, 2026; 30-day application windows.", "confidence": "confirmed"},
@@ -62,6 +63,7 @@ STATUS_EVENTS = [
     {"state": "Alabama", "status": "subawards announced", "source_url": "https://adeca.alabama.gov/alruralhealth/", "event_date": "2026-09-02", "notes": "Correction to the entry above: ADECA's own program page lists 10 total planned initiatives, not 11 — the '5 of 11' figure came from the governor's newsroom post rather than the program's own page. A second set of 5 initiatives is approved but has no announced timeline yet.", "confidence": "confirmed"},
     {"state": "Mississippi", "status": "RFA issued", "source_url": "https://mississippirhtp.com/", "event_date": "2026-04-29", "notes": "RHTP Office established under Governor's Office (director: Richard Grimes); first round drew ~700 applications for ~$82M available.", "confidence": "confirmed"},
     {"state": "Mississippi", "status": "RFA issued", "source_url": "https://www.wlbt.com/2026/08/06/mississippi-rural-health-transformation-program-begins-awarding-grants/", "event_date": "2026-08-06", "notes": "Selection completed for 3 grant programs (Rural Capital Care Gap Closure, Rural Technology Grant, Telehealth Hub Connectivity/Equipment/Education); selected applicants were being contacted to begin sub-award execution. Director Richard Grimes said awards were 'expected by the end of the month' (Aug 2026) with a goal of having all funds obligated by the October federal deadline. As of Sep 7, 2026 no formal named-recipient/dollar announcement has been found, so status is left at RFA issued pending that.", "confidence": "confirmed"},
+    {"state": "Mississippi", "status": "subawards announced", "source_url": "https://governorreeves.ms.gov/governor-reeves-announces-167-rural-health-transformation-program-awards-totaling-more-than-104-million/", "event_date": "2026-09-14", "notes": "Gov. Reeves announced 167 awards totaling $104,115,146 — Mississippi's first named subawards, on the governor's own official page: Rural Provider Technology Grant Program (97 awards), Rural Capital Project Care Gap Closure Grant Program (43 awards), and Telehealth Hub Connectivity, Equipment & Education Grant Program (27 awards). Named recipients include Memorial Health System (e.g. $2,980,874 for an electronic oncology workflow), Hattiesburg Clinic ($537,094, ambient AI documentation), and Delta Health Center ($3,000,000, a 24/7 urgent and critical response center in Rosedale). These are only the first three of five Year One grant opportunities; workforce and psychiatric emergency services applications are still under review. Advances Mississippi from 'RFA issued' to 'subawards announced'.", "confidence": "confirmed"},
 ]
 
 # `confidence` is 'confirmed' (direct-fetched from an official .gov page) or
@@ -468,12 +470,12 @@ STATE_OVERVIEW = {
         "updated_at": "2026-09-02",
     },
     "Mississippi": {
-        "emphasis": "Centralized under a dedicated RHTP Office reporting to the Governor's Office, rather than an existing health-agency division.",
-        "applicant_profile": "The first round drew roughly 700 applications for ~$82M, and newer unverified leads point toward EMS capacity and psychiatric emergency services as upcoming tracks (see Calendar) — suggesting broad eligibility across rural EMS and behavioral health providers.",
+        "emphasis": "Centralized under a dedicated RHTP Office reporting to the Governor's Office, rather than an existing health-agency division; its first 167 awards ($104.1M) were announced Sept 14, 2026 across the first three of five Year One grant programs.",
+        "applicant_profile": "First awards went to hospitals, health systems, and clinics for technology upgrades, capital projects, and telehealth hubs; workforce and psychiatric emergency services applications are still under review, suggesting broad eligibility across rural EMS and behavioral health providers.",
         "contact_name": "Richard Grimes (RHTP Office Director)",
         "contact_email": None,
         "contact_note": "A director is named publicly; no direct email address has been published in sourced materials.",
-        "updated_at": "2026-09-02",
+        "updated_at": "2026-09-21",
     },
 }
 
@@ -545,6 +547,10 @@ STATE_CHANGELOG = [
     {"state": "Indiana", "changed_at": "2026-09-13", "summary": "Subaward total updated from $13.1M to $112.4M: all 8 GROW regional coalitions now itemized."},
     {"state": "Louisiana", "changed_at": "2026-09-13", "summary": "Subaward total updated from $2.1M to $4.2M: a second named recipient, University of Louisiana Lafayette, confirmed."},
     {"state": "Pennsylvania", "changed_at": "2026-09-13", "summary": "New funding round added: the Quality Investment Program (~$2.75M for long-term-care facilities), open Sept 1 - Oct 1, 2026."},
+    {"state": "South Carolina", "changed_at": "2026-09-21", "summary": "Status advanced from 'RFA issued' to 'subawards announced': 228 grants totaling $167.3M announced Sept 15 across 4 of 5 initiatives."},
+    {"state": "Mississippi", "changed_at": "2026-09-21", "summary": "Status advanced from 'RFA issued' to 'subawards announced': 167 awards totaling $104.1M announced Sept 14 across the first 3 of 5 Year One programs."},
+    {"state": "Connecticut", "changed_at": "2026-09-21", "summary": "Status advanced from 'RFA issued' to 'subawards announced': $46M awarded to four rural hospitals on Sept 16."},
+    {"state": "Kansas", "changed_at": "2026-09-21", "summary": "Subaward total updated from $79.1M to ~$96.1M: a $16M Emerging Technology round (14 providers) announced Sept 14, plus the $1.0M Aug round now included in the cumulative figure."},
 ]
 
 # Federal-level (not state-specific) statutory/programmatic milestones for the
@@ -654,6 +660,42 @@ FEDERAL_MILESTONES = [
         "confidence": "unverified",
     },
     {
+        "title": "Budget Period 1 ends — Year 1 funds must be obligated (Oct 30, 2026)",
+        "category": "obligation",
+        "start_date": "2026-10-30",
+        "end_date": None,
+        "source_url": "https://www.pa.gov/content/dam/copapwp-pagov/en/dhs/documents/rural-health/2026-03-31-webinar/2026-03-30-rhtp-year-1-overview-slides.pdf",
+        "notes": "Pennsylvania DHS's RHTP webinar slides (2026-03-30) list Oct 30, 2026 as the date Year 1 funds must be obligated, one day earlier than the approximate Oct 31 date above (which was our own calculation). Read directly from the slide text. Relayed by a state agency from its Notice of Award terms rather than from a CMS page; other state documents reportedly agree but were not independently checked.",
+        "confidence": "confirmed",
+    },
+    {
+        "title": "First annual report due to CMS (Aug 30, 2026)",
+        "category": "reporting",
+        "start_date": "2026-08-30",
+        "end_date": None,
+        "source_url": "https://www.pa.gov/content/dam/copapwp-pagov/en/dhs/documents/rural-health/2026-03-31-webinar/2026-03-30-rhtp-year-1-overview-slides.pdf",
+        "notes": "PA DHS slides: first reporting period ended July 31, 2026, and the first annual report was due Aug 30, 2026; CMS's rescoring for the Year 2 award is based on this report. Read directly from the slide text; an American Action Forum piece independently reports the same Aug 30 date. Not seen on a CMS page.",
+        "confidence": "confirmed",
+    },
+    {
+        "title": "Year 2 (FY2027) funding expected to be awarded (Oct 31, 2026)",
+        "category": "award",
+        "start_date": "2026-10-31",
+        "end_date": None,
+        "source_url": "https://www.pa.gov/content/dam/copapwp-pagov/en/dhs/documents/rural-health/2026-03-31-webinar/2026-03-30-rhtp-year-1-overview-slides.pdf",
+        "notes": "PA DHS slides (written March 2026) list Oct 31, 2026 as when Year 2 funding is awarded, after CMS rescoring based on the annual reports. An expected date from a state agency's slides, not a CMS commitment.",
+        "confidence": "unverified",
+    },
+    {
+        "title": "Quarterly reports to CMS begin (first due Nov 29, 2026)",
+        "category": "reporting",
+        "start_date": "2026-11-29",
+        "end_date": None,
+        "source_url": "https://www.pa.gov/content/dam/copapwp-pagov/en/dhs/documents/rural-health/2026-03-31-webinar/2026-03-30-rhtp-year-1-overview-slides.pdf",
+        "notes": "PA DHS slides list quarterly reports due Nov 29, 2026 (covering Aug 1 - Oct 30), Mar 1, 2027 (Oct 31 - Jan 30), and May 30, 2027 (Jan 31 - Apr 30). Only Pennsylvania documents this cadence; the NOFO itself does not state a quarterly requirement (see the annual reporting entry above), and no CMS page was found confirming it.",
+        "confidence": "unverified",
+    },
+    {
         "title": "Deadline to spend FY2026 (Year 1) award funds",
         "category": "obligation",
         "start_date": "2027-09-30",
@@ -734,8 +776,10 @@ _UPDATED_AT_OVERRIDES = {
     "New Hampshire": "2026-09-08",
     "New York": "2026-09-08",
     "Oklahoma": "2026-09-08",
-    "Connecticut": "2026-09-08",
     "Vermont": "2026-09-13",
+    "South Carolina": "2026-09-21",
+    "Connecticut": "2026-09-21",
+    "Kansas": "2026-09-21",
     "Rhode Island": "2026-09-13",
     "Idaho": "2026-09-13",
     "Alaska": "2026-09-13",
