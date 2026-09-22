@@ -169,14 +169,14 @@
       <p class="cal-caption">
         The business landscape behind rural health transformation. Two layers on one zoomable map: notable
         hospital/health-system <strong>operators</strong> (curated, sourced — the companies), and every individual
-        <strong>hospital</strong> nationwide from HIFLD/FEMA's public federal dataset (note: an older snapshot — see the
-        date caution under the map), clustered by location. Click a cluster to zoom in, or any single marker to see it right on the map.
+        <strong>hospital</strong> nationwide from CMS's Medicare hospital dataset, clustered by location. Click a
+        cluster to zoom in, or any single marker to see it right on the map.
       </p>
 
       <div class="hs-toggle-row">
         <div class="map-toggle" id="hs-layer-toggle">
           <button type="button" data-layer="operators" class="active">Operators</button>
-          <button type="button" data-layer="facilities" class="active">All hospitals (HIFLD)</button>
+          <button type="button" data-layer="facilities" class="active">All hospitals (CMS)</button>
         </div>
         <div class="map-toggle" id="hs-tier-toggle">
           <button type="button" data-tier="all" class="active">All tiers</button>
@@ -204,11 +204,15 @@
         <div class="hs-legend" id="hs-legend"></div>
         <p class="map-caption map-caption-wide">Ownership reflects each source's own reporting; "Government" appears only in the per-facility hospital layer below, since none of the curated operators above are government agencies.</p>
         <p class="map-caption" id="hs-curated-freshness"></p>
-        <p class="map-caption" id="hs-status">Loading hospitals from HIFLD…</p>
-        <p class="map-caption">Facility data: <a href="https://hifld-geoplatform.hub.arcgis.com/datasets/geoplatform::hospitals" target="_blank" rel="noopener">HIFLD Hospitals</a>,
-          fetched directly from Esri/FEMA's public feature service each time this page loads — but "fetched now" is not
-          "current now": the layer itself hasn't been refreshed by its publisher in years (see the date caution above), so
-          it is only as current as that last update. Basemap &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors.</p>
+        <p class="map-caption" id="hs-status">Loading hospitals…</p>
+        <p class="map-caption">Facility data: CMS's
+          <a href="https://data.cms.gov/provider-data/dataset/xubh-q36u" target="_blank" rel="noopener">Hospital General Information</a>
+          dataset — Medicare-registered hospitals, actively maintained by CMS (unlike this site's prior HIFLD-based
+          layer, which turned out to be a frozen 2016-17 snapshot). Address geocoding was done once by this site, not
+          by CMS; see the status line above for exactly when this snapshot was last pulled. CMS's own dataset excludes
+          most freestanding long-term-care and rehabilitation hospitals, which it tracks through separate programs —
+          so this layer runs somewhat smaller than a full hospital count would. Basemap &copy;
+          <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors.</p>
       </div>
 
       <div class="hs-list" id="hs-list"></div>
@@ -261,12 +265,12 @@
       <button type="button" class="modal-close" id="hs-compare-close" aria-label="Close">&times;</button>
       <h2 id="hs-compare-title">Compare operators by size</h2>
       <p class="modal-caption">
-        Curated hospital counts come from each operator's own source (right-most column). "Matched on map" and
-        "matched beds" are computed here, right now, by tying HIFLD's per-facility hospital layer back to each
-        operator's roster — that layer is an older snapshot (see the date caution under the map), so treat these as
-        approximate; renamed or newly built hospitals won't match. A patient-volume column isn't
-        included: no public source reports annual patient counts per operator in a comparable, verifiable way, so bed
-        capacity is used as the closest sourceable proxy for size instead of guessing.
+        Curated hospital counts come from each operator's own source (right-most column). "Matched on map" is
+        computed here, right now, by tying CMS's per-facility hospital layer back to each operator's roster — treat
+        it as approximate; renamed, newly built, or non-Medicare hospitals won't match. Neither column shows bed
+        capacity or patient volume: CMS's Hospital General Information dataset doesn't publish bed counts, and no
+        public source reports annual patient counts per operator in a comparable, verifiable way — better to omit
+        both than guess.
       </p>
       <div class="hs-compare-table-wrap" id="hs-compare-table-wrap"></div>
     </div>

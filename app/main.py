@@ -228,5 +228,14 @@ def api_hospital_roster():
     return jsonify(rows)
 
 
+@app.route("/api/cms_hospitals")
+def api_cms_hospitals():
+    conn = get_connection()
+    hospitals = rows_to_dicts(query(conn, "SELECT * FROM cms_hospitals ORDER BY state, city"))
+    meta = query(conn, "SELECT dataset_modified, geocoded_at, row_count, source_url FROM cms_hospitals_meta WHERE id = 1")
+    conn.close()
+    return jsonify({"meta": rows_to_dicts(meta)[0] if meta else None, "hospitals": hospitals})
+
+
 if __name__ == "__main__":
     app.run(debug=True, port=5050)

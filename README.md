@@ -34,34 +34,48 @@ python3 app/main.py   # serves the dashboard at http://localhost:5050
   `app/health_systems_data.py` for the sourced dataset — extend it the same way you'd extend
   `seed_data.py`.
 - `hospital_roster` — one row per hospital in a curated operator's own official location directory.
-  Used client-side to tag an individual hospital on the live HIFLD map layer as "part of
+  Used client-side to tag an individual hospital on the per-facility CMS map layer as "part of
   `<company>`" by matching name/city/state — matching requires at least one shared, non-generic
   name token even when only one roster hospital shares that city+state (a city having exactly one
   *rostered* hospital doesn't mean it only has one hospital), so a weak or absent match reads as
   "parent operator not identified" rather than guessing. The Health Systems tab's "Compare operator
   size" button opens a table of every curated operator sorted by size, with a live-computed count of
-  matched hospitals and total beds from today's HIFLD pull next to each operator's own reported
-  count — patient volume isn't shown there, since no public source reports it per-operator in a
-  comparable, verifiable way. See `app/health_system_rosters_data.py` for the sourced roster and how
-  to add more operators or states to it.
+  matched hospitals from the CMS layer next to each operator's own reported count — no bed or
+  patient-volume column: CMS's dataset doesn't publish bed counts, and no public source reports
+  patient volume per-operator in a comparable, verifiable way. See `app/health_system_rosters_data.py`
+  for the sourced roster and how to add more operators or states to it.
+- `cms_hospitals` / `cms_hospitals_meta` — the per-facility map layer: every U.S. hospital in CMS's
+  "Hospital General Information" dataset (Medicare-registered hospitals), geocoded once server-side
+  and stored, not fetched live from the browser (see "How this data stays current" below for why).
+  `app/data/cms_hospitals.json` is the checked-in snapshot `seed.py` loads from; there's no
+  hand-maintained Python source file for this one since it's a bulk import, not a curated pick.
 
 ## How this data stays current
 
 Two very different freshness models live on this site, and it's worth being explicit about which
 is which:
 
-- **Fetched live, but not current**: the Health Systems tab's per-facility map layer queries HIFLD/FEMA's
-  public ArcGIS feature service directly from the visitor's browser every time the page loads, and
-  nothing about individual hospitals is stored here. But "fetched live" describes the *retrieval*, not the
-  *data's age*: as of 2026-09-21 the HIFLD Hospitals layer's own last-edit date is 2018-02-05, and the
-  newest per-record `SOURCEDATE` among its 7,109 open hospitals is March 2017 (most are 2016–early 2017;
-  validation dates run 2013–2017). So it's a frozen snapshot: hospitals that closed, opened, were renamed
-  or were sold since then aren't reflected, which also hurts roster matching (a 2026 roster name won't
-  match a hospital HIFLD still lists under its 2016 name). The map's status line computes and shows the
-  newest record date from the data itself so this can't silently go stale in the UI. A current
-  replacement would be CMS's Hospital General Information dataset (5,419 Medicare-registered hospitals,
-  updated regularly, no coordinates or bed counts — would need server-side geocoding, e.g. the free Census
-  batch geocoder, and a stored table rather than a live browser fetch, since CMS's API sends no CORS headers).
+- **A server-side snapshot, refreshed by re-running the fetch — not curated by hand, and not live**:
+  the Health Systems tab's per-facility map layer used to query HIFLD/FEMA's public ArcGIS feature
+  service directly from the visitor's browser on every page load. That turned out to be misleading:
+  "fetched live" described the *retrieval*, not the *data's age* — HIFLD's hospital layer's own
+  last-edit date was 2018-02-05, and the newest per-record date among its 7,109 "open" hospitals was
+  March 2017, so it was a frozen snapshot silently going stale in the UI (hospitals that closed,
+  opened, were renamed, or were sold since 2017 weren't reflected, which also broke roster matching
+  against current company names).
+
+  It's now CMS's own "Hospital General Information" dataset instead — 5,419 Medicare-registered
+  hospitals, actively maintained by CMS (last modified 2026-07-22 as of this snapshot), pulled and
+  geocoded once server-side (`data.cms.gov` sends no CORS headers, so a browser can't fetch it
+  directly, and the dataset has no coordinates of its own — see `app/seed.py` for the Census
+  batch-geocoder + ZIP/city-centroid fallback pipeline that built `app/data/cms_hospitals.json`) and
+  served from this site's own DB via `/api/cms_hospitals`, the same as every other table here. That
+  makes it a **snapshot with a known, honestly-labeled age** (the map's status line shows both CMS's
+  own last-modified date and when this site last pulled it) rather than a live feed — refreshing it
+  means re-running the fetch/geocode pipeline and re-seeding, not something that happens automatically.
+  It also runs smaller than HIFLD's count: CMS's dataset excludes most freestanding long-term-care and
+  rehabilitation hospitals (they report through separate CMS quality programs, not this file) — a
+  scope difference, not missing data, and it's stated in the UI rather than left for someone to notice.
 - **Curated snapshots, re-checked manually**: everything else — the RHTP funding data, the
   `health_systems` operator list, and the `hospital_roster` parent-operator rosters — is a dated,
   sourced snapshot, the same as the rest of this site's data (see "Update policy" below). The
@@ -94,7 +108,7 @@ rule that excluded anything smaller. A genuinely small (4–5 hospital) system t
 especially in one of the states this tracker follows, is in scope; it just hasn't been looked up yet.
 Small regional systems in that range, and the much larger population of single-hospital independents,
 aren't represented here at all — and there are hundreds of the former and thousands of the latter
-nationally. Every one of them still shows up as an individual pin on the live HIFLD layer; they just
+nationally. Every one of them still shows up as an individual pin on the CMS facility layer; they just
 read as "parent operator not identified" rather than being tied to a named company, which is accurate
 (no roster claims them) rather than a bug. Extending curated coverage down to that tier isn't a
 scaled-up version of the current per-company approach — at 4–5 hospitals apiece it would take hundreds

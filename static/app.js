@@ -58,10 +58,6 @@ function fmtDate(iso) {
   return new Date(iso + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
 
-function fmtDateTime(d) {
-  return d.toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
-}
-
 function daysUntil(iso) {
   const ms = new Date(iso + "T00:00:00") - new Date(new Date().toDateString());
   return Math.round(ms / 86400000);
@@ -758,14 +754,18 @@ async function renderMap() {
 // ---- health systems map ----
 // Two Leaflet layers on one real pan/zoom tile map: a small curated layer of
 // health-system OPERATORS (companies — from our own sourced dataset, shown
-// at every zoom level since there are only a couple dozen) and a live layer
-// of every individual hospital FACILITY nationwide, queried straight from
-// HIFLD/FEMA's public ArcGIS feature service and clustered so all ~7,100 of
-// them stay usable at every zoom level — nothing about the live layer is
-// stored on this site, so it's only ever as current as HIFLD.
-
-const HIFLD_HOSPITALS_URL = "https://services2.arcgis.com/FiaPA4ga0iQKduv3/arcgis/rest/services/Hospitals/FeatureServer/0/query";
-const HIFLD_PAGE_SIZE = 2000; // the service's own maxRecordCount — paged through fully, once, rather than per pan/zoom
+// at every zoom level since there are only a couple dozen) and a bulk layer
+// of individual hospital FACILITIES nationwide, from our own /api/cms_hospitals
+// endpoint (CMS's "Hospital General Information" dataset, geocoded once
+// server-side into our DB — see app/seed.py). This used to fetch HIFLD's
+// ArcGIS feature service directly from the browser, but that layer turned out
+// to be a frozen 2016-17 snapshot (last edited 2018-02-05) with no CORS-free
+// current replacement, so CMS's own actively-maintained dataset is fetched
+// server-side instead and served from our DB like everything else curated
+// here — "fetched on page load" describes retrieval, not the data's age;
+// CMS_META below carries the dataset's own freshness, and the status line
+// says so explicitly rather than implying "live" means "current."
+let CMS_META = null;
 
 let hsMap = null;
 let hsOperatorLayer = null;
@@ -775,8 +775,6 @@ let hsShowFacilities = true;
 let hsFacilitiesLoaded = false;
 let hsFacilitiesLoading = false;
 let hsFacilitiesCount = 0;
-let hsFetchedAt = null; // when the live HIFLD pull last completed, for an on-page "as of" timestamp
-let hsNewestSourceDate = null; // newest per-record SOURCEDATE in the pull — HIFLD's hospital layer is a frozen snapshot, so "fetched live" says nothing about how current it is
 let hsAllFacilityMarkers = []; // every live marker, built once; filtering re-adds a subset rather than re-fetching
 let ROSTER_BY_CITY_STATE = {}; // "STATE|CITY" -> [{company, name, city, state, source_url, verified_at, tokens}]
 let ROSTER_COMPANIES = [];
@@ -796,20 +794,34 @@ function ownershipColorVar(ownership) {
   return ownership === "for-profit" ? "--owner-forprofit" : "--owner-nonprofit";
 }
 
-// HIFLD's OWNER field is a free-ish text taxonomy (NON-PROFIT, PROPRIETARY,
-// GOVERNMENT - STATE/FEDERAL/..., NOT AVAILABLE) — coarser-matched here into
-// the same three-way split used elsewhere on the map/legend.
+// CMS's ownership field is a free-ish text taxonomy ("Voluntary non-profit -
+// Private/Church/Other", "Proprietary", "Physician", "Government - Federal/
+// State/Local/Hospital District or Authority", "Veterans Health
+// Administration", "Department of Defense", "Tribal") — coarser-matched here
+// into the same three-way split used elsewhere on the map/legend.
 function facilityOwnerColorVar(owner) {
   const o = (owner || "").toUpperCase();
   if (o.includes("NON-PROFIT") || o.includes("NONPROFIT")) return "--owner-nonprofit";
-  if (o.includes("PROPRIETARY")) return "--owner-forprofit";
-  if (o.includes("GOVERNMENT")) return "--owner-government";
+  if (o.includes("PROPRIETARY") || o.includes("PHYSICIAN")) return "--owner-forprofit";
+  if (o.includes("GOVERNMENT") || o.includes("VETERANS") || o.includes("DEFENSE") || o.includes("TRIBAL")) return "--owner-government";
   return "--owner-unknown";
 }
 
-function facilityRadius(beds) {
-  const b = Math.max(0, Number(beds) || 0); // HIFLD uses -999 as a "no data" sentinel, not a real bed count
-  return Math.max(4, Math.min(13, 3 + Math.sqrt(b) * 0.8));
+// CMS doesn't publish a bed count in this dataset (unlike HIFLD), so marker
+// size is set by hospital type instead of scaling with beds.
+const FACILITY_TYPE_RADIUS = {
+  "Acute Care Hospitals": 8,
+  "Childrens": 7,
+  "Critical Access Hospitals": 6,
+  "Psychiatric": 6,
+  "Acute Care - Veterans Administration": 7,
+  "Acute Care - Department of Defense": 7,
+  "Rural Emergency Hospital": 5,
+  "Long-term": 6,
+};
+
+function facilityRadius(type) {
+  return FACILITY_TYPE_RADIUS[type] || 6;
 }
 
 function currentFilteredOperators() {
@@ -882,7 +894,7 @@ function renderOperatorLayer() {
 }
 
 // ---- parent-operator matching ----
-// Ties an individual live HIFLD facility back to a curated operator roster
+// Ties an individual CMS facility back to a curated operator roster
 // (app/health_system_rosters_data.py) by normalized city+state, then — when
 // more than one roster entry shares that city+state — by name-token overlap
 // to pick the closer match. City+state alone is usually decisive since two
@@ -939,18 +951,18 @@ function populateCompanyFilter() {
   if ([...select.options].some(o => o.value === current)) select.value = current;
 }
 
-// HIFLD leaves plenty of fields blank per facility — text fields as the
-// literal string "NOT AVAILABLE", numeric fields (BEDS, TTL_STAFF) as a
-// -999 sentinel — each line below is only shown when the source actually
-// has that value, rather than padding the popup with placeholders.
+// CMS leaves some fields blank per facility — each line below is only shown
+// when the source actually has that value, rather than padding the popup
+// with placeholders.
 function facilityPopupHtml(p, match) {
-  const na = v => v && String(v).toUpperCase() !== "NOT AVAILABLE";
-  const num = v => (Number.isFinite(v) && v >= 0 ? v : null); // filters the -999 "no data" sentinel
-  const address = [p.ADDRESS, `${p.CITY || ""}, ${p.STATE || ""}${na(p.COUNTY) ? ` (${p.COUNTY} County)` : ""}`]
+  const has = v => v && String(v).trim() && String(v).toUpperCase() !== "NOT AVAILABLE";
+  const address = [p.address, `${p.city || ""}, ${p.state || ""}${has(p.county) ? ` (${p.county} County)` : ""}`]
     .filter(Boolean).join(", ");
-  const phoneDigits = na(p.TELEPHONE) ? String(p.TELEPHONE).replace(/[^\d+]/g, "") : null;
-  const website = na(p.WEBSITE) ? (/^https?:\/\//.test(p.WEBSITE) ? p.WEBSITE : "https://" + p.WEBSITE) : null;
-  const sourceDate = na(p.SOURCEDATE) ? fmtDate(String(p.SOURCEDATE).slice(0, 10)) : null;
+  const phoneDigits = has(p.phone) ? String(p.phone).replace(/[^\d+]/g, "") : null;
+  const rating = has(p.rating) && /^[1-5]$/.test(p.rating) ? `${p.rating}★ CMS rating` : null;
+  const geoCaveat = p.geo_precision !== "address"
+    ? `Marker placed at ${p.geo_precision === "zip" ? "ZIP code" : "city"} center — CMS's own address for this hospital didn't geocode precisely.`
+    : null;
   // "Cite it when we can't link it" — an explicit, visible line either way,
   // never silently omitted, so absence of a match reads as "not identified"
   // rather than "not part of anything."
@@ -960,19 +972,16 @@ function facilityPopupHtml(p, match) {
 
   return `
     <div class="hs-popup">
-      <div class="hs-popup-title">${esc(p.NAME || "Unnamed facility")}</div>
-      <div>${esc(titleCase(p.TYPE || "Hospital"))} · ${esc(titleCase((p.OWNER || "Ownership not available").replace(/\s*-\s*/g, " ")))}</div>
+      <div class="hs-popup-title">${esc(p.name || "Unnamed facility")}</div>
+      <div>${esc(titleCase(p.type || "Hospital"))} · ${esc(titleCase((p.ownership || "Ownership not available").replace(/\s*-\s*/g, " ")))}</div>
       <div>${address}</div>
       <div>${[
-        num(p.BEDS) ? `${p.BEDS} beds` : null,
-        num(p.TTL_STAFF) ? `${p.TTL_STAFF} staff` : null,
-        na(p.TRAUMA) ? `Trauma level ${p.TRAUMA}` : null,
-        String(p.HELIPAD).toUpperCase() === "Y" ? "Helipad" : null,
+        has(p.emergency) ? (p.emergency === "Yes" ? "Emergency services" : "No emergency services") : null,
+        rating,
       ].filter(Boolean).map(esc).join(" · ")}</div>
       ${parentLine}
-      ${phoneDigits ? `<div><a href="tel:${esc(phoneDigits)}">${esc(p.TELEPHONE)}</a></div>` : ""}
-      ${website ? `<div><a href="${esc(website)}" target="_blank" rel="noopener">Website ↗</a></div>` : ""}
-      ${sourceDate ? `<div class="hs-popup-caution">HIFLD source data as of ${esc(sourceDate)}</div>` : ""}
+      ${phoneDigits ? `<div><a href="tel:${esc(phoneDigits)}">${esc(p.phone)}</a></div>` : ""}
+      ${geoCaveat ? `<div class="hs-popup-caution">${esc(geoCaveat)}</div>` : ""}
     </div>
   `;
 }
@@ -983,83 +992,57 @@ function updateHsStatus(message) {
 }
 
 function offFacilitiesMessage() {
-  return `Live hospital layer is off — turn on “All hospitals (HIFLD)” above to show all ${hsFacilitiesCount ? hsFacilitiesCount.toLocaleString() + " " : ""}U.S. hospitals, clustered.`;
+  return `Hospital layer is off — turn on “All hospitals (CMS)” above to show all ${hsFacilitiesCount ? hsFacilitiesCount.toLocaleString() + " " : ""}U.S. hospitals, clustered.`;
 }
 
 function loadedFacilitiesMessage() {
-  const newest = hsNewestSourceDate
-    ? ` Caution: the newest record in this dataset is dated ${fmtDate(hsNewestSourceDate)} — hospitals that have opened, closed, or been renamed or sold since then aren't reflected.`
+  const meta = CMS_META
+    ? ` CMS's dataset was last updated ${fmtDate(CMS_META.dataset_modified)}; this site last pulled and geocoded it ${fmtDate(CMS_META.geocoded_at)}.`
     : "";
-  const fetched = hsFetchedAt ? ` (Retrieved from HIFLD ${fmtDateTime(hsFetchedAt)}.)` : "";
-  return `Showing ${hsFacilitiesCount.toLocaleString()} hospitals from HIFLD's federal hospital layer, clustered — zoom in to split a cluster apart, click any marker for details.${newest}${fetched}`;
+  return `Showing ${hsFacilitiesCount.toLocaleString()} hospitals from CMS's Hospital General Information dataset, clustered — zoom in to split a cluster apart, click any marker for details.${meta}`;
 }
 
-// Fetches the full nationwide dataset once (paginating through HIFLD's own
-// 2,000-record page size) and hands it all to the cluster group in one
-// batch, rather than re-fetching a viewport slice on every pan/zoom — the
-// clustering plugin is what makes rendering all of them at once workable.
+// Fetches the full nationwide dataset once from our own API (a server-side
+// geocoded snapshot of CMS's dataset — see app/seed.py) and hands it all to
+// the cluster group in one batch, rather than re-fetching a viewport slice
+// on every pan/zoom — the clustering plugin is what makes rendering all of
+// them at once workable.
 async function ensureFacilitiesLoaded() {
   if (hsFacilitiesLoaded || hsFacilitiesLoading || !hsFacilityLayer) return;
   hsFacilitiesLoading = true;
+  updateHsStatus("Loading hospitals…");
 
-  const allFeatures = [];
-  let offset = 0;
+  let hospitals;
   try {
-    for (;;) {
-      updateHsStatus(`Loading hospitals from HIFLD… (${allFeatures.length.toLocaleString()} so far)`);
-      const params = new URLSearchParams({
-        where: "STATUS='OPEN'",
-        outFields: "NAME,ADDRESS,CITY,STATE,COUNTY,TELEPHONE,BEDS,TTL_STAFF,OWNER,TYPE,TRAUMA,HELIPAD,WEBSITE,SOURCEDATE",
-        resultOffset: String(offset),
-        resultRecordCount: String(HIFLD_PAGE_SIZE),
-        f: "geojson",
-      });
-      const res = await fetch(`${HIFLD_HOSPITALS_URL}?${params}`);
-      const data = await res.json();
-      const page = data.features || [];
-      allFeatures.push(...page);
-      if (page.length < HIFLD_PAGE_SIZE) break; // last page
-      offset += HIFLD_PAGE_SIZE;
-    }
+    const res = await fetch("/api/cms_hospitals");
+    const data = await res.json();
+    hospitals = data.hospitals || [];
+    CMS_META = data.meta || null;
   } catch {
     hsFacilitiesLoading = false;
-    updateHsStatus("Couldn't reach HIFLD's hospital data right now — the operator layer above is still unaffected.");
+    updateHsStatus("Couldn't reach the hospital data right now — the operator layer above is still unaffected.");
     return;
   }
 
-  // A handful of HIFLD rows carry null/placeholder geometry (unmapped
-  // facilities) — skip those rather than hand Leaflet a NaN center, which
-  // renders as a broken SVG path.
-  const markers = allFeatures
-    .filter(f => {
-      const c = f.geometry && f.geometry.coordinates;
-      return Array.isArray(c) && Number.isFinite(c[0]) && Number.isFinite(c[1]);
-    })
-    .map(f => {
-      const p = f.properties || {};
-      const [lon, lat] = f.geometry.coordinates;
-      const match = matchParentCompany(p.NAME, p.CITY, p.STATE);
-      const marker = L.circleMarker([lat, lon], {
-        radius: facilityRadius(p.BEDS),
+  const markers = hospitals
+    .filter(p => Number.isFinite(p.lat) && Number.isFinite(p.lon))
+    .map(p => {
+      const match = matchParentCompany(p.name, p.city, p.state);
+      const marker = L.circleMarker([p.lat, p.lon], {
+        radius: facilityRadius(p.type),
         color: "var(--surface)",
         weight: 1.5,
-        fillColor: `var(${facilityOwnerColorVar(p.OWNER)})`,
+        fillColor: `var(${facilityOwnerColorVar(p.ownership)})`,
         fillOpacity: 0.88,
       }).bindPopup(facilityPopupHtml(p, match), HS_POPUP_OPTIONS);
       marker.companyKey = match ? match.company : "unmatched";
-      marker.beds = Number.isFinite(p.BEDS) && p.BEDS >= 0 ? p.BEDS : 0; // -999 sentinel already excluded
       return marker;
     });
 
-  hsNewestSourceDate = allFeatures
-    .map(f => String((f.properties || {}).SOURCEDATE || "").slice(0, 10))
-    .filter(s => /^\d{4}-\d{2}-\d{2}$/.test(s))
-    .sort().pop() || null;
   hsAllFacilityMarkers = markers;
   hsFacilitiesCount = markers.length;
   hsFacilitiesLoaded = true;
   hsFacilitiesLoading = false;
-  hsFetchedAt = new Date();
   applyFacilityFilter();
   updateHsStatus(hsShowFacilities ? loadedFacilitiesMessage() : offFacilitiesMessage());
   if (!document.getElementById("hs-compare-overlay").hidden) renderCompareModalBody(); // fill in live columns if the modal was opened before the fetch finished
@@ -1129,14 +1112,13 @@ function refreshHsOperators() {
 }
 
 // ---- compare-operators modal ----
-// "Live matched" columns are computed on the spot from whatever HIFLD data
-// is already loaded (or being loaded) for the live layer — not a stored
-// figure — so they're always as current as that layer, and read as "—"
-// rather than 0 until the fetch finishes.
+// Computed on the spot from whatever CMS data is already loaded (or being
+// loaded) for the facility layer — not a stored figure — so it reads as "—"
+// rather than 0 until the fetch finishes. No bed total: CMS's Hospital
+// General Information dataset doesn't publish bed counts.
 function operatorLiveStats(name) {
   if (!hsFacilitiesLoaded) return null;
-  const matched = hsAllFacilityMarkers.filter(m => m.companyKey === name);
-  return { count: matched.length, beds: matched.reduce((sum, m) => sum + (m.beds || 0), 0) };
+  return { count: hsAllFacilityMarkers.filter(m => m.companyKey === name).length };
 }
 
 function renderCompareModalBody() {
@@ -1152,7 +1134,6 @@ function renderCompareModalBody() {
           <th>Tier</th>
           <th>Curated hospital count</th>
           <th>Matched on map${liveNote}</th>
-          <th>Matched beds${liveNote}</th>
           <th>Verified</th>
         </tr>
       </thead>
@@ -1165,7 +1146,6 @@ function renderCompareModalBody() {
               <td>${titleCase(h.tier)}</td>
               <td>${h.hospital_count}${h.confidence === "approximate" ? ` <span class="hs-compare-muted">(approx.)</span>` : ""}</td>
               <td>${live ? live.count.toLocaleString() : "—"}</td>
-              <td>${live && live.beds ? live.beds.toLocaleString() : "—"}</td>
               <td>${esc(h.verified_at || "—")}</td>
             </tr>
           `;

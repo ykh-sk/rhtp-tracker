@@ -151,6 +151,42 @@ CREATE TABLE IF NOT EXISTS hospital_roster (
     source_url TEXT NOT NULL,
     verified_at TEXT NOT NULL
 );
+
+-- Replaces the old client-side HIFLD fetch (its hospital layer turned out to
+-- be a frozen 2016-17 snapshot last edited 2018-02-05, not a current source —
+-- see README's "How this data stays current"). This is CMS's own "Hospital
+-- General Information" dataset (Medicare-registered hospitals; excludes
+-- freestanding long-term-care and rehab hospitals, which CMS tracks through
+-- separate quality-reporting programs), geocoded once server-side since
+-- data.cms.gov sends no CORS headers for a browser to fetch it directly.
+-- A bulk import, not hand-curated per row like the tables above — freshness
+-- is tracked once for the whole set in cms_hospitals_meta, not per row.
+CREATE TABLE IF NOT EXISTS cms_hospitals (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    address TEXT,
+    city TEXT NOT NULL,
+    state TEXT NOT NULL,
+    zip TEXT,
+    county TEXT,
+    phone TEXT,
+    type TEXT,
+    ownership TEXT,
+    emergency TEXT,
+    rating TEXT,
+    lat DOUBLE PRECISION NOT NULL,
+    lon DOUBLE PRECISION NOT NULL,
+    geo_precision TEXT NOT NULL CHECK (geo_precision IN ('address', 'zip', 'city'))
+);
+
+CREATE TABLE IF NOT EXISTS cms_hospitals_meta (
+    id INTEGER PRIMARY KEY DEFAULT 1,
+    dataset_modified TEXT NOT NULL,
+    geocoded_at TEXT NOT NULL,
+    row_count INTEGER NOT NULL,
+    source_url TEXT NOT NULL,
+    CHECK (id = 1)
+);
 """
 
 

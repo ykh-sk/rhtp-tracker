@@ -5,6 +5,9 @@ Safe to re-run: clears and reloads all rows. Usage:
     python3 app/seed.py
 """
 
+import json
+from pathlib import Path
+
 from db import get_connection, init_db, execute, execute_many
 from seed_data import (
     SOURCES, AWARDS, STATUS_EVENTS, DEADLINES, ANALYSIS, COMMENTARY,
@@ -13,11 +16,18 @@ from seed_data import (
 from health_systems_data import HEALTH_SYSTEMS
 from health_system_rosters_data import HOSPITAL_ROSTERS
 
+CMS_HOSPITALS_PATH = Path(__file__).resolve().parent / "data" / "cms_hospitals.json"
+CMS_DATASET_MODIFIED = "2026-07-22"  # data.cms.gov's own stated "modified" date for this dataset
+CMS_GEOCODED_AT = "2026-09-21"  # when this project last fetched + geocoded it
+CMS_SOURCE_URL = "https://data.cms.gov/provider-data/dataset/xubh-q36u"
+
 
 def seed():
     init_db()
     conn = get_connection()
 
+    execute(conn, "DELETE FROM cms_hospitals_meta")
+    execute(conn, "DELETE FROM cms_hospitals")
     execute(conn, "DELETE FROM hospital_roster")
     execute(conn, "DELETE FROM health_systems")
     execute(conn, "DELETE FROM federal_milestones")
@@ -128,6 +138,27 @@ def seed():
         roster_rows,
     )
 
+    cms_hospitals = json.loads(CMS_HOSPITALS_PATH.read_text())
+    execute_many(
+        conn,
+        """INSERT INTO cms_hospitals
+           (id, name, address, city, state, zip, county, phone, type, ownership, emergency, rating, lat, lon, geo_precision)
+           VALUES (%(id)s, %(name)s, %(address)s, %(city)s, %(state)s, %(zip)s, %(county)s, %(phone)s, %(type)s,
+                   %(ownership)s, %(emergency)s, %(rating)s, %(lat)s, %(lon)s, %(geo_precision)s)""",
+        cms_hospitals,
+    )
+    execute(
+        conn,
+        """INSERT INTO cms_hospitals_meta (id, dataset_modified, geocoded_at, row_count, source_url)
+           VALUES (1, %(dataset_modified)s, %(geocoded_at)s, %(row_count)s, %(source_url)s)""",
+        {
+            "dataset_modified": CMS_DATASET_MODIFIED,
+            "geocoded_at": CMS_GEOCODED_AT,
+            "row_count": len(cms_hospitals),
+            "source_url": CMS_SOURCE_URL,
+        },
+    )
+
     conn.commit()
     conn.close()
     print(
@@ -135,7 +166,8 @@ def seed():
         f"{len(DEADLINES)} deadlines, {len(COMMENTARY)} commentary links, {len(analysis_rows)} analysis rows, "
         f"{len(overview_rows)} overviews, {len(pillar_rows)} pillars, {len(STATE_CHANGELOG)} changelog entries, "
         f"{len(FEDERAL_MILESTONES)} federal milestones, {len(HEALTH_SYSTEMS)} health systems, "
-        f"{len(roster_rows)} hospital roster rows across {len(HOSPITAL_ROSTERS)} operators."
+        f"{len(roster_rows)} hospital roster rows across {len(HOSPITAL_ROSTERS)} operators, "
+        f"{len(cms_hospitals)} CMS hospitals."
     )
 
 
