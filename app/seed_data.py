@@ -21,9 +21,9 @@ SOURCES = [
 # concrete disbursed-to-date figure distinct from the total award. Left null
 # otherwise per state — never estimated.
 AWARDS = [
-    {"state": "West Virginia", "fiscal_year": "FY26", "amount": 199476099, "status": "subawards announced", "source_url": "https://wvpublic.org/story/government/2-4-million-awarded-to-help-w-va-residents-stay-healthy-working/", "verified_at": "2026-09-07", "subawards_amount": 30958000, "subawards_label": "cumulative across 2 tranches (Apr + Sep 2026)", "usaspending_url": "https://www.usaspending.gov/award/ASST_NON_RHTCMS332054_075"},
+    {"state": "West Virginia", "fiscal_year": "FY26", "amount": 199476099, "status": "subawards announced", "source_url": "https://governor.wv.gov/article/governor-morrisey-announces-first-provider-productivity-support-fund-award-through-rural", "verified_at": "2026-09-29", "subawards_amount": 34149403, "subawards_label": "cumulative across 5 tranches (Apr, Sept 4/9/21/22 2026)", "usaspending_url": "https://www.usaspending.gov/award/ASST_NON_RHTCMS332054_075"},
     {"state": "Kentucky", "fiscal_year": "FY26", "amount": 212905591, "status": "RFA issued", "source_url": "https://www.kentuckytoday.com/news/kentuckys-rural-health-transformation-plan-secures-212-9m-in-federal-funding/article_2adc2281-3461-4430-995d-07f6a6973df4.html", "verified_at": "2026-09-02", "subawards_amount": None, "subawards_label": None, "usaspending_url": "https://www.usaspending.gov/award/ASST_NON_RHTCMS332079_075"},
-    {"state": "Ohio", "fiscal_year": "FY26", "amount": 202030262, "status": "subawards announced", "source_url": "https://governor.ohio.gov/media/news-and-media/governor-dewine-announces-first-rural-health-transformation-program-award-to-ohio-university-for-10-million", "verified_at": "2026-09-02", "subawards_amount": 10000000, "subawards_label": "first award announced", "usaspending_url": "https://www.usaspending.gov/award/ASST_NON_RHTCMS332087_075"},
+    {"state": "Ohio", "fiscal_year": "FY26", "amount": 202030262, "status": "subawards announced", "source_url": "http://www.athensmessenger.com/news/opa-awarded-2m-to-expand-pharmacy-connectivity-improve-rural-health-in-ohio/article_02dd0042-94dc-555d-8438-48c8ab1de1de.html", "verified_at": "2026-09-29", "subawards_amount": 13150000, "subawards_label": "$10M Ohio University workforce + $3.15M pharmacy connectivity (OPA $2M + Board of Pharmacy $1.15M)", "usaspending_url": "https://www.usaspending.gov/award/ASST_NON_RHTCMS332087_075"},
     {"state": "Tennessee", "fiscal_year": "FY26", "amount": 206888882, "status": "subawards announced", "source_url": "https://www.tn.gov/health/news/2026/9/3/tennessee-department-of-health-announces-1st-recipients-of-rural-health-transformation-program-grants.html", "verified_at": "2026-09-07", "subawards_amount": None, "subawards_label": None, "usaspending_url": "https://www.usaspending.gov/award/ASST_NON_RHTCMS332057_075"},
     {"state": "Virginia", "fiscal_year": "FY26", "amount": 189544888, "status": "subawards announced", "source_url": "https://www.cms.gov/newsroom/press-releases/trump-administration-announces-122-million-expand-healthcare-access-workforce-innovation-across", "verified_at": "2026-09-07", "subawards_amount": 122000000, "subawards_label": "first disbursement wave, Aug 28 2026", "usaspending_url": "https://www.usaspending.gov/award/ASST_NON_RHTCMS332088_075"},
     {"state": "North Carolina", "fiscal_year": "FY26", "amount": 213008356, "status": "subawards announced", "source_url": "https://www.ncdhhs.gov/news/press-releases/2026/06/08/ncdhhs-announces-10-million-ems-workforce-through-nc-rural-health-transformation-program", "verified_at": "2026-09-08", "subawards_amount": 10000000, "subawards_label": "EMS Mobile Integrated Health grant, Jun 2026 (3 digital-health programs also launched but not yet dollar-quantified)", "usaspending_url": "https://www.usaspending.gov/award/ASST_NON_RHTCMS332042_075"},
@@ -44,8 +44,14 @@ STATUS_EVENTS = [
     {"state": "West Virginia", "status": "subawards announced", "source_url": "https://governor.wv.gov/article/governor-morrisey-announces-first-2856-million-rural-health-transformation-funding", "event_date": "2026-09-02", "notes": "Re-check on the $199M/$233.5M discrepancy above: an extensive search found no current source citing $233.5M. All live official sources (governor.wv.gov, health.wv.gov) and the WV Hospital Association consistently cite $199M (one figure specifies $199,476,098.72). Origin of the $233.5M figure could not be traced — the discrepancy is not resolved, but the weight of current evidence favors $199M.", "confidence": "confirmed"},
     {"state": "West Virginia", "status": "subawards announced", "source_url": "https://wvpublic.org/story/government/2-4-million-awarded-to-help-w-va-residents-stay-healthy-working/", "event_date": "2026-09-04", "notes": "Second subaward round: ~$2.4M in first implementation awards under the worksite-clinic/employer-based-health initiative (announced as an open solicitation June 24, 2026) — Spotted Owl Healthcare Organization ($1,174,000), CAMC/Vandalia Health ($612,000), Cabell Huntington Foundation ($612,000). Governor's office says more announcements are planned over the next 60 days to distribute the remaining balance of the ~$199M award.", "confidence": "confirmed"},
     {"state": "West Virginia", "status": "subawards announced", "source_url": "https://governor.wv.gov/article/governor-morrisey-announces-855400-award-strengthen-statewide-health-data-infrastructure", "event_date": "2026-09-17", "notes": "Gov. Morrisey announced an $855,400 award to the West Virginia Health Information Network (WVHIN) under the Connected Care Grid initiative, to expand participation in the statewide health information exchange and increase the number of healthcare organizations able to fully exchange information across systems. Connected Care Grid is one of the three programs already in the first $28.56M tranche opened in April 2026, so this names a recipient within that tranche and is NOT added to the cumulative subaward total above (which would double-count it). The governor's page says additional RHTP awards will be announced as implementation continues.", "confidence": "confirmed"},
+    {"state": "West Virginia", "status": "subawards announced", "source_url": "https://governor.wv.gov/article/governor-morrisey-announces-24-million-award-ascend-wv-strengthen-healthcare-workforce", "event_date": "2026-09-09", "notes": "BACKFILL (predates the Sept 17 entry above but was not previously captured): $2.4M awarded to Ascend WV (via WVU) for statewide healthcare-worker recruitment and relocation support.", "confidence": "confirmed"},
+    {"state": "West Virginia", "status": "subawards announced", "source_url": "https://governor.wv.gov/article/governor-morrisey-announces-award-expand-nursing-education-and-strengthen-west-virginias", "event_date": "2026-09-21", "notes": "$291,403 awarded to the WVU Medicine Center for Nursing Education (Mountain State Care Force initiative) to expand nursing-program capacity by roughly 100 additional students per year, prioritizing rural and Health Professional Shortage Area students.", "confidence": "confirmed"},
+    {"state": "West Virginia", "status": "subawards announced", "source_url": "https://governor.wv.gov/article/governor-morrisey-announces-first-provider-productivity-support-fund-award-through-rural", "event_date": "2026-09-22", "notes": "$500,000 awarded to CHANGE, Inc. -- first award under the Provider Productivity Support Fund (one of seven statewide RHTP initiatives), for provider-productivity/care-management/AI tools to reduce administrative burden.", "confidence": "confirmed"},
     {"state": "Kentucky", "status": "RFA issued", "source_url": "https://www.kentuckytoday.com/news/kentuckys-rural-health-transformation-plan-secures-212-9m-in-federal-funding/article_2adc2281-3461-4430-995d-07f6a6973df4.html", "event_date": "2025-12-29", "notes": "5 branded initiatives (PoWERing, Rooted in Health, Crisis to Care, Rapid Response to Recovery, Rural Community Hubs) via \"A3 Team\".", "confidence": "confirmed"},
+    {"state": "Kentucky", "status": "RFA issued", "source_url": "https://healthy-ky.org/rch", "event_date": "2026-09-14", "notes": "The Foundation for a Healthy Kentucky (the designated convening partner for KY RHTP) opened a Request for Applications for Rural Community Hub Lead organizations under the Rural Community Hubs for Chronic Care Innovation initiative, covering the first phased-rollout Area Development Districts (Big Sandy, Lake Cumberland, Purchase); total pool $3.5M. No specific Hub Lead has been named or selected yet -- this is subaward-adjacent (an RFA for future subawards), not a subaward itself, so status is not advanced. Reported by Lexington Times (2026-09-14) quoting the Foundation news release. Kentucky first dated development since Dec 29, 2025.", "confidence": "confirmed"},
     {"state": "Ohio", "status": "subawards announced", "source_url": "https://governor.ohio.gov/media/news-and-media/governor-dewine-announces-first-rural-health-transformation-program-award-to-ohio-university-for-10-million", "event_date": "2026-07-01", "notes": "First award: $10M to Ohio University for workforce (\"Health Workforce Ohio\").", "confidence": "confirmed"},
+    {"state": "Ohio", "status": "subawards announced", "source_url": "http://www.athensmessenger.com/news/opa-awarded-2m-to-expand-pharmacy-connectivity-improve-rural-health-in-ohio/article_02dd0042-94dc-555d-8438-48c8ab1de1de.html", "event_date": "2026-08-26", "notes": "Second named Ohio RHTP subaward round: $2M to the Ohio Pharmacists Association and $1.15M to the State of Ohio Board of Pharmacy ($3.15M combined) to connect independent/retail pharmacies, FQHCs, and outpatient hospital pharmacies across 73 rural Ohio counties to a health information exchange (OARRS integration). Announced by the DeWine administration; the CMS.gov press release on the same program describes the $2M/$1.15M split by purpose but does not itself name the two organizations -- corroborated here via Athens Messenger and multiple other Ohio outlets (Highland County Press, Xenia Gazette, Fairborn Daily Herald) all naming OPA and the Board of Pharmacy consistently.", "confidence": "confirmed"},
+    {"state": "Ohio", "status": "subawards announced", "source_url": "https://www.ohio.edu/news/2026/09/health-workforce-ohio-takes-next-step-strengthen-states-rural-health-care-workforce", "event_date": "2026-09-22", "notes": "Health Workforce Ohio (the existing $10M Ohio University award) opened a sub-solicitation/RFP inviting local organizations to apply for workforce-development subgrants via healthworkforceohio.org. A new detail under the existing award, not a new subaward with its own named recipient/dollar figure -- not counted in the cumulative subaward total.", "confidence": "confirmed"},
     {"state": "Tennessee", "status": "RFA issued", "source_url": "https://www.tn.gov/health/news/2026/5/15/tennessee-to-release-1st-grant-funding-opportunity-of-rural-health-transformation-program.html", "event_date": "2026-05-15", "notes": "Rolling RFAs released weekly through July 10, 2026; 30-day application windows.", "confidence": "confirmed"},
     {"state": "Tennessee", "status": "subawards announced", "source_url": "https://www.tn.gov/health/news/2026/9/3/tennessee-department-of-health-announces-1st-recipients-of-rural-health-transformation-program-grants.html", "event_date": "2026-09-03", "notes": "TDH announced its first round of RHTP awards: 53 projects across 44 rural counties under the Healthy Active Rural Tennessee (HART) initiative (nutrition/fitness/community-support focus, not clinical infrastructure) — 31 awards (58%) to county/municipal governments, 22 (42%) to nonprofits. Full award list published as a downloadable spreadsheet on the TDH site.", "confidence": "confirmed"},
     {"state": "Virginia", "status": "admin structure named", "source_url": "https://dmas.virginia.gov/data-reporting/programs-services/rural-health-transformation/", "event_date": "2026-01-13", "notes": "DMAS hiring core team in early 2026; program branded \"VA Rural Vitality.\" Sparsest official documentation of the 10 — verify further before treating as current.", "confidence": "confirmed"},
@@ -53,6 +59,7 @@ STATUS_EVENTS = [
     {"state": "North Carolina", "status": "subawards announced", "source_url": "https://www.ncdhhs.gov/divisions/office-rural-health/rural-health-transformation-program", "event_date": "2026-04-01", "notes": "NC ROOTS hubs and Rural Health Infrastructure Fund (RHIF) launched. RHTP Director named (Maggie Woods).", "confidence": "confirmed"},
     {"state": "North Carolina", "status": "subawards announced", "source_url": "https://www.ncdhhs.gov/news/press-releases/2026/06/08/ncdhhs-announces-10-million-ems-workforce-through-nc-rural-health-transformation-program", "event_date": "2026-06-08", "notes": "$10M distributed to 39 local EMS agencies through the NC Office of EMS for Mobile Integrated Health — supports overdose follow-up care, opioid-use-disorder medication delivery in the field, and EMS workforce strengthening.", "confidence": "confirmed"},
     {"state": "North Carolina", "status": "subawards announced", "source_url": "https://www.ncdhhs.gov/news/press-releases/2026/06/24/ncdhhs-ncdit-announce-three-programs-improve-health-care-part-north-carolinas-rural-health", "event_date": "2026-06-24", "notes": "NCDHHS + NC DIT announced 3 digital-health programs under NCRHTP Initiative Six: (1) Rural Health Innovation Fund — $20M/year for 5 years, competitive applications expected to open 'in September 2026' (no specific date given); (2) NC HealthConnex (state HIE) expansion support for rural orgs; (3) Digital Health Literacy Program via NC 211 Digital Navigators, live since July 1, 2026. No new dollar figure beyond the $10M EMS grant above has been disbursed yet under these three programs.", "confidence": "confirmed"},
+    {"state": "North Carolina", "status": "subawards announced", "source_url": "https://www.ncdhhs.gov/divisions/office-rural-health/rural-health-transformation-program", "event_date": "2026-09-23", "notes": "The official NCDHHS RHTP page now advertises a Sept. 23 webinar on a $20 million kickstart investment to launch the Rural Health Innovation Fund (RHIF) -- narrows the earlier note that it was expected in September with no specific date, but NCDHHS still has not published an actual application-opening or RFA-release date; funds remain described only as available through a competitive application process. Not a status change.", "confidence": "confirmed"},
     {"state": "Pennsylvania", "status": "subawards announced", "source_url": "https://www.pa.gov/agencies/dhs/programs-services/healthcare/rural-health/rhtp-funding-opportunities", "event_date": "2026-07-27", "notes": "EHR/HIO onboarding payment round opened July 27–Aug 14, 2026; $1.8M across 6 awards.", "confidence": "confirmed"},
     {"state": "Pennsylvania", "status": "subawards announced", "source_url": "https://www.pa.gov/agencies/dhs/programs-services/healthcare/rural-health/rhtp-funding-opportunities", "event_date": "2026-09-02", "notes": "Correction to the entry above: the $1.8M/6-award figure was misattributed to the EHR/HIO round. It actually belongs to a separate FQHC onboarding round (deadline Aug 7, 2026). The EHR/HIO round is a distinct $25M track whose award outcome is not yet confirmed on the official page. A further Rapid Response Stabilization Round 2 ($35M, Aug 17–24) has also opened since the original entry.", "confidence": "confirmed"},
     {"state": "Pennsylvania", "status": "subawards announced", "source_url": "https://www.wellspan.org/articles/2026/07/24/12/49/web---federal-grant---rural-health", "event_date": "2026-07-24", "notes": "UNVERIFIED LEAD: WellSpan Health's own announcement states it received $2.8M from PA DHS's RHTP EHR/HIO round for upgrades at its Chambersburg, Waynesboro, and Evangelical (Lewisburg) hospitals. This would be the first named recipient for the $25M EHR/HIO track, but PA's own DHS page still lists that track's outcome as unconfirmed — this is a recipient-side claim only, not yet corroborated by the state.", "confidence": "unverified"},
@@ -398,28 +405,28 @@ ANALYSIS = {
 # guessed or constructed from a name/agency.
 STATE_OVERVIEW = {
     "West Virginia": {
-        "emphasis": "Funds are moving through a series of separate, initiative-specific rounds rather than one central RFA — a second round (worksite clinics/employer-based health) has now made its first awards, with more rounds planned over the following two months.",
+        "emphasis": "Funds are moving through a series of separate, initiative-specific rounds rather than one central RFA — three more named awards landed in September (workforce recruitment, nursing education, and the first Provider Productivity Support Fund grant).",
         "applicant_profile": "Not detailed beyond the initiative names in current sources.",
         "contact_name": None,
         "contact_email": None,
         "contact_note": "No public contact email found in sourced materials.",
-        "updated_at": "2026-09-07",
+        "updated_at": "2026-09-29",
     },
     "Kentucky": {
-        "emphasis": "Five branded initiatives are administered together under a single coordinating body (\"A3 Team\"), with RFAs released per initiative.",
+        "emphasis": "Five branded initiatives are administered together under a single coordinating body (\"A3 Team\"), with RFAs released per initiative; the Foundation for a Healthy Kentucky opened its first Hub Lead RFA in September, Kentucky's first dated development since December 2025.",
         "applicant_profile": "Tracks published so far span chronic care innovation, mobile dental services, telebehavioral health/CMHC support, and community health worker certification — suggesting eligibility spans clinical, community, and workforce-training organizations.",
         "contact_name": None,
         "contact_email": None,
         "contact_note": "No public contact email found in sourced materials.",
-        "updated_at": "2026-09-02",
+        "updated_at": "2026-09-29",
     },
     "Ohio": {
-        "emphasis": "Workforce development was the first priority funded, ahead of other possible tracks.",
-        "applicant_profile": "The first award went to a university for workforce programming, suggesting higher-education and workforce-training partners are eligible alongside direct care providers.",
+        "emphasis": "Workforce development was the first priority funded, ahead of other possible tracks; a second named round (rural pharmacy connectivity, $3.15M) has since been confirmed.",
+        "applicant_profile": "Awards so far have gone to a university (workforce programming) and pharmacy-sector organizations (health information exchange connectivity), suggesting eligibility spans higher education, workforce training, and pharmacy/HIE infrastructure.",
         "contact_name": None,
         "contact_email": None,
         "contact_note": "No public contact email found in sourced materials.",
-        "updated_at": "2026-09-02",
+        "updated_at": "2026-09-29",
     },
     "Tennessee": {
         "emphasis": "Uses a rolling, recurring RFA cycle rather than a single funding round; its first subaward round has now been announced (53 projects, 44 counties) under the branded Healthy Active Rural Tennessee initiative.",
@@ -551,6 +558,18 @@ STATE_CHANGELOG = [
     {"state": "Mississippi", "changed_at": "2026-09-21", "summary": "Status advanced from 'RFA issued' to 'subawards announced': 167 awards totaling $104.1M announced Sept 14 across the first 3 of 5 Year One programs."},
     {"state": "Connecticut", "changed_at": "2026-09-21", "summary": "Status advanced from 'RFA issued' to 'subawards announced': $46M awarded to four rural hospitals on Sept 16."},
     {"state": "Kansas", "changed_at": "2026-09-21", "summary": "Subaward total updated from $79.1M to ~$96.1M: a $16M Emerging Technology round (14 providers) announced Sept 14, plus the $1.0M Aug round now included in the cumulative figure."},
+    {"state": "Colorado", "changed_at": "2026-09-29", "summary": "Status advanced from 'RFA issued' to 'subawards announced': $169.6M announced Sept 28 to 91 applicants across 52 rural/frontier counties."},
+    {"state": "Missouri", "changed_at": "2026-09-29", "summary": "Status advanced from 'admin structure named' to 'subawards announced': $45.6M in named awards confirmed Sept 22, ending the months-long gap with no dollar figures."},
+    {"state": "Montana", "changed_at": "2026-09-29", "summary": "Status advanced from 'RFA issued' to 'subawards announced': first subaward, $8.7M to 78 EMS agencies statewide."},
+    {"state": "Texas", "changed_at": "2026-09-29", "summary": "Status advanced from 'RFA issued' to 'subawards announced': first named subaward round, $51M to 68 rural hospital districts."},
+    {"state": "Delaware", "changed_at": "2026-09-29", "summary": "First subaward dollar figure recorded: nearly $23M to 3 FQHCs, announced Sept 24."},
+    {"state": "Arkansas", "changed_at": "2026-09-29", "summary": "Subaward total updated from $149.3M to ~$203.9M: a second round, $54.6M across 54 projects, announced Sept 24."},
+    {"state": "Alaska", "changed_at": "2026-09-29", "summary": "Subaward total updated from ~$207M to ~$242.6M across 250 projects; ~$29.4M of the award remains."},
+    {"state": "Michigan", "changed_at": "2026-09-29", "summary": "An additional $25M in tech/telehealth funding confirmed via CMS (Sept 4); no single aggregate total is stated by the state."},
+    {"state": "West Virginia", "changed_at": "2026-09-29", "summary": "Subaward total updated from ~$31.0M to ~$34.1M across 3 new named awards (Ascend WV, WVU nursing education, CHANGE Inc.)."},
+    {"state": "Ohio", "changed_at": "2026-09-29", "summary": "Subaward total updated from $10M to $13.15M: a second named round, $3.15M for rural pharmacy connectivity."},
+    {"state": "Nevada", "changed_at": "2026-09-29", "summary": "Subaward total updated from $86M to $112.9M: a third round ($26.9M) confirmed via the state's own press release, which also surfaces (but does not reconcile) a larger ~$150M aggregate claim."},
+    {"state": "Kentucky", "changed_at": "2026-09-29", "summary": "First dated development since Dec 2025: an RFA opened for Rural Community Hub Lead organizations ($3.5M pool). Status remains 'RFA issued' — this is not yet a subaward."},
 ]
 
 # Federal-level (not state-specific) statutory/programmatic milestones for the
@@ -769,10 +788,10 @@ STATE_PILLARS.update(NEW_PILLARS)
 # every state's date just because one field changed).
 _UPDATED_AT_OVERRIDES = {
     "Hawaii": "2026-09-07",
-    "Delaware": "2026-09-07",
+    "Delaware": "2026-09-29",
     "Indiana": "2026-09-13",
     "Louisiana": "2026-09-13",
-    "Nevada": "2026-09-08",
+    "Nevada": "2026-09-29",
     "New Hampshire": "2026-09-08",
     "New York": "2026-09-08",
     "Oklahoma": "2026-09-08",
@@ -782,7 +801,13 @@ _UPDATED_AT_OVERRIDES = {
     "Kansas": "2026-09-21",
     "Rhode Island": "2026-09-13",
     "Idaho": "2026-09-13",
-    "Alaska": "2026-09-13",
+    "Alaska": "2026-09-29",
+    "Colorado": "2026-09-29",
+    "Missouri": "2026-09-29",
+    "Montana": "2026-09-29",
+    "Texas": "2026-09-29",
+    "Arkansas": "2026-09-29",
+    "Michigan": "2026-09-29",
 }
 
 for _state, _fields in NEW_OVERVIEW.items():
