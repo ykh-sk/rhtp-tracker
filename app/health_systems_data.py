@@ -165,11 +165,11 @@ HEALTH_SYSTEMS = [
         "verified_at": "2026-09-14", "confidence": "confirmed",
     },
     {
-        "name": "Universal Health Services", "tier": "mid", "ownership_type": "for-profit",
+        "name": "Universal Health Services", "tier": "major", "ownership_type": "for-profit",
         "hq_city": "King of Prussia", "hq_state": "Pennsylvania", "hq_lat": 40.0893, "hq_lon": -75.3927,
-        "hospital_count": 30, "notes": "Acute-care hospital count; also the largest US operator of behavioral-health facilities (380+ separately).",
-        "source_url": "https://en.wikipedia.org/wiki/Universal_Health_Services",
-        "verified_at": "2026-09-14", "confidence": "confirmed",
+        "hospital_count": 196, "notes": "35 acute-care hospitals plus 161 behavioral-health inpatient hospitals, per UHS's own combined locations list (uhs.com/our-locations) — the largest US operator of behavioral-health facilities. UHS's marketing materials cite \"380+\" behavioral-health facilities, but that figure blends inpatient hospitals with outpatient clinics, residential treatment centers, schools, and telehealth (Talkspace); only genuine inpatient hospitals are counted here, filtered out explicitly rather than taking the bigger number at face value.",
+        "source_url": "https://uhs.com/our-locations/",
+        "verified_at": "2026-09-29", "confidence": "confirmed",
     },
     {
         "name": "Cleveland Clinic", "tier": "mid", "ownership_type": "nonprofit",
