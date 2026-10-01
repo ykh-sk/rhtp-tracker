@@ -570,6 +570,7 @@ STATE_CHANGELOG = [
     {"state": "Ohio", "changed_at": "2026-09-29", "summary": "Subaward total updated from $10M to $13.15M: a second named round, $3.15M for rural pharmacy connectivity."},
     {"state": "Nevada", "changed_at": "2026-09-29", "summary": "Subaward total updated from $86M to $112.9M: a third round ($26.9M) confirmed via the state's own press release, which also surfaces (but does not reconcile) a larger ~$150M aggregate claim."},
     {"state": "Kentucky", "changed_at": "2026-09-29", "summary": "First dated development since Dec 2025: an RFA opened for Rural Community Hub Lead organizations ($3.5M pool). Status remains 'RFA issued' — this is not yet a subaward."},
+    {"state": "Minnesota", "changed_at": "2026-10-01", "summary": "Status advanced from 'RFA issued' to 'subawards announced': an official MDH document (Sept 17) names Stratis Health, $883,371, for an HIT technical-assistance contract."},
 ]
 
 # Federal-level (not state-specific) statutory/programmatic milestones for the
@@ -808,6 +809,7 @@ _UPDATED_AT_OVERRIDES = {
     "Texas": "2026-09-29",
     "Arkansas": "2026-09-29",
     "Michigan": "2026-09-29",
+    "Minnesota": "2026-10-01",
 }
 
 for _state, _fields in NEW_OVERVIEW.items():
