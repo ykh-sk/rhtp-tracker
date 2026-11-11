@@ -16,8 +16,11 @@ real source_url.
 
 Tiers are cut by hospital_count: major >=90, large 40-89, mid 15-39, small <15.
 `confidence` follows the same convention as status_events/deadlines: 'confirmed'
-when a source gave the figure directly for this org, 'approximate' when the
-count is dated, mid-merger, or aggregated across a broader ranking page.
+only when a PRIMARY source gave the figure directly for this org (the system's own
+site or filing, e.g. an SEC 10-K); 'approximate' when the count comes from a secondary
+source (Wikipedia, a Becker's ranking or news item), or is dated, mid-merger, or
+aggregated across a broader ranking page. Rule tightened 2026-11-11 after an audit found
+secondary sources had been marked 'confirmed' and several counts had gone stale.
 """
 
 HEALTH_SYSTEMS = [
@@ -27,7 +30,7 @@ HEALTH_SYSTEMS = [
         "hq_city": "Nashville", "hq_state": "Tennessee", "hq_lat": 36.1627, "hq_lon": -86.7816,
         "hospital_count": 190, "notes": "Largest for-profit hospital operator in the US.",
         "source_url": "https://www.beckershospitalreview.com/rankings-and-ratings/100-of-the-largest-hospitals-and-health-systems-in-the-us-2026/",
-        "verified_at": "2026-09-14", "confidence": "confirmed",
+        "verified_at": "2026-09-14", "confidence": "approximate",
     },
     {
         "name": "CommonSpirit Health", "tier": "major", "ownership_type": "nonprofit",
@@ -69,15 +72,15 @@ HEALTH_SYSTEMS = [
         "name": "Advocate Health", "tier": "large", "ownership_type": "nonprofit",
         "hq_city": "Charlotte", "hq_state": "North Carolina", "hq_lat": 35.2271, "hq_lon": -80.8431,
         "hospital_count": 69, "notes": "Formed by the 2022 merger of Advocate Aurora Health and Atrium Health. Its Carolinas/Georgia/Alabama Atrium Health brand blocks automated access to its own location directory, so the hospital_roster entry for this operator (55 hospitals) is complete for Illinois and Wisconsin but likely missing some smaller Atrium-branded facilities.",
-        "source_url": "https://en.wikipedia.org/wiki/Advocate_Health",
-        "verified_at": "2026-09-14", "confidence": "confirmed",
+        "source_url": "https://www.advocatehealth.org/",
+        "verified_at": "2026-11-11", "confidence": "confirmed",
     },
     {
         "name": "Christus Health", "tier": "large", "ownership_type": "nonprofit",
         "hq_city": "Irving", "hq_state": "Texas", "hq_lat": 32.8140, "hq_lon": -96.9489,
         "hospital_count": 66, "notes": "Includes long-term care facilities and international hospitals (Mexico, Chile, Colombia); their own site's US-only hospital directory (TX/LA/NM) lists 32.",
         "source_url": "https://www.beckershospitalreview.com/rankings-and-ratings/100-of-the-largest-hospitals-and-health-systems-in-the-us-2026/",
-        "verified_at": "2026-09-14", "confidence": "confirmed",
+        "verified_at": "2026-09-14", "confidence": "approximate",
     },
     {
         "name": "Community Health Systems", "tier": "large", "ownership_type": "for-profit",
@@ -119,7 +122,7 @@ HEALTH_SYSTEMS = [
         "hq_city": "Dallas", "hq_state": "Texas", "hq_lat": 32.7767, "hq_lon": -96.7970,
         "hospital_count": 50, "notes": "Acute-care and specialty hospitals, as of Dec 31, 2025.",
         "source_url": "https://en.wikipedia.org/wiki/Tenet_Healthcare",
-        "verified_at": "2026-09-14", "confidence": "confirmed",
+        "verified_at": "2026-09-14", "confidence": "approximate",
     },
     {
         "name": "Bon Secours Mercy Health", "tier": "large", "ownership_type": "nonprofit",
@@ -148,7 +151,7 @@ HEALTH_SYSTEMS = [
         "hq_city": "Sioux Falls", "hq_state": "South Dakota", "hq_lat": 43.5460, "hq_lon": -96.7313,
         "hospital_count": 38, "notes": "Faith-based regional system; most of its hospitals serve rural communities across SD, MN, IA, NE, ND.",
         "source_url": "https://en.wikipedia.org/wiki/Avera_Health",
-        "verified_at": "2026-09-14", "confidence": "confirmed",
+        "verified_at": "2026-09-14", "confidence": "approximate",
     },
     {
         "name": "Intermountain Health", "tier": "mid", "ownership_type": "nonprofit",
@@ -161,8 +164,8 @@ HEALTH_SYSTEMS = [
         "name": "Banner Health", "tier": "mid", "ownership_type": "nonprofit",
         "hq_city": "Phoenix", "hq_state": "Arizona", "hq_lat": 33.4484, "hq_lon": -112.0740,
         "hospital_count": 33, "notes": "Operates across 6 states.",
-        "source_url": "https://en.wikipedia.org/wiki/Banner_Health",
-        "verified_at": "2026-09-14", "confidence": "confirmed",
+        "source_url": "https://www.bannerhealth.com/about/glance",
+        "verified_at": "2026-11-11", "confidence": "confirmed",
     },
     {
         "name": "Universal Health Services", "tier": "major", "ownership_type": "for-profit",
@@ -182,8 +185,8 @@ HEALTH_SYSTEMS = [
         "name": "Ballad Health", "tier": "mid", "ownership_type": "nonprofit",
         "hq_city": "Johnson City", "hq_state": "Tennessee", "hq_lat": 36.3134, "hq_lon": -82.3535,
         "hospital_count": 20, "notes": "Serves 29 mostly-rural Appalachian counties across TN, VA, NC and KY — formed via a state-approved COPA merger.",
-        "source_url": "https://en.wikipedia.org/wiki/Ballad_Health",
-        "verified_at": "2026-09-14", "confidence": "confirmed",
+        "source_url": "https://www.balladhealth.org/about-us",
+        "verified_at": "2026-11-11", "confidence": "confirmed",
     },
     {
         "name": "Novant Health", "tier": "mid", "ownership_type": "nonprofit",
@@ -198,14 +201,14 @@ HEALTH_SYSTEMS = [
         "hq_city": "Duluth", "hq_state": "Minnesota", "hq_lat": 46.7867, "hq_lon": -92.1005,
         "hospital_count": 14, "notes": "Serves rural and underserved communities across MN, WI and ND. Pending: HealthPartners and Essentia announced on 2026-09-29 that they will combine under the HealthPartners name, targeted for 2027-01-01 pending regulatory review. Not closed.",
         "source_url": "https://en.wikipedia.org/wiki/Essentia_Health",
-        "verified_at": "2026-11-11", "confidence": "confirmed",
+        "verified_at": "2026-11-11", "confidence": "approximate",
     },
     {
         "name": "Baptist Health (Kentucky)", "tier": "small", "ownership_type": "nonprofit",
         "hq_city": "Louisville", "hq_state": "Kentucky", "hq_lat": 38.2527, "hq_lon": -85.7585,
         "hospital_count": 10, "notes": "Founded 1924; not affiliated with the similarly-named Baptist Health systems in Florida or Arkansas.",
-        "source_url": "https://en.wikipedia.org/wiki/Baptist_Health_(Kentucky_and_Southern_Indiana)",
-        "verified_at": "2026-09-14", "confidence": "confirmed",
+        "source_url": "https://www.baptisthealth.com/about",
+        "verified_at": "2026-11-11", "confidence": "confirmed",
     },
     # --- state-flagship additions (single-state/regional, not just multi-state chains) ---
     {
@@ -255,7 +258,7 @@ HEALTH_SYSTEMS = [
         "hq_city": 'New Hyde Park', "hq_state": 'New York', "hq_lat": 40.7412, "hq_lon": -73.6849,
         "hospital_count": 28, "notes": "New York State's largest healthcare provider and private employer; count reflects its May 2025 merger with Nuvance Health. NewYork-Presbyterian, Mount Sinai Health System, and Montefiore are also major, distinct NY systems.",
         "source_url": 'https://en.wikipedia.org/wiki/Northwell_Health',
-        "verified_at": '2026-09-17', "confidence": 'confirmed',
+        "verified_at": '2026-09-17', "confidence": 'approximate',
     },
     {
         "name": 'RWJBarnabas Health', "tier": 'mid', "ownership_type": 'nonprofit',
@@ -275,8 +278,8 @@ HEALTH_SYSTEMS = [
         "name": 'ChristianaCare', "tier": 'small', "ownership_type": 'nonprofit',
         "hq_city": 'Wilmington', "hq_state": 'Delaware', "hq_lat": 39.7391, "hq_lon": -75.5398,
         "hospital_count": 3, "notes": "Delaware's largest health system and private employer; one of its three hospitals (Union Hospital) is just over the state line in Elkton, Maryland.",
-        "source_url": 'https://en.wikipedia.org/wiki/ChristianaCare',
-        "verified_at": '2026-09-17', "confidence": 'confirmed',
+        "source_url": "https://christianacare.org/about/whoweare/way/",
+        "verified_at": "2026-11-11", "confidence": "confirmed",
     },
     {
         "name": 'Johns Hopkins Medicine', "tier": 'small', "ownership_type": 'nonprofit',
@@ -289,8 +292,8 @@ HEALTH_SYSTEMS = [
         "name": 'Sentara Health', "tier": 'small', "ownership_type": 'nonprofit',
         "hq_city": 'Norfolk', "hq_state": 'Virginia', "hq_lat": 36.8508, "hq_lon": -76.2859,
         "hospital_count": 12, "notes": "Virginia's largest nonprofit health system, operating in VA and northeastern NC. A proposed 2020 merger with Cone Health was called off in 2021 and never completed.",
-        "source_url": 'https://en.wikipedia.org/wiki/Sentara_Health',
-        "verified_at": '2026-09-17', "confidence": 'confirmed',
+        "source_url": "https://www.sentara.com/aboutus/news/facts-and-figures",
+        "verified_at": "2026-11-11", "confidence": "confirmed",
     },
     {
         "name": "WVU Medicine", "tier": "mid", "ownership_type": "nonprofit",
@@ -304,7 +307,7 @@ HEALTH_SYSTEMS = [
         "hq_city": 'Durham', "hq_state": 'North Carolina', "hq_lat": 35.994, "hq_lon": -78.8986,
         "hospital_count": 5, "notes": 'Elite academic medical system tied to Duke University. UNM Health-sized comparison aside, UNC Health (Chapel Hill, ~11 hospitals, state-owned) is a larger, also-distinct NC academic system worth knowing about.',
         "source_url": 'https://en.wikipedia.org/wiki/Duke_University_Health_System',
-        "verified_at": '2026-09-17', "confidence": 'confirmed',
+        "verified_at": '2026-09-17', "confidence": 'approximate',
     },
     {
         "name": "Prisma Health", "tier": "mid", "ownership_type": "nonprofit",
@@ -325,7 +328,7 @@ HEALTH_SYSTEMS = [
         "hq_city": 'Orlando', "hq_state": 'Florida', "hq_lat": 28.5383, "hq_lon": -81.3792,
         "hospital_count": 25, "notes": "Florida's second-largest health system, distinct from AdventHealth (also Florida-HQ'd, already in this dataset); flagship houses Central Florida's only Level I trauma center.",
         "source_url": 'https://en.wikipedia.org/wiki/Orlando_Health',
-        "verified_at": '2026-09-17', "confidence": 'confirmed',
+        "verified_at": '2026-09-17', "confidence": 'approximate',
     },
     {
         "name": 'UAB Medicine', "tier": 'mid', "ownership_type": 'nonprofit',
@@ -416,14 +419,14 @@ HEALTH_SYSTEMS = [
         "hq_city": 'Lincoln', "hq_state": 'Nebraska', "hq_lat": 40.8136, "hq_lon": -96.7026,
         "hospital_count": 6, "notes": "Nebraska's most notable independently-headquartered multi-hospital system, centered on Lincoln with expanded operations in Crete, Grand Island, Merrick County, and Kearney.",
         "source_url": 'https://en.wikipedia.org/wiki/Bryan_Health',
-        "verified_at": '2026-09-17', "confidence": 'confirmed',
+        "verified_at": '2026-09-17', "confidence": 'approximate',
     },
     {
         "name": 'Norton Healthcare', "tier": 'small', "ownership_type": 'nonprofit',
         "hq_city": 'Louisville', "hq_state": 'Kentucky', "hq_lat": 38.2527, "hq_lon": -85.7585,
         "hospital_count": 9, "notes": "Louisville's dominant nonprofit system (6 in Louisville metro + 3 in southern Indiana); distinct from ScionHealth (for-profit, also Louisville-HQ'd) and Baptist Health (Kentucky), both already in this dataset.",
-        "source_url": 'https://en.wikipedia.org/wiki/Norton_Healthcare',
-        "verified_at": '2026-09-17', "confidence": 'confirmed',
+        "source_url": "https://www.nortonhealthcare.org/about-us",
+        "verified_at": "2026-11-11", "confidence": "confirmed",
     },
     {
         "name": "INTEGRIS Health", "tier": "mid", "ownership_type": "nonprofit",
@@ -451,7 +454,7 @@ HEALTH_SYSTEMS = [
         "hq_city": 'Minot', "hq_state": 'North Dakota', "hq_lat": 48.2325, "hq_lon": -101.2963,
         "hospital_count": 3, "notes": 'A small, entirely separate organization from Trinity Health (Livonia, Michigan, already in this dataset) that happens to share the same name — Wikipedia itself flags the collision. Runs 3 hospitals in and around Minot, ND.',
         "source_url": 'https://en.wikipedia.org/wiki/Trinity_Health_(Minot,_North_Dakota)',
-        "verified_at": '2026-09-17', "confidence": 'confirmed',
+        "verified_at": '2026-09-17', "confidence": 'approximate',
     },
     {
         "name": 'Monument Health', "tier": 'small', "ownership_type": 'nonprofit',
@@ -464,8 +467,8 @@ HEALTH_SYSTEMS = [
         "name": 'UCHealth', "tier": 'mid', "ownership_type": 'nonprofit',
         "hq_city": 'Aurora', "hq_state": 'Colorado', "hq_lat": 39.7294, "hq_lon": -104.8319,
         "hospital_count": 15, "notes": 'Operates acute-care hospitals across CO, WY, and western NE. Centura Health, a former CO candidate, was fully dissolved and split between CommonSpirit and AdventHealth by 2024 and no longer exists as an independent operator.',
-        "source_url": 'https://en.wikipedia.org/wiki/UCHealth',
-        "verified_at": '2026-09-17', "confidence": 'confirmed',
+        "source_url": "https://www.uchealth.org/newsroom/newsweek-recognizes-four-uchealth-hospitals-for-specialty-care/",
+        "verified_at": "2026-11-11", "confidence": "confirmed",
     },
     {
         "name": 'Presbyterian Healthcare Services', "tier": 'small', "ownership_type": 'nonprofit',
@@ -514,7 +517,7 @@ HEALTH_SYSTEMS = [
         "hq_city": 'Portland', "hq_state": 'Oregon', "hq_lat": 45.5152, "hq_lon": -122.6784,
         "hospital_count": 7, "notes": "Oregon's largest Oregon-based nonprofit health system; a planned full integration with Oregon Health & Science University was announced in 2024 and called off in May 2025.",
         "source_url": 'https://en.wikipedia.org/wiki/Legacy_Health',
-        "verified_at": '2026-09-17', "confidence": 'confirmed',
+        "verified_at": '2026-09-17', "confidence": 'approximate',
     },
     {
         "name": "Sutter Health", "tier": "mid", "ownership_type": "nonprofit",
@@ -528,7 +531,7 @@ HEALTH_SYSTEMS = [
         "hq_city": 'Roseville', "hq_state": 'California', "hq_lat": 38.7521, "hq_lon": -121.288,
         "hospital_count": 27, "notes": "Serves the West Coast and Hawaii. Despite the very similar name, this is a completely separate company from AdventHealth (Florida-HQ'd, already in this dataset) — both trace to the Seventh-day Adventist Church but are independently governed.",
         "source_url": 'https://en.wikipedia.org/wiki/Adventist_Health',
-        "verified_at": '2026-09-17', "confidence": 'confirmed',
+        "verified_at": '2026-09-17', "confidence": 'approximate',
     },
     {
         "name": "The Queen's Health Systems", "tier": 'small', "ownership_type": 'nonprofit',
