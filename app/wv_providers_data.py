@@ -261,7 +261,7 @@ WV_PROVIDER_ROWS = [
   "src": "HRSA Health Center Service Delivery and Look-Alike Sites data (data.hrsa.gov), downloaded 2026-11-10"
  },
  {
-  "name": "Logan-mingo Area Mental Health, Inc.",
+  "name": "Logan-Mingo Area Mental Health, Inc.",
   "city": "Logan",
   "lat": 37.8615,
   "lon": -82.0449,
@@ -396,7 +396,7 @@ WV_PROVIDER_ROWS = [
   "src": "CMS Provider Data Catalog, Home Health Care Agencies (data.cms.gov), retrieved 2026-11-10; coordinates from the Census geocoder or the city's hospital centroid"
  },
  {
-  "name": "Valley Health Home Health/west Virginia",
+  "name": "Valley Health Home Health/West Virginia",
   "city": "Romney",
   "lat": 39.3362,
   "lon": -78.7474,
@@ -630,7 +630,7 @@ WV_PROVIDER_ROWS = [
   "src": "CMS Hospital General Information (data.cms.gov), as loaded in app/data/cms_hospitals.json"
  },
  {
-  "name": "Highland-clarksburg Hospital, Inc.",
+  "name": "Highland-Clarksburg Hospital, Inc.",
   "city": "Clarksburg",
   "lat": 39.28643,
   "lon": -80.37269,
@@ -648,7 +648,7 @@ WV_PROVIDER_ROWS = [
   "src": "CMS Hospital General Information (data.cms.gov), as loaded in app/data/cms_hospitals.json"
  },
  {
-  "name": "Mildred Mitchell-bateman Hospital",
+  "name": "Mildred Mitchell-Bateman Hospital",
   "city": "Huntington",
   "lat": 38.40635,
   "lon": -82.36254,

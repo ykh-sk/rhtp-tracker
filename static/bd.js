@@ -221,7 +221,7 @@ function systemStatus(key) {
   return (BD_OUTREACH[key] && BD_OUTREACH[key].status) || "not_contacted";
 }
 
-function currentFilteredSystems() {
+function currentFilteredSystems(ignoreStatus) {
   return SYSTEMS_UNIFIED.filter(sys => {
     if (hsTierFilter !== "all" && systemTier(sys) !== hsTierFilter) return false;
     if (hsOwnershipFilter !== "all" && systemOwnership(sys) !== hsOwnershipFilter) return false;
@@ -233,7 +233,7 @@ function currentFilteredSystems() {
     if (hsFilters.state !== "all" && sys.state !== hsFilters.state) return false;
     if (hsFilters.source !== "all" && sys.type !== hsFilters.source) return false;
     if (hsFilters.q && !(sys.name + " " + sys.city).toLowerCase().includes(hsFilters.q)) return false;
-    if (hsFilters.status !== "all" && BD_AUTH.authed && systemStatus(sys.key) !== hsFilters.status) return false;
+    if (!ignoreStatus && hsFilters.status !== "all" && BD_AUTH.authed && systemStatus(sys.key) !== hsFilters.status) return false;
     return true;
   });
 }
@@ -530,8 +530,7 @@ function saveOutreach(key, patch, rowEl) {
       }
       BD_OUTREACH[key] = { ...r.data, ...(bdPending[key] || {}) }; // keep anything typed while this request was in flight
       if (note) note.textContent = "Saved";
-      renderBdSummary();
-      refreshHsAll();
+      refreshHsAll(true); // counts update; the table is left alone so the row being edited doesn't jump away
     } catch {
       bdPending[key] = { ...body, ...(bdPending[key] || {}) };
       if (note) note.textContent = "Couldn't reach the server — will retry on your next edit.";
@@ -542,7 +541,6 @@ function saveOutreach(key, patch, rowEl) {
 // ---------- BD modal ----------
 
 let bdModalSearch = "";
-let bdModalStatus = "all";
 
 function openSignIn() {
   document.getElementById("bd-overlay").hidden = false;
@@ -554,22 +552,18 @@ function openSignIn() {
 function openOutreach(searchText) {
   if (!BD_AUTH.authed) { openSignIn(); return; }
   bdModalSearch = searchText || "";
-  bdModalStatus = "all";
+  if (searchText) { // looking up one system: clear the other filters so it can't be hidden by them
+    Object.assign(hsFilters, { category: "all", strategy: "all", rhtp: "all", state: "all", status: "all", source: "all", q: "" });
+    hsTierFilter = "all"; hsOwnershipFilter = "all";
+    syncHsControls();
+    refreshHsAll();
+  }
   setHsView("outreach");
 }
 
 function closeBdModal() {
   document.getElementById("bd-overlay").hidden = true;
   document.body.classList.remove("modal-open");
-}
-
-function renderBdSummary() {
-  const el = document.getElementById("bd-summary");
-  if (!el) return;
-  const counts = {};
-  SYSTEMS_UNIFIED.forEach(s => { const st = systemStatus(s.key); counts[st] = (counts[st] || 0) + 1; });
-  el.innerHTML = BD_STATUS_ORDER.map(k =>
-    `<span class="bd-status-pill" style="--chip:var(${BD_STATUSES[k].varName})">${esc(BD_STATUSES[k].label)} · ${counts[k] || 0}</span>`).join("");
 }
 
 function bdRowHtml(sys) {
@@ -591,10 +585,12 @@ function renderBdTable() {
   const wrap = document.getElementById("bd-table-wrap");
   if (!wrap) return;
   const q = bdModalSearch.trim().toLowerCase();
-  const rows = SYSTEMS_UNIFIED
-    .filter(s => (bdModalStatus === "all" || systemStatus(s.key) === bdModalStatus)
-      && (!q || (s.name + " " + s.state).toLowerCase().includes(q)))
+  // Follows the filters above (state, type, status pills …); only the search box is local to this table.
+  const rows = currentFilteredSystems()
+    .filter(s => !q || (s.name + " " + s.state).toLowerCase().includes(q))
     .sort((a, b) => a.name.localeCompare(b.name));
+  const count = document.getElementById("bd-count");
+  if (count) count.textContent = `${rows.length.toLocaleString()} of ${SYSTEMS_UNIFIED.length.toLocaleString()} systems — follows the filters above`;
   wrap.innerHTML = `
     <table class="bd-table">
       <thead><tr><th>System</th><th>HQ state</th><th>Status</th><th>Owner</th><th>Notes</th><th></th></tr></thead>
@@ -624,22 +620,17 @@ function renderOutreachPanel() {
   if (!el) return;
   if (!BD_AUTH.authed) { el.innerHTML = ""; return; }
   el.innerHTML = `
-    <p class="cal-caption">Every system in the Atlas, ${SYSTEMS_UNIFIED.length.toLocaleString()} in all. Anything not logged here is "Not contacted". Edits save automatically and are shared with everyone who has the password.</p>
-    <div id="bd-summary" class="bd-summary"></div>
+    <p class="cal-caption">Anything not logged here is "Not contacted". Edits save automatically and are shared with everyone who has the password. Use the filters and status buttons above (for example State → West Virginia) to narrow the list.</p>
+    <p class="cal-caption" id="bd-count"></p>
     <details class="bd-state-notes" open>
       <summary>State notes</summary>
       <div id="bd-state-notes-body"></div>
     </details>
     <div class="bd-toolbar">
       <input type="search" id="bd-search" placeholder="Search system or state…" value="${escAttr(bdModalSearch)}" aria-label="Search systems">
-      <select id="bd-status-filter" aria-label="Filter by status">
-        <option value="all">All statuses</option>
-        ${BD_STATUS_ORDER.map(k => `<option value="${k}"${bdModalStatus === k ? " selected" : ""}>${esc(BD_STATUSES[k].label)}</option>`).join("")}
-      </select>
       <button type="button" class="hs-compare-btn" id="bd-lock-btn">Sign out</button>
     </div>
     <div class="bd-table-wrap" id="bd-table-wrap"></div>`;
-  renderBdSummary();
   renderStateNotes();
   renderBdTable();
 }
@@ -879,7 +870,9 @@ function renderBdStrip() {
   let html = `<span class="bd-strip-count"><strong>${shown.length.toLocaleString()}</strong> of ${SYSTEMS_UNIFIED.length.toLocaleString()} systems shown <span class="ls-sub">(${withSize.toLocaleString()} with a sourced size · ${(shown.length - withSize).toLocaleString()} unsized)</span></span>`;
   if (BD_AUTH.authed) {
     const counts = {};
-    shown.forEach(s => { const st = systemStatus(s.key); counts[st] = (counts[st] || 0) + 1; });
+    // The breakdown covers every filter except the status one, so choosing a state shows all its statuses
+    // and picking one status doesn't zero out the others.
+    currentFilteredSystems(true).forEach(s => { const st = systemStatus(s.key); counts[st] = (counts[st] || 0) + 1; });
     html += `<span class="bd-strip-statuses">${BD_STATUS_ORDER.map(k =>
       `<button type="button" class="bd-status-pill${hsFilters.status === k ? " selected" : ""}" style="--chip:var(${BD_STATUSES[k].varName})" data-bd-status="${k}" title="Filter to ${esc(BD_STATUSES[k].label)}">${esc(BD_STATUSES[k].label)} · ${counts[k] || 0}</button>`).join("")}</span>`;
   }
@@ -888,7 +881,7 @@ function renderBdStrip() {
 
 // Re-renders everything on the Health Systems tab that depends on filters / colors / status.
 let lastFilterSig = "";
-function refreshHsAll() {
+function refreshHsAll(keepTable) {
   if (!SYSTEMS_UNIFIED.length) return;
   const sig = JSON.stringify([hsFilters, hsTierFilter, hsOwnershipFilter]);
   if (sig !== lastFilterSig) { hsCardLimit = 60; lastFilterSig = sig; } // a new filter starts the card list over
@@ -898,6 +891,7 @@ function refreshHsAll() {
   renderOperatorLayer();
   if (hsFacilitiesLoaded) applyFacilityFilter();
   if (hsView === "landscape") renderLandscape();
+  if (hsView === "outreach" && !keepTable && BD_AUTH.authed) renderBdTable();
 }
 
 function zoomToState(abbr) {
@@ -1003,7 +997,6 @@ function wireHsBdControls() {
     if (f === "owner" || f === "notes") saveOutreach(e.target.dataset.bdKey, { [f]: e.target.value }, e.target.closest("tr"));
   });
   panel.addEventListener("change", e => {
-    if (e.target.id === "bd-status-filter") { bdModalStatus = e.target.value; renderBdTable(); return; }
     if (e.target.dataset.bdField === "status") saveOutreach(e.target.dataset.bdKey, { status: e.target.value }, e.target.closest("tr"));
   });
   panel.addEventListener("click", e => {
