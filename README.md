@@ -1,6 +1,6 @@
 # RHTP Tracker
 
-Tracks Rural Health Transformation Program funding, status, and sources across 10 states.
+Tracks Rural Health Transformation Program funding, status, and sources across all 50 states.
 
 ## Local setup
 
