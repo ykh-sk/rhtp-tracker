@@ -1,8 +1,8 @@
-"""Community health centers (FQHC grantees) in the Atlas's focus states — Nevada, Arizona, Tennessee, Colorado,
-Alaska and Wyoming — from HRSA's free "Health Center Service Delivery and Look-Alike Sites" file
+"""Community health centers (FQHC grantees) in the Atlas's focus states — Nevada, Arizona, Tennessee, Kentucky,
+Colorado, Alaska and Wyoming — from HRSA's free "Health Center Service Delivery and Look-Alike Sites" file
 (https://data.hrsa.gov/data/download), active sites only, grantees based in the state. Grantees that are
 already an Atlas entry under another name (Denver Health, SEARHC, Maury Regional, Erlanger's hospital
-authority, Valleywise's county district, the University of Colorado) are left out.
+authority, Valleywise's county district, the University of Colorado and of Kentucky) are left out.
 
 Added so each focus state has enough organizations to track, as West Virginia has (see wv_providers_data.py).
 Each row becomes a bd_profiles row (profile-only, no AHRQ link, confidence 'unverified'; the category is ours).
@@ -1077,6 +1077,326 @@ FOCUS_FQHC_ROWS = [
   "lon": -105.5615,
   "category": "fqhc",
   "note": "HRSA-funded community health center (FQHC) grantee based in Laramie, WY; 3 active sites on its HRSA scope (u.s. government entity).",
+  "src": "HRSA Health Center Service Delivery and Look-Alike Sites data (data.hrsa.gov), downloaded 2026-11-10"
+ },
+ {
+  "name": "A+ Family Healthcare, LLC",
+  "city": "Brownsville",
+  "state": "KY",
+  "lat": 37.1914,
+  "lon": -86.2647,
+  "category": "fqhc",
+  "note": "HRSA-funded community health center (FQHC) grantee based in Brownsville, KY; 9 active sites on its HRSA scope (corporate entity, federal tax exempt).",
+  "src": "HRSA Health Center Service Delivery and Look-Alike Sites data (data.hrsa.gov), downloaded 2026-11-10"
+ },
+ {
+  "name": "Audubon Area Community Care Clinic, Inc.",
+  "city": "Owensboro",
+  "state": "KY",
+  "lat": 37.7598,
+  "lon": -87.1126,
+  "category": "fqhc",
+  "note": "HRSA-funded community health center (FQHC) grantee based in Owensboro, KY; 13 active sites on its HRSA scope (corporate entity, federal tax exempt).",
+  "src": "HRSA Health Center Service Delivery and Look-Alike Sites data (data.hrsa.gov), downloaded 2026-11-10"
+ },
+ {
+  "name": "Big Sandy Health Care",
+  "city": "Prestonsburg",
+  "state": "KY",
+  "lat": 37.6946,
+  "lon": -82.7711,
+  "category": "fqhc",
+  "note": "HRSA-funded community health center (FQHC) grantee based in Prestonsburg, KY; 22 active sites on its HRSA scope (corporate entity, federal tax exempt).",
+  "src": "HRSA Health Center Service Delivery and Look-Alike Sites data (data.hrsa.gov), downloaded 2026-11-10"
+ },
+ {
+  "name": "Bluegrass Primary Health Care Center, Inc.",
+  "city": "Lexington",
+  "state": "KY",
+  "lat": 38.0492,
+  "lon": -84.5218,
+  "category": "fqhc",
+  "note": "HRSA-funded community health center (FQHC) grantee based in Lexington, KY; 7 active sites on its HRSA scope (other).",
+  "src": "HRSA Health Center Service Delivery and Look-Alike Sites data (data.hrsa.gov), downloaded 2026-11-10"
+ },
+ {
+  "name": "Bowling Green-Warren County Primary Care Center, Inc.",
+  "city": "Bowling Green",
+  "state": "KY",
+  "lat": 36.967,
+  "lon": -86.3998,
+  "category": "fqhc",
+  "note": "HRSA-funded community health center (FQHC) grantee based in Bowling Green, KY; 1 active sites on its HRSA scope (corporate entity, federal tax exempt).",
+  "src": "HRSA Health Center Service Delivery and Look-Alike Sites data (data.hrsa.gov), downloaded 2026-11-10"
+ },
+ {
+  "name": "Clover Fork Outpatient Medical Project Inc.",
+  "city": "Evarts",
+  "state": "KY",
+  "lat": 36.9717,
+  "lon": -82.9763,
+  "category": "fqhc",
+  "note": "HRSA-funded community health center (FQHC) grantee based in Evarts, KY; 24 active sites on its HRSA scope (na).",
+  "src": "HRSA Health Center Service Delivery and Look-Alike Sites data (data.hrsa.gov), downloaded 2026-11-10"
+ },
+ {
+  "name": "Community Health Centers of Western Kentucky, Inc.",
+  "city": "Greenville",
+  "state": "KY",
+  "lat": 37.1967,
+  "lon": -87.191,
+  "category": "fqhc",
+  "note": "HRSA-funded community health center (FQHC) grantee based in Greenville, KY; 6 active sites on its HRSA scope (corporate entity, federal tax exempt).",
+  "src": "HRSA Health Center Service Delivery and Look-Alike Sites data (data.hrsa.gov), downloaded 2026-11-10"
+ },
+ {
+  "name": "Cumberland Family Medical Center, Inc.",
+  "city": "Burkesville",
+  "state": "KY",
+  "lat": 37.0611,
+  "lon": -85.0672,
+  "category": "fqhc",
+  "note": "HRSA-funded community health center (FQHC) grantee based in Burkesville, KY; 232 active sites on its HRSA scope (corporate entity, federal tax exempt).",
+  "src": "HRSA Health Center Service Delivery and Look-Alike Sites data (data.hrsa.gov), downloaded 2026-11-10"
+ },
+ {
+  "name": "East Kentucky Health Service Center",
+  "city": "Hindman",
+  "state": "KY",
+  "lat": 37.3134,
+  "lon": -82.9357,
+  "category": "fqhc",
+  "note": "HRSA-funded community health center (FQHC) grantee based in Hindman, KY; 1 active sites on its HRSA scope (na).",
+  "src": "HRSA Health Center Service Delivery and Look-Alike Sites data (data.hrsa.gov), downloaded 2026-11-10"
+ },
+ {
+  "name": "Faith Healthcare Inc.",
+  "city": "Monticello",
+  "state": "KY",
+  "lat": 37.1077,
+  "lon": -84.0735,
+  "category": "fqhc",
+  "note": "HRSA-funded community health center (FQHC) grantee based in Monticello, KY; 9 active sites on its HRSA scope (na).",
+  "src": "HRSA Health Center Service Delivery and Look-Alike Sites data (data.hrsa.gov), downloaded 2026-11-10"
+ },
+ {
+  "name": "Family Health Centers, Inc.",
+  "city": "Louisville",
+  "state": "KY",
+  "lat": 38.2706,
+  "lon": -85.7847,
+  "category": "fqhc",
+  "note": "HRSA-funded community health center (FQHC) grantee based in Louisville, KY; 14 active sites on its HRSA scope (corporate entity, federal tax exempt).",
+  "src": "HRSA Health Center Service Delivery and Look-Alike Sites data (data.hrsa.gov), downloaded 2026-11-10"
+ },
+ {
+  "name": "Grace Community Health Center",
+  "city": "Corbin",
+  "state": "KY",
+  "lat": 36.9285,
+  "lon": -84.1045,
+  "category": "fqhc",
+  "note": "HRSA-funded community health center (FQHC) grantee based in Corbin, KY; 41 active sites on its HRSA scope (corporate entity, federal tax exempt).",
+  "src": "HRSA Health Center Service Delivery and Look-Alike Sites data (data.hrsa.gov), downloaded 2026-11-10"
+ },
+ {
+  "name": "Health First Bluegrass",
+  "city": "Lexington",
+  "state": "KY",
+  "lat": 38.0207,
+  "lon": -84.529,
+  "category": "fqhc",
+  "note": "HRSA-funded community health center (FQHC) grantee based in Lexington, KY; 22 active sites on its HRSA scope (corporate entity, federal tax exempt).",
+  "src": "HRSA Health Center Service Delivery and Look-Alike Sites data (data.hrsa.gov), downloaded 2026-11-10"
+ },
+ {
+  "name": "Health Help, Incorporated",
+  "city": "Richmond",
+  "state": "KY",
+  "lat": 37.733,
+  "lon": -84.3078,
+  "category": "fqhc",
+  "note": "HRSA-funded community health center (FQHC) grantee based in Richmond, KY; 12 active sites on its HRSA scope (corporate entity, federal tax exempt).",
+  "src": "HRSA Health Center Service Delivery and Look-Alike Sites data (data.hrsa.gov), downloaded 2026-11-10"
+ },
+ {
+  "name": "Health Point Family Care, Inc.",
+  "city": "Newport",
+  "state": "KY",
+  "lat": 39.0878,
+  "lon": -84.4936,
+  "category": "fqhc",
+  "note": "HRSA-funded community health center (FQHC) grantee based in Newport, KY; 32 active sites on its HRSA scope (corporate entity, federal tax exempt).",
+  "src": "HRSA Health Center Service Delivery and Look-Alike Sites data (data.hrsa.gov), downloaded 2026-11-10"
+ },
+ {
+  "name": "Helping Hands Health Clinic, Inc.",
+  "city": "Elkton",
+  "state": "KY",
+  "lat": 36.7952,
+  "lon": -87.1619,
+  "category": "fqhc",
+  "note": "HRSA-funded community health center (FQHC) grantee based in Elkton, KY; 1 active sites on its HRSA scope (na).",
+  "src": "HRSA Health Center Service Delivery and Look-Alike Sites data (data.hrsa.gov), downloaded 2026-11-10"
+ },
+ {
+  "name": "Juniper Health, Inc.",
+  "city": "Beattyville",
+  "state": "KY",
+  "lat": 37.5597,
+  "lon": -83.3949,
+  "category": "fqhc",
+  "note": "HRSA-funded community health center (FQHC) grantee based in Beattyville, KY; 24 active sites on its HRSA scope (corporate entity, federal tax exempt).",
+  "src": "HRSA Health Center Service Delivery and Look-Alike Sites data (data.hrsa.gov), downloaded 2026-11-10"
+ },
+ {
+  "name": "Kentucky Mountain Health Alliance, Inc.",
+  "city": "Hazard",
+  "state": "KY",
+  "lat": 37.2811,
+  "lon": -83.2196,
+  "category": "fqhc",
+  "note": "HRSA-funded community health center (FQHC) grantee based in Hazard, KY; 5 active sites on its HRSA scope (corporate entity, federal tax exempt).",
+  "src": "HRSA Health Center Service Delivery and Look-Alike Sites data (data.hrsa.gov), downloaded 2026-11-10"
+ },
+ {
+  "name": "Kentucky River Foothills Development Council",
+  "city": "Richmond",
+  "state": "KY",
+  "lat": 37.8536,
+  "lon": -83.9163,
+  "category": "fqhc",
+  "note": "HRSA-funded community health center (FQHC) grantee based in Richmond, KY; 8 active sites on its HRSA scope (corporate entity, federal tax exempt).",
+  "src": "HRSA Health Center Service Delivery and Look-Alike Sites data (data.hrsa.gov), downloaded 2026-11-10"
+ },
+ {
+  "name": "Lewis County Primary Care Center Inc.",
+  "city": "Vanceburg",
+  "state": "KY",
+  "lat": 38.5825,
+  "lon": -83.3278,
+  "category": "fqhc",
+  "note": "HRSA-funded community health center (FQHC) grantee based in Vanceburg, KY; 21 active sites on its HRSA scope (corporate entity, federal tax exempt).",
+  "src": "HRSA Health Center Service Delivery and Look-Alike Sites data (data.hrsa.gov), downloaded 2026-11-10"
+ },
+ {
+  "name": "Monticello Medical Associates, Inc.",
+  "city": "Monticello",
+  "state": "KY",
+  "lat": 36.8184,
+  "lon": -84.8714,
+  "category": "fqhc",
+  "note": "HRSA-funded community health center (FQHC) grantee based in Monticello, KY; 6 active sites on its HRSA scope (corporate entity, federal tax exempt).",
+  "src": "HRSA Health Center Service Delivery and Look-Alike Sites data (data.hrsa.gov), downloaded 2026-11-10"
+ },
+ {
+  "name": "Mountain Comprehensive Care Center, Inc.",
+  "city": "Prestonsburg",
+  "state": "KY",
+  "lat": 37.4798,
+  "lon": -82.5181,
+  "category": "fqhc",
+  "note": "HRSA-funded community health center (FQHC) grantee based in Prestonsburg, KY; 26 active sites on its HRSA scope (corporate entity, federal tax exempt).",
+  "src": "HRSA Health Center Service Delivery and Look-Alike Sites data (data.hrsa.gov), downloaded 2026-11-10"
+ },
+ {
+  "name": "Mountain Comprehensive Health Corporation",
+  "city": "Whitesburg",
+  "state": "KY",
+  "lat": 36.6255,
+  "lon": -83.7033,
+  "category": "fqhc",
+  "note": "HRSA-funded community health center (FQHC) grantee based in Whitesburg, KY; 34 active sites on its HRSA scope (corporate entity, federal tax exempt).",
+  "src": "HRSA Health Center Service Delivery and Look-Alike Sites data (data.hrsa.gov), downloaded 2026-11-10"
+ },
+ {
+  "name": "One Cross Community Inc.",
+  "city": "Campbellsville",
+  "state": "KY",
+  "lat": 37.3518,
+  "lon": -85.3548,
+  "category": "fqhc",
+  "note": "HRSA-funded community health center (FQHC) grantee based in Campbellsville, KY; 2 active sites on its HRSA scope (na).",
+  "src": "HRSA Health Center Service Delivery and Look-Alike Sites data (data.hrsa.gov), downloaded 2026-11-10"
+ },
+ {
+  "name": "Park Duvalle Community Health Center Inc.",
+  "city": "Louisville",
+  "state": "KY",
+  "lat": 38.2272,
+  "lon": -85.8071,
+  "category": "fqhc",
+  "note": "HRSA-funded community health center (FQHC) grantee based in Louisville, KY; 7 active sites on its HRSA scope (corporate entity, federal tax exempt).",
+  "src": "HRSA Health Center Service Delivery and Look-Alike Sites data (data.hrsa.gov), downloaded 2026-11-10"
+ },
+ {
+  "name": "Pennyroyal Healthcare Services, Inc.",
+  "city": "Princeton",
+  "state": "KY",
+  "lat": 37.1116,
+  "lon": -87.8801,
+  "category": "fqhc",
+  "note": "HRSA-funded community health center (FQHC) grantee based in Princeton, KY; 4 active sites on its HRSA scope (corporate entity, federal tax exempt).",
+  "src": "HRSA Health Center Service Delivery and Look-Alike Sites data (data.hrsa.gov), downloaded 2026-11-10"
+ },
+ {
+  "name": "Ramey-Estep Homes Inc.",
+  "city": "Rush",
+  "state": "KY",
+  "lat": 38.2936,
+  "lon": -82.7725,
+  "category": "fqhc",
+  "note": "HRSA-funded community health center (FQHC) grantee based in Rush, KY; 1 active sites on its HRSA scope (na).",
+  "src": "HRSA Health Center Service Delivery and Look-Alike Sites data (data.hrsa.gov), downloaded 2026-11-10"
+ },
+ {
+  "name": "Regional Health Care Affiliates, Inc.",
+  "city": "Providence",
+  "state": "KY",
+  "lat": 37.398,
+  "lon": -87.7597,
+  "category": "fqhc",
+  "note": "HRSA-funded community health center (FQHC) grantee based in Providence, KY; 11 active sites on its HRSA scope (corporate entity, federal tax exempt).",
+  "src": "HRSA Health Center Service Delivery and Look-Alike Sites data (data.hrsa.gov), downloaded 2026-11-10"
+ },
+ {
+  "name": "Shawnee Christian Healthcare Center Inc.",
+  "city": "Louisville",
+  "state": "KY",
+  "lat": 38.2604,
+  "lon": -85.8137,
+  "category": "fqhc",
+  "note": "HRSA-funded community health center (FQHC) grantee based in Louisville, KY; 3 active sites on its HRSA scope (corporate entity, federal tax exempt).",
+  "src": "HRSA Health Center Service Delivery and Look-Alike Sites data (data.hrsa.gov), downloaded 2026-11-10"
+ },
+ {
+  "name": "Sterling Health Solutions, Inc.",
+  "city": "Mount Sterling",
+  "state": "KY",
+  "lat": 38.0544,
+  "lon": -83.9467,
+  "category": "fqhc",
+  "note": "HRSA-funded community health center (FQHC) grantee based in Mount Sterling, KY; 33 active sites on its HRSA scope (corporate entity, federal tax exempt).",
+  "src": "HRSA Health Center Service Delivery and Look-Alike Sites data (data.hrsa.gov), downloaded 2026-11-10"
+ },
+ {
+  "name": "Triad Health Systems Inc.",
+  "city": "Warsaw",
+  "state": "KY",
+  "lat": 38.7848,
+  "lon": -84.9016,
+  "category": "fqhc",
+  "note": "HRSA-funded community health center (FQHC) grantee based in Warsaw, KY; 24 active sites on its HRSA scope (corporate entity, federal tax exempt).",
+  "src": "HRSA Health Center Service Delivery and Look-Alike Sites data (data.hrsa.gov), downloaded 2026-11-10"
+ },
+ {
+  "name": "Trinity Family Health, Inc.",
+  "city": "Corbin",
+  "state": "KY",
+  "lat": 36.9599,
+  "lon": -84.0749,
+  "category": "fqhc",
+  "note": "HRSA-funded community health center (FQHC) grantee based in Corbin, KY; 2 active sites on its HRSA scope (na).",
   "src": "HRSA Health Center Service Delivery and Look-Alike Sites data (data.hrsa.gov), downloaded 2026-11-10"
  }
 ]
