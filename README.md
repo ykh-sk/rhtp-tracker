@@ -2,6 +2,20 @@
 
 Tracks Rural Health Transformation Program funding, status, and sources across all 50 states.
 
+## Two pages, one backend
+
+- `/` — **Rural Health Radar** (`static/index.html` + `app.js`): the state-by-state RHTP funding tracker.
+- `/atlas` — **Health Systems Atlas** (`static/atlas.html` + `atlas.js` + `bd.js`): the map, landscape and
+  outreach views of U.S. health systems. A separate page with its own identity, linked both ways; it uses
+  the Radar's API only to show each system's home-state RHTP stage as optional context.
+- Each state page on the Radar has a small zoomable map of that state's health systems and hospitals
+  (`/api/atlas_state/<ST>`), with an "Open in the Health Systems Atlas" link that opens `/atlas?state=<State>` already filtered.
+- `static/common.js` holds the helpers both pages share (escaping, date/money formats, theme toggle,
+  pipeline-stage colors). Both pages use the same Flask API and database.
+- The Atlas's **Outreach** tab (who has been contacted, by whom) is invisible until a team member signs in
+  (one shared password, `BD_PASSWORD`; see "Deploying"). Signed out, the page shows no status controls at all
+  and the API refuses the data (401).
+
 ## Local setup
 
 Requires a Postgres database (this project uses [Neon](https://neon.tech)). Get a connection
@@ -49,6 +63,76 @@ python3 app/main.py   # serves the dashboard at http://localhost:5050
   and stored, not fetched live from the browser (see "How this data stays current" below for why).
   `app/data/cms_hospitals.json` is the checked-in snapshot `seed.py` loads from; there's no
   hand-maintained Python source file for this one since it's a bulk import, not a curated pick.
+
+- `bd_profiles` — the BD layer's taxonomy, merged in from the standalone "Health System Atlas": a
+  `category` (academic / faith-based / secular nonprofit / for-profit / payer-provider / public /
+  specialty), `strategy_tags` (venture arm, digital pilots, value-based care, rural focus, ...) and a
+  one-line `note` per system. **Every row is `confidence = 'unverified'`**: unlike `health_systems`,
+  nothing here has a per-row source (compiled from general public knowledge, Sept 2026). A profile
+  attaches to a curated operator through the hand-written `OPERATOR_CROSSWALK` in
+  `app/bd_profiles_data.py` (exact / renamed / partial matches, no fuzzy matching); profiles with no
+  operator record render as "profile only" pins with no hospital count. Where both exist the operator's
+  sourced fields (hospital count, ownership, HQ, source) win; the profile only adds category, signals
+  and the note. Two systems the team has dealt with directly (Marshall Health Network, Vandalia Health)
+  were added from the team's own target list rather than from Atlas, and say so in `basis`.
+- `bd_outreach` — private contact tracking (status / owner / notes per system), written only through the
+  password-gated `/api/bd/*` routes. **`seed.py` never clears this table** — it's hand-entered working
+  data, not seed data. Keys are slugs (`slug(operator name)` or the profile's own key).
+- `bd_login_failures` — failed unlock attempts, kept only to throttle guessing (8 per IP per 15 min).
+
+- `ahrq_systems` / `ahrq_crosswalk` — AHRQ's free **Compendium of U.S. Health Systems, 2023** (system file,
+  `app/data/ahrq/chsp-compendium-2023-rev.csv`): 639 systems with hospital, bed, discharge, physician and
+  net-revenue counts, ownership and a few teaching / safety-net flags. `app/ahrq_data.py` says exactly what
+  is used and why: counts and the flags whose names are self-explanatory are used as published; the
+  ownership code is decoded by **inference** (AHRQ's technical documentation could not be read);
+  `sys_multistate`, `sys_teachint` and `deg_children` are not used because their code meanings are
+  unconfirmed. Home-office coordinates are derived from CMS hospital locations (AHRQ gives only city and
+  state). `ahrq_crosswalk` is a hand-written link from our systems to AHRQ's (136 links, in
+  `app/ahrq_crosswalk_data.py`; nothing is fuzzy-matched at runtime). The 503 AHRQ systems with no match
+  in our lists appear as their own entries (outreach key `ahrq-<id>`). The 2023 file predates later
+  mergers. **Not loaded:** AHRQ's separate *hospital linkage file* (hospital CCN -> system), which would let
+  the CMS hospital layer show each hospital's parent system.
+
+The Health Systems tab is systems-first: the unified list (`SYSTEMS_UNIFIED` in `static/bd.js`) is every
+curated operator plus every profile-only system. The RHTP stage of a system's HQ state is shown as an
+optional "tailwind" and a filter, never as a requirement for a system to appear. The tab's **Landscape**
+view breaks the national picture down by category x size, by state (CMS hospital counts by ownership,
+critical-access count, systems HQ'd, RHTP stage) and by hospital type. Known gap: the CMS layer has no
+parent-system field, so only the hospitals matched through the curated rosters (about a quarter) are tied
+to a system; the free AHRQ Compendium of U.S. Health Systems would close most of that gap by linking CMS
+hospital IDs to systems.
+
+## How each entry is classified ("Type")
+
+Every entry in the Atlas carries one Type, shown as a chip and usable as a filter:
+
+| Type | What it is | Where it comes from | Size / ownership |
+|---|---|---|---|
+| **Sourced operator** | Hospital operator in the curated list | `app/health_systems_data.py` (source link + verified date) | Own hospital count; ownership as reported by the source |
+| **Profile system** | System from the BD profile list | `app/bd_profiles_data.py` (**unverified** category / strategy / note) | From AHRQ when matched, else none |
+| **AHRQ system** | System that appears only in AHRQ's 2023 file | `app/data/ahrq/…csv` | AHRQ's counts; ownership decoded from AHRQ's code (inferred) |
+| **Community provider** | A single provider, not a system: community health center (FQHC), home health agency or community hospital. West Virginia only (92 entries) | `wv_providers_data.py`, generated from HRSA and CMS public data (each row names its source) | None |
+| **Network / association / other** | Not a hospital system: hospital network, association, university, tribal health organization | `bd_profiles_data.py` categories `network`, `association`, `tribal`, `university` | None |
+
+Overlaps are handled by hand-written files, not guessed at runtime:
+
+- `ahrq_crosswalk_data.py` links our entries to AHRQ systems (136 links) and lists AHRQ 2023 systems that have
+  since **merged** into one of our entries (ThedaCare, Lehigh Valley, Nuvance): those are not listed twice; the
+  surviving entry says "AHRQ also lists …".
+- `PART_OF` in `bd_profiles_data.py` marks brands and members of a larger entry (e.g. MercyOne, part of Trinity
+  Health), shown as "Part of …".
+- Two different organizations with the same name (e.g. Memorial Health System in IL and OH) are shown with
+  their state.
+
+### West Virginia providers and seeded outreach
+
+`wv_providers_data.py` adds West Virginia's 30 HRSA health-center grantees, 33 Medicare-certified home health
+agencies and 29 community hospitals (CMS hospitals not already counted inside a listed system; their parent
+systems were not researched, so each says "verify"). Other states have only systems for now.
+
+`app/bd_initial_data.py` holds the private starting records for the password-protected Outreach tab. It is
+**gitignored** because this repository is public; `seed.py` loads it only when the file exists locally, so seed
+from the machine that has it. Seeding never overwrites later edits.
 
 ## How this data stays current
 
@@ -118,6 +202,12 @@ AHA Annual Survey or a CMS ownership crosswalk, most of which require a paid lic
 
 ## Update policy
 
+`app/nov_pass_data.py` holds a follow-up sweep (Oct 1 - Nov 10, 2026 developments the first Nov 10 pass
+missed: named awards, solicitation deadlines, a few corrections). It is merged at the bottom of
+`seed_data.py`, like `new_states_data.py`, so earlier entries stay untouched. New events never lower a
+state's stage, so sub-program solicitations carry the state's current stage. Year 2 award amounts (CMS table
+of Nov 9) are not modeled; the award table is FY26.
+
 This site gets re-checked and edited roughly every couple of days. Two different kinds of "update"
 need different handling:
 
@@ -159,6 +249,11 @@ the source of truth and the API as a way to preview additions before folding the
 2. In the Vercel project: **Storage** tab → **Connect Database** → **Neon** → follow the prompts. This
    creates a Neon Postgres project and sets `DATABASE_URL` in your Vercel environment automatically.
 3. Copy that same `DATABASE_URL` into your local shell and run `python3 app/seed.py` once to populate it.
+3b. Set `BD_PASSWORD` (Vercel → Settings → Environment Variables, and locally) to enable contact
+   tracking. The login ID is fixed and not secret — `bd` by default, overridable with `BD_USERNAME`; the
+   password is what protects the data, and it must only ever live in the environment, never in the repo. Unset, every `/api/bd/*` write/read fails closed with a 503 and the UI says it isn't set up.
+   Use a long random password; changing it logs every existing session out. Re-seeding is required once
+   after this release (new tables/columns) but never touches `bd_outreach`.
 4. Deploy (Vercel does this automatically on push). The API runs as a serverless function
    (`api/index.py`); `static/` is served directly by Vercel's CDN.
 5. Point your domain at this Vercel project under **Settings → Domains**.

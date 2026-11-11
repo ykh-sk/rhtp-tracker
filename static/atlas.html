@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Health Systems Atlas</title>
+  <link rel="icon" type="image/png" href="/static/favicon-32.png" />
+  <script>
+    (function () {
+      try {
+        var stored = localStorage.getItem("theme");
+        if (stored === "dark" || stored === "light") document.documentElement.setAttribute("data-theme", stored);
+      } catch (e) { /* storage blocked — falls back to prefers-color-scheme */ }
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body class="atlas">
+  <div class="wrap">
+    <header class="masthead atlas-masthead">
+      <div class="masthead-left">
+        <p class="kicker">U.S. health systems &middot; size, category, strategy</p>
+        <div class="brand">
+          <a href="/atlas" class="brand-link atlas-brand" aria-label="Health Systems Atlas">
+            <svg class="atlas-pin" viewBox="0 0 16 16" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" aria-hidden="true">
+              <path d="M8 15C8 15 13 10.2 13 6.5C13 3.5 10.8 1.5 8 1.5C5.2 1.5 3 3.5 3 6.5C3 10.2 8 15 8 15Z" />
+              <circle cx="8" cy="6.4" r="1.7" fill="currentColor" stroke="none" />
+            </svg>
+            <span class="atlas-wordmark">Health Systems <span>Atlas</span></span>
+          </a>
+        </div>
+        <p class="intro-line">Find U.S. health systems to approach — by size, ownership, category and strategy.</p>
+      </div>
+      <div class="masthead-right">
+        <a href="/" id="radar-link" class="hs-launch radar-launch">Rural Health Radar &#8599;</a>
+        <button type="button" id="team-signin" class="hs-compare-btn" hidden>Team sign-in</button>
+        <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">🌙</button>
+      </div>
+    </header>
+
+    <main id="health-systems">
+      <ul class="atlas-about">
+        <li><strong>What:</strong> about 660 health systems, plus every Medicare hospital, on one map.</li>
+        <li><strong>Sources:</strong> CMS hospital data · AHRQ 2023 Compendium (639 systems) · each operator's own site. Category and strategy tags are <em>unverified</em>.</li>
+        <li><strong>Map:</strong> dot size = hospital count; color = ownership (switchable); dashed = no size on file.</li>
+        <li><strong>RHTP:</strong> a home state's funding stage is optional context, never a requirement.</li>
+        <li><strong>Views:</strong> Map · Landscape (national breakdown) · Outreach (team sign-in).</li>
+      </ul>
+
+      <div class="hs-toggle-row">
+        <div class="map-toggle" id="hs-layer-toggle">
+          <button type="button" data-layer="operators" class="active">Operators</button>
+          <button type="button" data-layer="facilities" class="active">All hospitals (CMS)</button>
+        </div>
+        <div class="map-toggle" id="hs-tier-toggle">
+          <button type="button" data-tier="all" class="active">All tiers</button>
+          <button type="button" data-tier="major">Major</button>
+          <button type="button" data-tier="large">Large</button>
+          <button type="button" data-tier="mid">Mid</button>
+          <button type="button" data-tier="small">Small</button>
+          <button type="button" data-tier="unsized" title="Entries with no sourced hospital count: networks, associations, and a few profiles">Unsized</button>
+        </div>
+        <div class="map-toggle" id="hs-ownership-toggle">
+          <button type="button" data-ownership="all" class="active">All ownership</button>
+          <button type="button" data-ownership="nonprofit">Nonprofit</button>
+          <button type="button" data-ownership="for-profit">For-profit</button>
+        </div>
+        <label class="hs-company-filter-wrap">
+          <span class="hs-legend-title">Find a parent operator (hospital layer)</span>
+          <select id="hs-company-filter">
+            <option value="all">All hospitals</option>
+          </select>
+        </label>
+        <button type="button" id="hs-compare-btn" class="hs-compare-btn">Compare operator size ⤢</button>
+      </div>
+
+      <div class="hs-toggle-row">
+        <label class="hs-select-wrap"><span class="hs-legend-title">Category</span><select id="hs-category-filter"></select></label>
+        <label class="hs-select-wrap"><span class="hs-legend-title">Strategy signal</span><select id="hs-strategy-filter"></select></label>
+        <label class="hs-select-wrap"><span class="hs-legend-title">RHTP</span><select id="hs-rhtp-filter"></select></label>
+        <label class="hs-select-wrap"><span class="hs-legend-title">State</span><select id="hs-state-filter"></select></label>
+        <label class="hs-select-wrap"><span class="hs-legend-title">Type</span><select id="hs-source-filter"></select></label>
+        <input type="search" id="hs-search" class="hs-search" placeholder="Find a system or city…" aria-label="Find a system or city" autocomplete="off">
+        <div class="map-toggle" id="hs-color-toggle" role="group" aria-label="Marker color">
+          <button type="button" data-color="ownership" class="active">Color: ownership</button>
+          <button type="button" data-color="category">category</button>
+          <button type="button" data-color="status" id="hs-color-status-btn" hidden>contact status</button>
+        </div>
+        <div class="map-toggle" id="hs-view-toggle" role="group" aria-label="View">
+          <button type="button" data-view="map" class="active">Map</button>
+          <button type="button" data-view="landscape">Landscape</button>
+          <button type="button" data-view="outreach" id="hs-outreach-tab" hidden>Outreach</button>
+        </div>
+      </div>
+      <div class="hs-bd-strip" id="hs-bd-strip"></div>
+
+      <div id="hs-landscape" hidden></div>
+      <div id="hs-outreach" hidden></div>
+
+      <div class="map-section" id="hs-map-section">
+        <div id="hs-map"></div>
+        <div class="hs-legend" id="hs-legend"></div>
+        <p class="map-caption map-caption-wide">Ownership reflects each source's own reporting; "Government" appears only in the per-facility hospital layer below, since none of the curated operators above are government agencies.</p>
+        <p class="map-caption" id="hs-curated-freshness"></p>
+        <p class="map-caption" id="hs-status">Loading hospitals…</p>
+        <p class="map-caption">Facility data: CMS's
+          <a href="https://data.cms.gov/provider-data/dataset/xubh-q36u" target="_blank" rel="noopener">Hospital General Information</a>
+          dataset — Medicare-registered hospitals, actively maintained by CMS (unlike this site's prior HIFLD-based
+          layer, which turned out to be a frozen 2016-17 snapshot). Address geocoding was done once by this site, not
+          by CMS; see the status line above for exactly when this snapshot was last pulled. CMS's own dataset excludes
+          most freestanding long-term-care and rehabilitation hospitals, which it tracks through separate programs —
+          so this layer runs somewhat smaller than a full hospital count would. Basemap &copy;
+          <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors.</p>
+      </div>
+
+      <div class="hs-list" id="hs-list"></div>
+    </main>
+
+    <footer class="site-footer">
+      <ul class="atlas-about atlas-foot">
+        <li>Hospital locations and ownership: CMS Hospital General Information. System size and ownership: AHRQ 2023 and each operator's own site.</li>
+        <li>Categories, strategy signals and notes are unverified — check the source before acting. Basemap &copy; OpenStreetMap contributors.</li>
+      </ul>
+      <div class="footer-legal">
+        <p>The state-by-state funding tracker that supplies the RHTP context here is <a href="/">Rural Health Radar</a>.</p>
+      </div>
+    </footer>
+  </div>
+
+  <div class="modal-overlay" id="hs-compare-overlay" hidden>
+    <div class="modal modal-wide" role="dialog" aria-modal="true" aria-labelledby="hs-compare-title">
+      <button type="button" class="modal-close" id="hs-compare-close" aria-label="Close">&times;</button>
+      <h2 id="hs-compare-title">Compare operators by size</h2>
+      <p class="modal-caption">
+        Curated hospital counts come from each operator's own source (right-most column). "Matched on map" is
+        computed here, right now, by tying CMS's per-facility hospital layer back to each operator's roster — treat
+        it as approximate; renamed, newly built, or non-Medicare hospitals won't match. Neither column shows bed
+        capacity or patient volume: CMS's Hospital General Information dataset doesn't publish bed counts, and no
+        public source reports annual patient counts per operator in a comparable, verifiable way — better to omit
+        both than guess.
+      </p>
+      <div class="hs-compare-table-wrap" id="hs-compare-table-wrap"></div>
+    </div>
+  </div>
+
+
+  <div class="modal-overlay" id="bd-overlay" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="bd-modal-title">
+      <button type="button" class="modal-close" id="bd-modal-close" aria-label="Close">&times;</button>
+      <h2 id="bd-modal-title">Team sign-in</h2>
+      <div id="bd-modal-body"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+  <script src="/static/common.js"></script>
+  <script src="/static/bd.js"></script>
+  <script src="/static/atlas.js"></script>
+</body>
+</html>

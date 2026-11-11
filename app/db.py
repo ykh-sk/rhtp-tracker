@@ -187,6 +187,98 @@ CREATE TABLE IF NOT EXISTS cms_hospitals_meta (
     source_url TEXT NOT NULL,
     CHECK (id = 1)
 );
+
+-- Category / strategy-signal taxonomy + a one-line note per system, merged in from the
+-- standalone "Health System Atlas". Public, curated, and reloaded by seed.py like the
+-- tables above — but UNSOURCED (confidence is always 'unverified'; see
+-- app/bd_profiles_data.py for provenance and the hand-written operator crosswalk).
+-- bd_key = slug(operator name when matched, else the profile's own name).
+CREATE TABLE IF NOT EXISTS bd_profiles (
+    bd_key TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    operator_name TEXT,
+    match_type TEXT CHECK (match_type IN ('exact', 'renamed', 'partial')),
+    hq_place TEXT NOT NULL,
+    hq_lat DOUBLE PRECISION NOT NULL,
+    hq_lon DOUBLE PRECISION NOT NULL,
+    category TEXT NOT NULL,
+    strategy_tags TEXT[] NOT NULL DEFAULT '{}',
+    note TEXT,
+    atlas_names TEXT NOT NULL,
+    part_of TEXT,
+    basis TEXT NOT NULL,
+    confidence TEXT NOT NULL DEFAULT 'unverified' CHECK (confidence = 'unverified')
+);
+
+-- AHRQ Compendium of U.S. Health Systems (2023 system file): 639 U.S. health systems with published
+-- size, ownership and money figures. A sourced, bulk federal dataset (see app/ahrq_data.py for what is
+-- used and why). Home-office coordinates are derived from CMS hospital locations (geo_precision).
+CREATE TABLE IF NOT EXISTS ahrq_systems (
+    sys_id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    city TEXT NOT NULL,
+    state TEXT NOT NULL,
+    lat DOUBLE PRECISION NOT NULL,
+    lon DOUBLE PRECISION NOT NULL,
+    geo_precision TEXT NOT NULL CHECK (geo_precision IN ('city', 'city-manual', 'state')),
+    hospitals INTEGER,
+    acute_hospitals INTEGER,
+    beds INTEGER,
+    discharges INTEGER,
+    physician_groups INTEGER,
+    physicians INTEGER,
+    primary_care_physicians INTEGER,
+    nurse_practitioners INTEGER,
+    physician_assistants INTEGER,
+    nursing_homes INTEGER,
+    ownership_code INTEGER,
+    ownership TEXT,
+    net_revenue BIGINT,
+    total_revenue BIGINT,
+    major_teaching BOOLEAN,
+    very_major_teaching BOOLEAN,
+    high_dsh BOOLEAN,
+    high_uc_burden BOOLEAN,
+    offers_insurance BOOLEAN,
+    aha_sysid TEXT
+);
+
+-- Hand-written link from this site's systems (operators / BD profiles) to AHRQ systems; see
+-- app/ahrq_crosswalk_data.py. bd_key is slug(name) as everywhere else.
+CREATE TABLE IF NOT EXISTS ahrq_crosswalk (
+    bd_key TEXT PRIMARY KEY,
+    sys_id TEXT NOT NULL UNIQUE,
+    match_type TEXT NOT NULL CHECK (match_type IN ('exact', 'renamed', 'partial'))
+);
+
+ALTER TABLE bd_profiles ADD COLUMN IF NOT EXISTS part_of TEXT;
+
+-- Private BD outreach tracking, written only through the password-gated /api/bd/* routes.
+-- Deliberately NOT cleared by seed.py (unlike every table above): this is hand-entered
+-- working data, not seed data, so re-seeding the curated tables must never wipe it.
+-- bd_key matches bd_profiles.bd_key / slug(health_systems.name).
+CREATE TABLE IF NOT EXISTS bd_outreach (
+    bd_key TEXT PRIMARY KEY,
+    status TEXT NOT NULL DEFAULT 'not_contacted'
+        CHECK (status IN ('not_contacted', 'researching', 'contacted', 'in_discussion', 'piloting', 'declined')),
+    owner TEXT NOT NULL DEFAULT '',
+    notes TEXT NOT NULL DEFAULT '',
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- Private free-text notes per state (e.g. how a round of email outreach went). Written only through the
+-- password-gated /api/bd/state_notes routes; like bd_outreach, never cleared by seed.py.
+CREATE TABLE IF NOT EXISTS bd_state_notes (
+    abbr TEXT PRIMARY KEY,
+    note TEXT NOT NULL DEFAULT '',
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- Failed BD logins, kept only to throttle guessing (per client IP, short window). Not seed data.
+CREATE TABLE IF NOT EXISTS bd_login_failures (
+    ip TEXT NOT NULL,
+    at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
 """
 
 

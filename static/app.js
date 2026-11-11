@@ -3,17 +3,6 @@
 // sourcing-confidence dots used everywhere else in the UI.
 const USASPENDING_ICON = '<svg class="verified-icon" viewBox="0 0 16 18" width="12" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M8 1.2 L14.3 3.3 V8.4 C14.3 12.4 11.7 15.5 8 16.8 C4.3 15.5 1.7 12.4 1.7 8.4 V3.3 Z"/></svg>';
 
-function usd(n) {
-  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
-}
-
-// Abbreviated form ("$9.98B", "$1.23M") for large summary figures where
-// scannability matters more than the exact dollar — every other dollar
-// figure on the site still uses usd() at full precision.
-function usdCompact(n) {
-  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", notation: "compact", maximumFractionDigits: 2 }).format(n);
-}
-
 // Share of a state's total award reflected in its recorded subawards figure.
 // Shared by the map's "Subawards disbursed" toggle and the progress bar shown
 // next to the subawards figure everywhere else — one calculation, one meaning.
@@ -34,28 +23,10 @@ function disbBarHtml(share) {
   return `<div class="disb-bar" title="${pct}% of the total award reflected in the subawards figure above"><div class="disb-fill" style="width:${pct}%"></div></div><div class="disb-pct">${pct}% of award</div>`;
 }
 
-function esc(str) {
-  const d = document.createElement("div");
-  d.textContent = str == null ? "" : String(str);
-  return d.innerHTML;
-}
-
-// Capitalizes the first letter of each word without touching existing case
-// elsewhere in the word — "RFA issued" -> "RFA Issued", not "Rfa Issued".
-// Applied only to status labels themselves, never to surrounding sentence
-// text (so "Stage 4 of 5" keeps a lowercase "of").
-function titleCase(str) {
-  return str.replace(/\b\w/g, c => c.toUpperCase());
-}
-
 function splitFlag(notes) {
   const i = notes.indexOf("FLAG:");
   if (i === -1) return { main: notes, flag: null };
   return { main: notes.slice(0, i).trim(), flag: notes.slice(i + 5).trim() };
-}
-
-function fmtDate(iso) {
-  return new Date(iso + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
 
 function daysUntil(iso) {
@@ -80,29 +51,15 @@ let STATES = [];
 let DEADLINES = [];
 let COMMENTARY = [];
 let FEDERAL_MILESTONES = [];
-let HEALTH_SYSTEMS = [];
-let HOSPITAL_ROSTER = [];
 let SEARCH_INDEX = [];
 let currentStatus = [];
 let currentState = null;
 let currentView = null;
 let currentSort = "stage";
-let hsTierFilter = "all";
-let hsOwnershipFilter = "all";
-let hsCompanyFilter = "all";
-
-function stageVar(status) {
-  const s = STAGES.find(s => s.key === status);
-  return s ? `var(${s.var})` : "var(--muted)";
-}
 
 function stagePillHtml(status) {
   const v = stageVar(status);
   return `<span class="stage-pill" style="--stage-color:${v}"><span class="dot" style="background:${v}"></span>${esc(titleCase(status))}</span>`;
-}
-
-function stageIndex(status) {
-  return STAGES.findIndex(s => s.key === status);
 }
 
 function parseHash() {
@@ -125,13 +82,11 @@ function goStatus(status) {
 }
 
 async function boot() {
-  const [statesRes, deadlinesRes, commentaryRes, federalRes, healthSystemsRes, hospitalRosterRes] = await Promise.all([
+  const [statesRes, deadlinesRes, commentaryRes, federalRes] = await Promise.all([
     fetch("/api/states").then(r => r.json()),
     fetch("/api/deadlines").then(r => r.json()),
     fetch("/api/commentary").then(r => r.json()),
     fetch("/api/federal_milestones").then(r => r.json()).catch(() => []),
-    fetch("/api/health_systems").then(r => r.json()).catch(() => []),
-    fetch("/api/hospital_roster").then(r => r.json()).catch(() => []),
   ]);
 
   STAGES = statesRes.status_taxonomy.map((key, i) => ({ key, order: i + 1, var: `--stage-${i + 1}` }));
@@ -139,10 +94,6 @@ async function boot() {
   DEADLINES = deadlinesRes;
   COMMENTARY = commentaryRes;
   FEDERAL_MILESTONES = federalRes;
-  HEALTH_SYSTEMS = healthSystemsRes;
-  HOSPITAL_ROSTER = hospitalRosterRes;
-  buildRosterIndex();
-  populateCompanyFilter();
   SEARCH_INDEX = buildSearchIndex();
 
   document.getElementById("stamp").textContent = `${STATES.length} states · FY26`;
@@ -171,38 +122,6 @@ async function boot() {
     mapMetric = btn.dataset.metric;
     document.querySelectorAll("#map-toggle button").forEach(b => b.classList.toggle("active", b === btn));
     renderMap();
-  });
-  document.getElementById("hs-layer-toggle").addEventListener("click", e => {
-    const btn = e.target.closest("button[data-layer]");
-    if (!btn) return;
-    btn.classList.toggle("active");
-    if (btn.dataset.layer === "operators") hsShowOperators = btn.classList.contains("active");
-    if (btn.dataset.layer === "facilities") hsShowFacilities = btn.classList.contains("active");
-    renderOperatorLayer();
-    updateFacilityVisibility();
-  });
-  document.getElementById("hs-tier-toggle").addEventListener("click", e => {
-    const btn = e.target.closest("button[data-tier]");
-    if (!btn) return;
-    hsTierFilter = btn.dataset.tier;
-    document.querySelectorAll("#hs-tier-toggle button").forEach(b => b.classList.toggle("active", b === btn));
-    refreshHsOperators();
-  });
-  document.getElementById("hs-ownership-toggle").addEventListener("click", e => {
-    const btn = e.target.closest("button[data-ownership]");
-    if (!btn) return;
-    hsOwnershipFilter = btn.dataset.ownership;
-    document.querySelectorAll("#hs-ownership-toggle button").forEach(b => b.classList.toggle("active", b === btn));
-    refreshHsOperators();
-  });
-  document.getElementById("hs-company-filter").addEventListener("change", e => {
-    hsCompanyFilter = e.target.value;
-    applyFacilityFilter();
-  });
-  document.getElementById("hs-compare-btn").addEventListener("click", openCompareModal);
-  document.getElementById("hs-compare-close").addEventListener("click", closeCompareModal);
-  document.getElementById("hs-compare-overlay").addEventListener("click", e => {
-    if (e.target.id === "hs-compare-overlay") closeCompareModal();
   });
   document.getElementById("sort-select").addEventListener("change", e => {
     currentSort = e.target.value;
@@ -239,7 +158,6 @@ async function boot() {
     if (e.key !== "Escape") return;
     closeFederalModal();
     closeWhatsNewModal();
-    closeCompareModal();
   });
 
   initSiteSearch();
@@ -267,6 +185,71 @@ function federalMilestoneHtml(m) {
       </div>
     </div>
   `;
+}
+
+// A small zoomable map of one state: the health systems headquartered there and every Medicare-registered
+// hospital in it. The full Atlas (filters, categories, outreach, systems headquartered elsewhere) is one
+// click away. Size = hospitals; color = ownership, same palette as the Atlas.
+let stateAtlasMap = null;
+
+function stateAtlasRadius(n) {
+  if (n == null) return 6;
+  return n >= 90 ? 15 : n >= 40 ? 12 : n >= 15 ? 9.5 : n >= 5 ? 7.5 : 6;
+}
+
+function stateAtlasOwnerVar(o) {
+  const v = (o || "").toLowerCase();
+  if (v.includes("investor") || v.includes("for-profit") || v.includes("proprietary")) return "--owner-forprofit";
+  if (v.includes("government") || v.includes("veterans") || v.includes("defense") || v.includes("tribal")) return "--owner-government";
+  return "--owner-nonprofit";
+}
+
+async function initStateAtlas(stateName) {
+  if (stateAtlasMap) { stateAtlasMap.remove(); stateAtlasMap = null; }
+  const mapEl = document.getElementById("state-atlas-map");
+  const caption = document.getElementById("state-atlas-caption");
+  if (!mapEl) return;
+  const abbr = stateAbbrOf(stateName);
+  let data = null;
+  try { data = abbr ? await (await fetch(`/api/atlas_state/${abbr}`)).json() : null; } catch { data = null; }
+  if (!document.getElementById("state-atlas-map")) return; // navigated away while loading
+  if (!data || typeof L === "undefined") {
+    caption.textContent = "The state map isn't available right now — the Health Systems Atlas has the full view.";
+    mapEl.hidden = true;
+    return;
+  }
+  const sys = data.systems.filter(x => Number.isFinite(x.lat) && Number.isFinite(x.lon));
+  const hosp = data.hospitals.filter(x => Number.isFinite(x.lat) && Number.isFinite(x.lon));
+  caption.textContent = `${sys.length} health system${sys.length === 1 ? "" : "s"} headquartered in ${stateName} and ${hosp.length.toLocaleString()} Medicare-registered hospitals. Systems based elsewhere that run hospitals here appear as hospital dots, not as large circles.`;
+  document.getElementById("state-atlas-legend").textContent = "Large circles = health systems headquartered here (size = hospital count where known); small dots = hospitals (CMS). Green = nonprofit, orange = for-profit/investor-owned, blue = government.";
+
+  stateAtlasMap = L.map(mapEl, { scrollWheelZoom: false });
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 18,
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors',
+  }).addTo(stateAtlasMap);
+  stateAtlasMap.once("click", () => stateAtlasMap.scrollWheelZoom.enable());
+  stateAtlasMap.createPane("stateSystems").style.zIndex = 620;
+
+  hosp.forEach(p => {
+    L.circleMarker([p.lat, p.lon], { radius: 3.5, color: "var(--surface)", weight: 1, fillColor: `var(${stateAtlasOwnerVar(p.ownership)})`, fillOpacity: 0.8 })
+      .bindPopup(`<div class="hs-popup"><div class="hs-popup-title">${esc(p.name)}</div><div>${esc(titleCase((p.type || "Hospital").toLowerCase()))}</div><div>${esc(p.city)}</div></div>`)
+      .addTo(stateAtlasMap);
+  });
+  sys.forEach(x => {
+    const lines = [
+      x.hospitals != null ? `${x.hospitals.toLocaleString()} hospitals${x.kind === "operator" ? "" : " (AHRQ)"}` : "Hospital count not on file",
+      x.beds ? `${x.beds.toLocaleString()} beds (AHRQ)` : null,
+      x.city ? `HQ ${esc(x.city)}` : null,
+    ].filter(Boolean).map(t => `<div>${t}</div>`).join("");
+    L.circleMarker([x.lat, x.lon], {
+      radius: stateAtlasRadius(x.hospitals), color: "var(--ink)", weight: 1.5, dashArray: x.hospitals == null ? "3 2" : null,
+      fillColor: `var(${stateAtlasOwnerVar(x.ownership)})`, fillOpacity: 0.85, pane: "stateSystems",
+    }).bindPopup(`<div class="hs-popup"><div class="hs-popup-title">${esc(x.name)}</div>${lines}</div>`).addTo(stateAtlasMap);
+  });
+  const pts = [...hosp, ...sys].map(p => [p.lat, p.lon]);
+  if (pts.length) stateAtlasMap.fitBounds(L.latLngBounds(pts).pad(0.1));
+  else stateAtlasMap.setView([39.5, -98.35], 4);
 }
 
 function renderFederalModalBody() {
@@ -467,7 +450,6 @@ function renderAll() {
   document.getElementById("detail").hidden = true;
   document.getElementById("calendar").hidden = true;
   document.getElementById("commentary").hidden = true;
-  document.getElementById("health-systems").hidden = true;
 
   if (currentState) {
     document.getElementById("detail").hidden = false;
@@ -484,12 +466,6 @@ function renderAll() {
   if (currentView === "commentary") {
     document.getElementById("commentary").hidden = false;
     renderCommentary();
-    return;
-  }
-
-  if (currentView === "health-systems") {
-    document.getElementById("health-systems").hidden = false;
-    renderHealthSystems();
     return;
   }
 
@@ -751,480 +727,6 @@ async function renderMap() {
     : "Colored by total FY26 award, scaled to the range actually observed among tracked states (not from $0) so relative differences are visible. Untracked states are neutral gray.";
 }
 
-// ---- health systems map ----
-// Two Leaflet layers on one real pan/zoom tile map: a small curated layer of
-// health-system OPERATORS (companies — from our own sourced dataset, shown
-// at every zoom level since there are only a couple dozen) and a bulk layer
-// of individual hospital FACILITIES nationwide, from our own /api/cms_hospitals
-// endpoint (CMS's "Hospital General Information" dataset, geocoded once
-// server-side into our DB — see app/seed.py). This used to fetch HIFLD's
-// ArcGIS feature service directly from the browser, but that layer turned out
-// to be a frozen 2016-17 snapshot (last edited 2018-02-05) with no CORS-free
-// current replacement, so CMS's own actively-maintained dataset is fetched
-// server-side instead and served from our DB like everything else curated
-// here — "fetched on page load" describes retrieval, not the data's age;
-// CMS_META below carries the dataset's own freshness, and the status line
-// says so explicitly rather than implying "live" means "current."
-let CMS_META = null;
-
-let hsMap = null;
-let hsOperatorLayer = null;
-let hsFacilityLayer = null; // an L.markerClusterGroup once the plugin loads, else a plain layerGroup
-let hsShowOperators = true;
-let hsShowFacilities = true;
-let hsFacilitiesLoaded = false;
-let hsFacilitiesLoading = false;
-let hsFacilitiesCount = 0;
-let hsAllFacilityMarkers = []; // every live marker, built once; filtering re-adds a subset rather than re-fetching
-let ROSTER_BY_CITY_STATE = {}; // "STATE|CITY" -> [{company, name, city, state, source_url, verified_at, tokens}]
-let ROSTER_COMPANIES = [];
-
-function tierRadius(tier) {
-  return { small: 5, mid: 8, large: 12, major: 17 }[tier] || 6;
-}
-
-// Reuses the pipeline's 5-hue stage palette for the tier badge/legend, just
-// borrowing hues rather than any pipeline meaning: gray→purple reads as a
-// small→major size ramp the same way it already reads as early→late stage.
-function tierColorVar(tier) {
-  return { small: "--stage-1", mid: "--stage-2", large: "--stage-3", major: "--stage-5" }[tier] || "--stage-1";
-}
-
-function ownershipColorVar(ownership) {
-  return ownership === "for-profit" ? "--owner-forprofit" : "--owner-nonprofit";
-}
-
-// CMS's ownership field is a free-ish text taxonomy ("Voluntary non-profit -
-// Private/Church/Other", "Proprietary", "Physician", "Government - Federal/
-// State/Local/Hospital District or Authority", "Veterans Health
-// Administration", "Department of Defense", "Tribal") — coarser-matched here
-// into the same three-way split used elsewhere on the map/legend.
-function facilityOwnerColorVar(owner) {
-  const o = (owner || "").toUpperCase();
-  if (o.includes("NON-PROFIT") || o.includes("NONPROFIT")) return "--owner-nonprofit";
-  if (o.includes("PROPRIETARY") || o.includes("PHYSICIAN")) return "--owner-forprofit";
-  if (o.includes("GOVERNMENT") || o.includes("VETERANS") || o.includes("DEFENSE") || o.includes("TRIBAL")) return "--owner-government";
-  return "--owner-unknown";
-}
-
-// CMS doesn't publish a bed count in this dataset (unlike HIFLD), so marker
-// size is set by hospital type instead of scaling with beds.
-const FACILITY_TYPE_RADIUS = {
-  "Acute Care Hospitals": 8,
-  "Childrens": 7,
-  "Critical Access Hospitals": 6,
-  "Psychiatric": 6,
-  "Acute Care - Veterans Administration": 7,
-  "Acute Care - Department of Defense": 7,
-  "Rural Emergency Hospital": 5,
-  "Long-term": 6,
-};
-
-function facilityRadius(type) {
-  return FACILITY_TYPE_RADIUS[type] || 6;
-}
-
-function currentFilteredOperators() {
-  return HEALTH_SYSTEMS.filter(h =>
-    (hsTierFilter === "all" || h.tier === hsTierFilter) &&
-    (hsOwnershipFilter === "all" || h.ownership_type === hsOwnershipFilter)
-  );
-}
-
-function ensureHsMap() {
-  if (hsMap || typeof L === "undefined") return;
-  // scrollWheelZoom starts off so scrolling the page past the map doesn't
-  // hijack the wheel — a click (or the +/- control, which works regardless)
-  // arms it, the same pattern most embedded maps use.
-  hsMap = L.map("hs-map", { scrollWheelZoom: false, worldCopyJump: true }).setView([39.5, -98.35], 4);
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    maxZoom: 18,
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors',
-  }).addTo(hsMap);
-  hsMap.once("click", () => hsMap.scrollWheelZoom.enable());
-
-  // Cluster bubbles live in Leaflet's marker pane (z 600), which would hide
-  // the operator HQ dots drawn in the default overlay pane (z 400) — give
-  // operators their own pane above the clusters so they stay visible and
-  // clickable. Popups (z 700) still sit above both.
-  hsMap.createPane("operators").style.zIndex = 620;
-  hsOperatorLayer = L.layerGroup().addTo(hsMap);
-  // Clusters into count bubbles that split apart on zoom — the only way to
-  // keep ~7,100 individual hospital markers responsive at every zoom level,
-  // including the whole-country view. Falls back to a plain (unclustered)
-  // layer if the plugin failed to load, so the map still works either way.
-  hsFacilityLayer = typeof L.markerClusterGroup === "function"
-    ? L.markerClusterGroup({ maxClusterRadius: 45, disableClusteringAtZoom: 16 })
-    : L.layerGroup();
-}
-
-// Keeps an opened popup panned clear of the zoom control (top-left) and the
-// map edges instead of letting it sit underneath them.
-const HS_POPUP_OPTIONS = { autoPanPaddingTopLeft: [50, 12], autoPanPaddingBottomRight: [12, 12] };
-
-function operatorPopupHtml(h) {
-  return `
-    <div class="hs-popup">
-      <div class="hs-popup-title">${esc(h.name)}</div>
-      <div>${titleCase(h.tier)} operator · ${h.ownership_type === "for-profit" ? "For-profit" : "Nonprofit"}</div>
-      <div>${h.hospital_count} hospitals · HQ ${esc(h.hq_city)}, ${esc(h.hq_state)}</div>
-      ${h.confidence === "approximate" ? `<div class="hs-popup-caution">Approximate count</div>` : ""}
-      <div class="hs-popup-meta">Verified ${esc(h.verified_at || "date unknown")}</div>
-      <a href="${esc(h.source_url)}" target="_blank" rel="noopener">Source ↗</a>
-    </div>
-  `;
-}
-
-function renderOperatorLayer() {
-  if (!hsOperatorLayer) return;
-  hsOperatorLayer.clearLayers();
-  if (!hsShowOperators) return;
-  currentFilteredOperators().forEach(h => {
-    L.circleMarker([h.hq_lat, h.hq_lon], {
-      radius: tierRadius(h.tier),
-      color: "var(--surface)",
-      weight: 2,
-      fillColor: `var(${ownershipColorVar(h.ownership_type)})`,
-      fillOpacity: 0.92,
-      pane: "operators",
-    })
-      .bindPopup(operatorPopupHtml(h), HS_POPUP_OPTIONS)
-      .addTo(hsOperatorLayer);
-  });
-}
-
-// ---- parent-operator matching ----
-// Ties an individual CMS facility back to a curated operator roster
-// (app/health_system_rosters_data.py) by normalized city+state, then — when
-// more than one roster entry shares that city+state — by name-token overlap
-// to pick the closer match. City+state alone is usually decisive since two
-// different rostered operators rarely share an exact town.
-const ROSTER_STOPWORDS = new Set([
-  "HOSPITAL", "HOSPITALS", "MEDICAL", "CENTER", "CENTERS", "HEALTH", "HEALTHCARE",
-  "SYSTEM", "CAMPUS", "THE", "OF", "AND", "REGIONAL", "GENERAL", "INC", "CARE",
-]);
-
-function normalizeMatchText(s) {
-  return (s || "").toUpperCase().replace(/[^A-Z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
-}
-
-function nameTokens(s) {
-  return normalizeMatchText(s).split(" ").filter(t => t && !ROSTER_STOPWORDS.has(t));
-}
-
-function buildRosterIndex() {
-  ROSTER_BY_CITY_STATE = {};
-  const companies = new Set();
-  HOSPITAL_ROSTER.forEach(row => {
-    companies.add(row.company);
-    const key = `${normalizeMatchText(row.state)}|${normalizeMatchText(row.city)}`;
-    const entry = { ...row, tokens: nameTokens(row.name) };
-    (ROSTER_BY_CITY_STATE[key] = ROSTER_BY_CITY_STATE[key] || []).push(entry);
-  });
-  ROSTER_COMPANIES = [...companies].sort();
-}
-
-function matchParentCompany(name, city, state) {
-  const candidates = ROSTER_BY_CITY_STATE[`${normalizeMatchText(state)}|${normalizeMatchText(city)}`];
-  if (!candidates || !candidates.length) return null;
-  // Even with a single roster candidate for this city+state, still require at
-  // least one shared name token before accepting the match — many towns have
-  // more than one hospital, and a roster listing only one of them there is
-  // not evidence the live facility we're looking at is that one. Better to
-  // fall through to "not identified" than mislabel an unrelated hospital.
-  const targetTokens = new Set(nameTokens(name));
-  let best = null, bestScore = 0;
-  candidates.forEach(c => {
-    const score = c.tokens.filter(t => targetTokens.has(t)).length;
-    if (score > bestScore) { bestScore = score; best = c; }
-  });
-  return bestScore > 0 ? best : null;
-}
-
-function populateCompanyFilter() {
-  const select = document.getElementById("hs-company-filter");
-  if (!select) return;
-  const current = select.value || "all";
-  select.innerHTML = `<option value="all">All hospitals</option>`
-    + ROSTER_COMPANIES.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join("")
-    + `<option value="unmatched">Parent not identified</option>`;
-  if ([...select.options].some(o => o.value === current)) select.value = current;
-}
-
-// CMS leaves some fields blank per facility — each line below is only shown
-// when the source actually has that value, rather than padding the popup
-// with placeholders.
-function facilityPopupHtml(p, match) {
-  const has = v => v && String(v).trim() && String(v).toUpperCase() !== "NOT AVAILABLE";
-  const address = [p.address, `${p.city || ""}, ${p.state || ""}${has(p.county) ? ` (${p.county} County)` : ""}`]
-    .filter(Boolean).join(", ");
-  const phoneDigits = has(p.phone) ? String(p.phone).replace(/[^\d+]/g, "") : null;
-  const rating = has(p.rating) && /^[1-5]$/.test(p.rating) ? `${p.rating}★ CMS rating` : null;
-  const geoCaveat = p.geo_precision !== "address"
-    ? `Marker placed at ${p.geo_precision === "zip" ? "ZIP code" : "city"} center — CMS's own address for this hospital didn't geocode precisely.`
-    : null;
-  // "Cite it when we can't link it" — an explicit, visible line either way,
-  // never silently omitted, so absence of a match reads as "not identified"
-  // rather than "not part of anything."
-  const parentLine = match
-    ? `<div>Part of <strong>${esc(match.company)}</strong> (roster verified ${esc(match.verified_at || "date unknown")}) · <a href="${esc(match.source_url)}" target="_blank" rel="noopener">Source</a></div>`
-    : `<div class="hs-popup-caution">Parent operator not identified</div>`;
-
-  return `
-    <div class="hs-popup">
-      <div class="hs-popup-title">${esc(p.name || "Unnamed facility")}</div>
-      <div>${esc(titleCase(p.type || "Hospital"))} · ${esc(titleCase((p.ownership || "Ownership not available").replace(/\s*-\s*/g, " ")))}</div>
-      <div>${address}</div>
-      <div>${[
-        has(p.emergency) ? (p.emergency === "Yes" ? "Emergency services" : "No emergency services") : null,
-        rating,
-      ].filter(Boolean).map(esc).join(" · ")}</div>
-      ${parentLine}
-      ${phoneDigits ? `<div><a href="tel:${esc(phoneDigits)}">${esc(p.phone)}</a></div>` : ""}
-      ${geoCaveat ? `<div class="hs-popup-caution">${esc(geoCaveat)}</div>` : ""}
-    </div>
-  `;
-}
-
-function updateHsStatus(message) {
-  const el = document.getElementById("hs-status");
-  if (el) el.textContent = message;
-}
-
-function offFacilitiesMessage() {
-  return `Hospital layer is off — turn on “All hospitals (CMS)” above to show all ${hsFacilitiesCount ? hsFacilitiesCount.toLocaleString() + " " : ""}U.S. hospitals, clustered.`;
-}
-
-function loadedFacilitiesMessage() {
-  const meta = CMS_META
-    ? ` CMS's dataset was last updated ${fmtDate(CMS_META.dataset_modified)}; this site last pulled and geocoded it ${fmtDate(CMS_META.geocoded_at)}.`
-    : "";
-  return `Showing ${hsFacilitiesCount.toLocaleString()} hospitals from CMS's Hospital General Information dataset, clustered — zoom in to split a cluster apart, click any marker for details.${meta}`;
-}
-
-// Fetches the full nationwide dataset once from our own API (a server-side
-// geocoded snapshot of CMS's dataset — see app/seed.py) and hands it all to
-// the cluster group in one batch, rather than re-fetching a viewport slice
-// on every pan/zoom — the clustering plugin is what makes rendering all of
-// them at once workable.
-async function ensureFacilitiesLoaded() {
-  if (hsFacilitiesLoaded || hsFacilitiesLoading || !hsFacilityLayer) return;
-  hsFacilitiesLoading = true;
-  updateHsStatus("Loading hospitals…");
-
-  let hospitals;
-  try {
-    const res = await fetch("/api/cms_hospitals");
-    const data = await res.json();
-    hospitals = data.hospitals || [];
-    CMS_META = data.meta || null;
-  } catch {
-    hsFacilitiesLoading = false;
-    updateHsStatus("Couldn't reach the hospital data right now — the operator layer above is still unaffected.");
-    return;
-  }
-
-  const markers = hospitals
-    .filter(p => Number.isFinite(p.lat) && Number.isFinite(p.lon))
-    .map(p => {
-      const match = matchParentCompany(p.name, p.city, p.state);
-      const marker = L.circleMarker([p.lat, p.lon], {
-        radius: facilityRadius(p.type),
-        color: "var(--surface)",
-        weight: 1.5,
-        fillColor: `var(${facilityOwnerColorVar(p.ownership)})`,
-        fillOpacity: 0.88,
-      }).bindPopup(facilityPopupHtml(p, match), HS_POPUP_OPTIONS);
-      marker.companyKey = match ? match.company : "unmatched";
-      return marker;
-    });
-
-  hsAllFacilityMarkers = markers;
-  hsFacilitiesCount = markers.length;
-  hsFacilitiesLoaded = true;
-  hsFacilitiesLoading = false;
-  applyFacilityFilter();
-  updateHsStatus(hsShowFacilities ? loadedFacilitiesMessage() : offFacilitiesMessage());
-  if (!document.getElementById("hs-compare-overlay").hidden) renderCompareModalBody(); // fill in live columns if the modal was opened before the fetch finished
-}
-
-// Re-populates the cluster group from the already-loaded marker set — no
-// re-fetch — whenever the parent-operator dropdown or the layer toggle
-// changes which subset should be visible.
-function applyFacilityFilter() {
-  if (!hsFacilityLayer || !hsFacilitiesLoaded) return;
-  hsFacilityLayer.clearLayers();
-  const filtered = hsCompanyFilter === "all"
-    ? hsAllFacilityMarkers
-    : hsAllFacilityMarkers.filter(m => m.companyKey === hsCompanyFilter);
-  if (typeof hsFacilityLayer.addLayers === "function") {
-    hsFacilityLayer.addLayers(filtered); // markercluster's bulk-add — much faster than adding one at a time
-  } else {
-    filtered.forEach(m => m.addTo(hsFacilityLayer));
-  }
-}
-
-function updateFacilityVisibility() {
-  if (!hsMap || !hsFacilityLayer) return;
-  if (hsShowFacilities) {
-    if (!hsMap.hasLayer(hsFacilityLayer)) hsFacilityLayer.addTo(hsMap);
-    if (hsFacilitiesLoaded) { applyFacilityFilter(); updateHsStatus(loadedFacilitiesMessage()); }
-    else if (!hsFacilitiesLoading) ensureFacilitiesLoaded();
-  } else {
-    if (hsMap.hasLayer(hsFacilityLayer)) hsMap.removeLayer(hsFacilityLayer);
-    updateHsStatus(offFacilitiesMessage());
-  }
-}
-
-// Same cutoffs documented in app/health_systems_data.py — kept here as the
-// single source of truth for how the legend labels its own tier bubbles.
-function tierRangeLabel(tier) {
-  return { small: "under 15", mid: "15–39", large: "40–89", major: "90+" }[tier] || "";
-}
-
-function renderHsLegend() {
-  document.getElementById("hs-legend").innerHTML = `
-    <div class="hs-legend-group">
-      <span class="hs-legend-title">Operator size = hospital count</span>
-      ${["small", "mid", "large", "major"].map(t => `
-        <span class="hs-legend-item" title="${titleCase(t)}: ${tierRangeLabel(t)} hospitals">
-          <svg width="${tierRadius("major") * 2 + 4}" height="${tierRadius("major") * 2 + 4}">
-            <circle cx="${tierRadius("major") + 2}" cy="${tierRadius("major") + 2}" r="${tierRadius(t)}" fill="var(--muted)" fill-opacity="0.5"/>
-          </svg>
-          ${titleCase(t)} <span class="hs-legend-range">(${tierRangeLabel(t)})</span>
-        </span>
-      `).join("")}
-    </div>
-    <div class="hs-legend-group">
-      <span class="hs-legend-title">Color = ownership</span>
-      <span class="hs-legend-item" title="Tax-exempt / mission-driven operator, as reported by the source"><span class="hs-dot" style="background:var(--owner-nonprofit)"></span>Nonprofit</span>
-      <span class="hs-legend-item" title="Investor- or privately-owned operator, as reported by the source"><span class="hs-dot" style="background:var(--owner-forprofit)"></span>For-profit</span>
-      <span class="hs-legend-item" title="Federal, state, or county-run facility — appears only in the per-facility hospital layer, since none of the curated operators above are government agencies"><span class="hs-dot" style="background:var(--owner-government)"></span>Government (hospital layer only)</span>
-    </div>
-  `;
-}
-
-// Tier/ownership filters only touch the curated operator layer — refresh
-// just that (and the list) rather than re-checking the map/live layer too.
-function refreshHsOperators() {
-  renderHealthSystemsList(currentFilteredOperators());
-  renderOperatorLayer();
-}
-
-// ---- compare-operators modal ----
-// Computed on the spot from whatever CMS data is already loaded (or being
-// loaded) for the facility layer — not a stored figure — so it reads as "—"
-// rather than 0 until the fetch finishes. No bed total: CMS's Hospital
-// General Information dataset doesn't publish bed counts.
-function operatorLiveStats(name) {
-  if (!hsFacilitiesLoaded) return null;
-  return { count: hsAllFacilityMarkers.filter(m => m.companyKey === name).length };
-}
-
-function renderCompareModalBody() {
-  const wrap = document.getElementById("hs-compare-table-wrap");
-  if (!wrap) return;
-  const sorted = [...HEALTH_SYSTEMS].sort((a, b) => b.hospital_count - a.hospital_count);
-  const liveNote = hsFacilitiesLoaded ? "" : " (loading…)";
-  wrap.innerHTML = `
-    <table class="hs-compare-table">
-      <thead>
-        <tr>
-          <th>Operator</th>
-          <th>Tier</th>
-          <th>Curated hospital count</th>
-          <th>Matched on map${liveNote}</th>
-          <th>Verified</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${sorted.map(h => {
-          const live = operatorLiveStats(h.name);
-          return `
-            <tr>
-              <td><span class="hs-dot" style="background:var(${ownershipColorVar(h.ownership_type)})"></span>${esc(h.name)}</td>
-              <td>${titleCase(h.tier)}</td>
-              <td>${h.hospital_count}${h.confidence === "approximate" ? ` <span class="hs-compare-muted">(approx.)</span>` : ""}</td>
-              <td>${live ? live.count.toLocaleString() : "—"}</td>
-              <td>${esc(h.verified_at || "—")}</td>
-            </tr>
-          `;
-        }).join("")}
-      </tbody>
-    </table>
-  `;
-}
-
-function openCompareModal() {
-  renderCompareModalBody();
-  document.getElementById("hs-compare-overlay").hidden = false;
-  document.body.classList.add("modal-open");
-  if (!hsFacilitiesLoaded && !hsFacilitiesLoading) ensureFacilitiesLoaded();
-}
-
-function closeCompareModal() {
-  document.getElementById("hs-compare-overlay").hidden = true;
-  document.body.classList.remove("modal-open");
-}
-
-// The 26 curated operators are re-checked individually, not on one schedule,
-// so this reports the actual spread of verified_at dates rather than a
-// single "as of" date that would imply every entry was just re-checked.
-function renderCuratedFreshness() {
-  const dates = HEALTH_SYSTEMS.map(h => h.verified_at).filter(Boolean).sort();
-  const el = document.getElementById("hs-curated-freshness");
-  if (!el || !dates.length) return;
-  const oldest = fmtDate(dates[0]), newest = fmtDate(dates[dates.length - 1]);
-  el.textContent = oldest === newest
-    ? `Curated operator list: every entry verified ${newest}.`
-    : `Curated operator list: entries verified between ${oldest} and ${newest} — each has its own date, see "Compare operator size" or a card's source link.`;
-}
-
-function renderHealthSystems() {
-  renderHealthSystemsList(currentFilteredOperators());
-  renderHsLegend();
-  renderCuratedFreshness();
-
-  if (typeof L === "undefined") {
-    document.getElementById("hs-map").innerHTML = `<p style="text-align:center; color:var(--muted); font-size:12px;">Map library unavailable right now.</p>`;
-    return;
-  }
-
-  ensureHsMap();
-  if (!hsMap) return;
-  hsMap.invalidateSize(); // the container may have been display:none while on another tab
-  renderOperatorLayer();
-  updateFacilityVisibility();
-}
-
-function renderHealthSystemsList(list) {
-  const sorted = [...list].sort((a, b) => b.hospital_count - a.hospital_count);
-  document.getElementById("hs-list").innerHTML = sorted.map(h => `
-    <div class="hs-card" id="hs-row-${h.id}">
-      <div class="hs-card-head">
-        <span class="stage-pill" style="--stage-color:var(${tierColorVar(h.tier)})">${titleCase(h.tier)}</span>
-        <h3>${esc(h.name)}</h3>
-        <span class="stage-pill" style="--stage-color:var(${ownershipColorVar(h.ownership_type)})">${h.ownership_type === "for-profit" ? "For-profit" : "Nonprofit"}</span>
-        ${h.confidence === "approximate" ? `<span class="caution-tag">Approximate count</span>` : ""}
-      </div>
-      <div class="hs-card-body">
-        <span>${h.hospital_count} hospitals</span>
-        <span>HQ: ${esc(h.hq_city)}, ${esc(h.hq_state)}</span>
-        <span>Verified ${esc(h.verified_at || "date unknown")}</span>
-      </div>
-      ${h.notes ? `<p class="hs-notes">${esc(h.notes)}</p>` : ""}
-      <a class="tl-source" href="${esc(h.source_url)}" target="_blank" rel="noopener">Source ↗</a>
-    </div>
-  `).join("") || `<p style="text-align:center; color:var(--muted); padding:24px 0;">No systems match this filter.</p>`;
-}
-
-function latestConfirmedEvent(s) {
-  const events = s.status_events || [];
-  const confirmed = events.filter(e => e.confidence === "confirmed");
-  const pool = confirmed.length ? confirmed : events;
-  return pool.length ? pool[pool.length - 1] : null;
-}
-
 function latestNote(s) {
   const e = latestConfirmedEvent(s);
   return e ? e.notes : "";
@@ -1339,6 +841,15 @@ function renderDetail(name) {
       </div>
     </div>
     ${overviewHtml}
+    <section class="state-atlas" id="state-atlas">
+      <div class="state-atlas-head">
+        <h2>Health systems in ${esc(s.state)}</h2>
+        <a class="hs-launch" href="/atlas?state=${encodeURIComponent(s.state)}">Open in the Health Systems Atlas &#8599;</a>
+      </div>
+      <p class="overview-caption" id="state-atlas-caption">Loading the state's hospitals and health systems…</p>
+      <div id="state-atlas-map" class="state-atlas-map"></div>
+      <p class="map-caption map-caption-wide" id="state-atlas-legend"></p>
+    </section>
     <div class="detail-body">
       <div class="detail-main">
         <h2>History</h2>
@@ -1364,6 +875,7 @@ function renderDetail(name) {
       </div>
     </div>
   `;
+  initStateAtlas(s.state);
 }
 
 // ---- calendar ----
@@ -1458,49 +970,6 @@ function fmtLoose(s) {
   if (parts.length === 3) return fmtDate(s);
   if (parts.length === 2) return new Date(parts[0], parts[1] - 1, 1).toLocaleDateString("en-US", { month: "short", year: "numeric" });
   return s;
-}
-
-// ---- dark mode toggle ----
-// A stored preference (set by the button) always wins; with none stored, the
-// site follows the OS/browser's prefers-color-scheme, same as before this
-// toggle existed. The inline script in index.html's <head> applies any
-// stored choice before first paint so there's no flash of the wrong theme.
-// localStorage access is wrapped because this runs before boot() — an
-// exception here (e.g. storage blocked by a privacy setting) must not take
-// the rest of the page down with it.
-function getStoredTheme() {
-  try { return localStorage.getItem("theme"); } catch { return null; }
-}
-
-function setStoredTheme(value) {
-  try { localStorage.setItem("theme", value); } catch { /* ignore — toggle still works for this page view */ }
-}
-
-function effectiveTheme() {
-  const stored = getStoredTheme();
-  if (stored === "dark" || stored === "light") return stored;
-  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-}
-
-function updateThemeToggleIcon() {
-  const btn = document.getElementById("theme-toggle");
-  const dark = effectiveTheme() === "dark";
-  btn.textContent = dark ? "☀️" : "🌙";
-  btn.setAttribute("aria-label", dark ? "Switch to light mode" : "Switch to dark mode");
-}
-
-function initThemeToggle() {
-  const btn = document.getElementById("theme-toggle");
-  updateThemeToggleIcon();
-  btn.addEventListener("click", () => {
-    const next = effectiveTheme() === "dark" ? "light" : "dark";
-    setStoredTheme(next);
-    document.documentElement.setAttribute("data-theme", next);
-    updateThemeToggleIcon();
-  });
-  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
-    if (!getStoredTheme()) updateThemeToggleIcon();
-  });
 }
 
 initThemeToggle();

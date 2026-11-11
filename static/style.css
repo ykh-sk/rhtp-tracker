@@ -37,6 +37,29 @@
   --owner-forprofit: #ea580c;
   --owner-government: #1d4ed8;
   --owner-unknown: #57606a;
+  /* BD layer: system category and contact status. Same reasoning as the owner colors above —
+     they sit on map tiles, so they're saturated and not theme-swapped. Status reads as a funnel
+     (gray -> blue -> amber -> orange -> green) with red as the closed-out end. */
+  --cat-academic: #7c3aed;
+  --cat-faith: #be185d;
+  --cat-secular: #15803d;
+  --cat-forprofit: #ea580c;
+  --cat-payerprovider: #0e7490;
+  --cat-public: #1d4ed8;
+  --cat-specialty: #a16207;
+  --cat-network: #4d7c0f;
+  --cat-association: #0f766e;
+  --cat-tribal: #c026d3;
+  --cat-university: #4338ca;
+  --cat-fqhc: #0369a1;
+  --cat-homehealth: #b45309;
+  --cat-hospital: #475569;
+  --bd-not_contacted: #6b7280;
+  --bd-researching: #2563eb;
+  --bd-contacted: #d97706;
+  --bd-in_discussion: #ea580c;
+  --bd-piloting: #15803d;
+  --bd-declined: #b91c1c;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -1881,3 +1904,192 @@ body.modal-open { overflow: hidden; }
 }
 
 .side-deadline-list .sd-title { color: var(--ink); }
+
+/* ---- BD layer: filters, status strip, landscape, contact-tracking modal ---- */
+.hs-select-wrap { display: inline-flex; align-items: center; gap: 8px; }
+.hs-select-wrap select,
+.bd-toolbar select,
+.bd-toolbar input,
+.bd-login input,
+.bd-table select,
+.bd-table input,
+.bd-table textarea {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11.5px;
+  color: var(--ink);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 7px 10px;
+}
+.hs-select-wrap select { max-width: 200px; }
+
+.hs-bd-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  margin: -6px 0 14px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.bd-strip-count strong { color: var(--ink); }
+.bd-strip-statuses { display: inline-flex; flex-wrap: wrap; gap: 6px; }
+.bd-unlock-link {
+  font: inherit;
+  color: var(--accent);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.bd-chip-row { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+.hs-popup .bd-chip-row { margin: 6px 0; }
+.bd-chip {
+  --chip: var(--muted);
+  display: inline-block;
+  font-size: 10.5px;
+  line-height: 1.5;
+  padding: 1px 8px;
+  border-radius: 999px;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+}
+.bd-chip-cat { color: #fff; background: var(--chip); border-color: var(--chip); }
+.bd-chip-rhtp { color: var(--stage-4); border-color: currentColor; background: none; }
+
+.bd-status-pill {
+  --chip: var(--bd-not_contacted);
+  display: inline-block;
+  font: inherit;
+  font-size: 10.5px;
+  font-weight: 600;
+  line-height: 1.5;
+  padding: 1px 9px;
+  border-radius: 999px;
+  color: #fff;
+  background: var(--chip);
+  border: 2px solid var(--chip);
+}
+button.bd-status-pill { cursor: pointer; }
+button.bd-status-pill.selected { outline: 2px solid var(--ink); outline-offset: 1px; }
+.bd-popup-status { margin-top: 8px; padding-top: 6px; border-top: 1px solid var(--border); }
+.bd-edit-link {
+  font: inherit;
+  font-size: 11.5px;
+  color: var(--accent);
+  background: none;
+  border: none;
+  padding: 0 0 0 6px;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.bd-unverified .caution-tag { margin-left: 4px; }
+
+/* Landscape */
+#hs-landscape { margin-bottom: 24px; }
+.ls-h { font-size: 13px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); margin: 22px 0 8px; }
+.ls-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
+.ls-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.ls-table th, .ls-table td { padding: 7px 12px; text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; }
+.ls-table thead th { font-size: 11px; color: var(--muted); font-weight: 600; background: var(--surface-2); position: sticky; top: 0; }
+.ls-table tfoot td { font-weight: 600; background: var(--surface-2); border-bottom: none; }
+.ls-table tbody tr:last-child td { border-bottom: none; }
+.ls-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+.ls-states { min-width: 860px; }
+.ls-sortable { cursor: pointer; user-select: none; }
+.ls-sortable:hover, .ls-sortable.sorted { color: var(--ink); }
+.ls-zero { color: var(--muted); opacity: 0.6; }
+.ls-sub { color: var(--muted); font-size: 11px; font-weight: 400; }
+.ls-note { font-size: 11.5px; color: var(--muted); margin: 8px 0 0; max-width: 80ch; }
+.ls-cell {
+  font: inherit;
+  color: var(--accent);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-weight: 600;
+}
+.ls-cell:hover { text-decoration: underline; }
+.ls-state { font-weight: 500; text-align: left; }
+.ls-bars { display: flex; flex-direction: column; gap: 5px; max-width: 640px; }
+.ls-bar-row { display: grid; grid-template-columns: 190px 1fr 56px; align-items: center; gap: 10px; font-size: 12px; }
+.ls-bar { height: 10px; background: var(--surface-2); border-radius: 5px; overflow: hidden; }
+.ls-bar span { display: block; height: 100%; background: var(--accent); border-radius: 5px; }
+.ls-bar-n { text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
+
+/* Contact-tracking modal */
+.bd-login { display: flex; gap: 8px; margin: 4px 0 8px; }
+.bd-login input { flex: 1 1 auto; max-width: 280px; }
+.bd-login-error { color: var(--warn); font-size: 12px; min-height: 1.2em; margin: 0; }
+.bd-summary { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 12px; }
+.bd-toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+.bd-toolbar input { flex: 1 1 220px; max-width: 320px; }
+.bd-table-wrap { max-height: 54vh; overflow: auto; border: 1px solid var(--border); border-radius: 10px; }
+.bd-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.bd-table th, .bd-table td { padding: 6px 8px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
+.bd-table thead th { font-size: 11px; color: var(--muted); background: var(--surface-2); position: sticky; top: 0; z-index: 1; }
+.bd-col-name { min-width: 190px; }
+.bd-sub { font-size: 11px; color: var(--muted); }
+.bd-table input { width: 130px; }
+.bd-table textarea { width: 100%; min-width: 220px; resize: vertical; }
+.bd-col-meta { font-size: 11px; color: var(--muted); white-space: nowrap; }
+.bd-empty { text-align: center; color: var(--muted); padding: 20px; }
+@media (max-width: 640px) {
+  .ls-bar-row { grid-template-columns: 120px 1fr 48px; }
+}
+#bd-username { flex: 0 0 90px !important; }
+
+.hs-search {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11.5px;
+  color: var(--ink);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 7px 10px;
+  min-width: 200px;
+}
+.hs-more-btn { align-self: center; margin: 6px 0 2px; }
+
+/* ---- Health Systems Atlas: a separate page with its own identity (indigo), linked to the Radar (green) ---- */
+body.atlas { --accent: #4a4fb0; --accent-soft: #eaeaf7; --radar-green: #2e6e5e; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) body.atlas { --accent: #9fa3e8; --accent-soft: #26284a; --radar-green: #6fbfa8; }
+}
+:root[data-theme="dark"] body.atlas { --accent: #9fa3e8; --accent-soft: #26284a; --radar-green: #6fbfa8; }
+.atlas-brand { display: inline-flex; align-items: center; gap: 10px; color: var(--ink); text-decoration: none; }
+.atlas-pin { color: var(--accent); flex: none; }
+.atlas-wordmark { font-family: "IBM Plex Serif", Georgia, serif; font-weight: 600; font-size: 30px; letter-spacing: -0.01em; line-height: 1.1; }
+.atlas-wordmark span { color: var(--accent); }
+.atlas-masthead { border-bottom: 3px solid var(--accent); }
+.radar-launch { color: var(--radar-green); background: transparent; border: 1px solid var(--radar-green); }
+.radar-launch:hover { background: color-mix(in srgb, var(--radar-green) 14%, transparent); }
+#team-signin { margin-left: 2px; }
+
+/* ---- Radar: the per-state health-systems mini map ---- */
+.state-atlas { margin: 28px 0; }
+.state-atlas-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px; margin-bottom: 8px; }
+.state-atlas-head h2 { margin: 0; }
+.state-atlas-map { width: 100%; height: 360px; border-radius: 10px; overflow: hidden; border: 1px solid var(--border); background: var(--surface-2); margin-top: 10px; }
+@media (max-width: 640px) { .state-atlas-map { height: 300px; } }
+
+/* Atlas: short bullet blocks instead of paragraphs; type chip; private state notes */
+.atlas-about { margin: 0 0 16px; padding-left: 18px; font-size: 13px; line-height: 1.6; color: var(--muted); }
+.atlas-about li { margin: 2px 0; }
+.atlas-about strong { color: var(--ink); }
+.atlas-foot { margin: 0; font-size: 12px; }
+.ls-notes { margin: 8px 0 0; padding-left: 18px; font-size: 12px; line-height: 1.55; color: var(--muted); max-width: 80ch; }
+.bd-chip-type { color: var(--accent); border-color: var(--accent); background: transparent; }
+.bd-state-notes { margin: 0 0 14px; border: 1px solid var(--border); border-radius: 10px; padding: 8px 12px; background: var(--surface); }
+.bd-state-notes summary { cursor: pointer; font-weight: 600; font-size: 12.5px; }
+.bd-state-note { display: grid; grid-template-columns: 130px 1fr auto; gap: 10px; align-items: start; margin: 10px 0; }
+.bd-state-note label { font-weight: 600; font-size: 12.5px; padding-top: 6px; }
+.bd-state-note textarea { width: 100%; font-family: "IBM Plex Sans", sans-serif; font-size: 12.5px; line-height: 1.5; background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; color: var(--ink); resize: vertical; }
+.bd-state-add { display: flex; gap: 8px; margin-top: 8px; }
+.bd-state-add select { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 7px 10px; color: var(--ink); }
+@media (max-width: 640px) { .bd-state-note { grid-template-columns: 1fr; } }

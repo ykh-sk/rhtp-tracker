@@ -6,3 +6,5 @@ rhtp.db
 .env.local
 .vercel
 .DS_Store
+# Private outreach history — this repo is public; seed.py loads it only if the file exists locally
+app/bd_initial_data.py

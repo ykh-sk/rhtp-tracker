@@ -15,6 +15,15 @@ from seed_data import (
 )
 from health_systems_data import HEALTH_SYSTEMS
 from health_system_rosters_data import HOSPITAL_ROSTERS
+from bd_profiles_data import BD_PROFILES, slugify
+from ahrq_data import load_ahrq_systems
+from ahrq_crosswalk_data import AHRQ_CROSSWALK
+try:
+    # Private starting records (the team's outreach history). Deliberately NOT committed — see .gitignore —
+    # because this repository is public and the Outreach tab is meant to sit behind the password.
+    from bd_initial_data import INITIAL_OUTREACH, INITIAL_STATE_NOTES
+except ImportError:
+    INITIAL_OUTREACH, INITIAL_STATE_NOTES = [], {}
 
 CMS_HOSPITALS_PATH = Path(__file__).resolve().parent / "data" / "cms_hospitals.json"
 CMS_DATASET_MODIFIED = "2026-07-22"  # data.cms.gov's own stated "modified" date for this dataset
@@ -29,6 +38,9 @@ def seed():
     execute(conn, "DELETE FROM cms_hospitals_meta")
     execute(conn, "DELETE FROM cms_hospitals")
     execute(conn, "DELETE FROM hospital_roster")
+    execute(conn, "DELETE FROM ahrq_crosswalk")
+    execute(conn, "DELETE FROM ahrq_systems")
+    execute(conn, "DELETE FROM bd_profiles")  # bd_outreach is intentionally NOT cleared — see db.py
     execute(conn, "DELETE FROM health_systems")
     execute(conn, "DELETE FROM federal_milestones")
     execute(conn, "DELETE FROM state_changelog")
@@ -126,6 +138,16 @@ def seed():
         HEALTH_SYSTEMS,
     )
 
+    execute_many(
+        conn,
+        """INSERT INTO bd_profiles
+           (bd_key, name, operator_name, match_type, hq_place, hq_lat, hq_lon, category, strategy_tags,
+            note, atlas_names, part_of, basis, confidence)
+           VALUES (%(bd_key)s, %(name)s, %(operator_name)s, %(match_type)s, %(hq_place)s, %(hq_lat)s, %(hq_lon)s,
+                   %(category)s, %(strategy_tags)s, %(note)s, %(atlas_names)s, %(part_of)s, %(basis)s, %(confidence)s)""",
+        BD_PROFILES,
+    )
+
     roster_rows = [
         {"company": r["company"], "source_url": r["source_url"], "verified_at": r["verified_at"], **h}
         for r in HOSPITAL_ROSTERS
@@ -139,6 +161,21 @@ def seed():
     )
 
     cms_hospitals = json.loads(CMS_HOSPITALS_PATH.read_text())
+    ahrq_systems = load_ahrq_systems(cms_hospitals)
+    cols = list(ahrq_systems[0].keys())
+    execute_many(
+        conn,
+        f"INSERT INTO ahrq_systems ({', '.join(cols)}) VALUES ({', '.join(f'%({c})s' for c in cols)})",
+        ahrq_systems,
+    )
+    ahrq_ids = {s["sys_id"] for s in ahrq_systems}
+    crosswalk_rows = [{"bd_key": slugify(name), "sys_id": sid, "match_type": mt} for name, (sid, mt) in AHRQ_CROSSWALK.items()]
+    assert all(r["sys_id"] in ahrq_ids for r in crosswalk_rows), "crosswalk names an AHRQ id that is not in the file"
+    execute_many(
+        conn,
+        "INSERT INTO ahrq_crosswalk (bd_key, sys_id, match_type) VALUES (%(bd_key)s, %(sys_id)s, %(match_type)s)",
+        crosswalk_rows,
+    )
     execute_many(
         conn,
         """INSERT INTO cms_hospitals
@@ -159,6 +196,19 @@ def seed():
         },
     )
 
+    # Private starting records: ON CONFLICT DO NOTHING, so a re-seed never overwrites later edits.
+    execute_many(
+        conn,
+        """INSERT INTO bd_outreach (bd_key, status, owner, notes) VALUES (%(bd_key)s, %(status)s, %(owner)s, %(notes)s)
+           ON CONFLICT (bd_key) DO NOTHING""",
+        INITIAL_OUTREACH,
+    )
+    execute_many(
+        conn,
+        "INSERT INTO bd_state_notes (abbr, note) VALUES (%(abbr)s, %(note)s) ON CONFLICT (abbr) DO NOTHING",
+        [{"abbr": a, "note": n} for a, n in INITIAL_STATE_NOTES.items()],
+    )
+
     conn.commit()
     conn.close()
     print(
@@ -166,6 +216,7 @@ def seed():
         f"{len(DEADLINES)} deadlines, {len(COMMENTARY)} commentary links, {len(analysis_rows)} analysis rows, "
         f"{len(overview_rows)} overviews, {len(pillar_rows)} pillars, {len(STATE_CHANGELOG)} changelog entries, "
         f"{len(FEDERAL_MILESTONES)} federal milestones, {len(HEALTH_SYSTEMS)} health systems, "
+        f"{len(BD_PROFILES)} BD profiles, {len(ahrq_systems)} AHRQ systems ({len(crosswalk_rows)} linked), "
         f"{len(roster_rows)} hospital roster rows across {len(HOSPITAL_ROSTERS)} operators, "
         f"{len(cms_hospitals)} CMS hospitals."
     )
