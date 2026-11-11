@@ -21,16 +21,16 @@ SOURCES = [
 # concrete disbursed-to-date figure distinct from the total award. Left null
 # otherwise per state — never estimated.
 AWARDS = [
-    {"state": "West Virginia", "fiscal_year": "FY26", "amount": 199476099, "status": "subawards announced", "source_url": "https://governor.wv.gov/article/governor-morrisey-announces-first-provider-productivity-support-fund-award-through-rural", "verified_at": "2026-09-29", "subawards_amount": 34149403, "subawards_label": "cumulative across 5 tranches (Apr, Sept 4/9/21/22 2026)", "usaspending_url": "https://www.usaspending.gov/award/ASST_NON_RHTCMS332054_075"},
+    {"state": "West Virginia", "fiscal_year": "FY26", "amount": 199476099, "status": "funds obligated", "source_url": "https://governor.wv.gov/article/governor-morrisey-announces-202-million-new-rural-health-funding-bringing-two-year-total", "verified_at": "2026-11-10", "subawards_amount": 34149403, "subawards_label": "cumulative across 5 tranches through Sept 22 2026; further named awards in Oct–Nov 2026 not yet aggregated", "usaspending_url": "https://www.usaspending.gov/award/ASST_NON_RHTCMS332054_075"},
     {"state": "Kentucky", "fiscal_year": "FY26", "amount": 212905591, "status": "RFA issued", "source_url": "https://www.kentuckytoday.com/news/kentuckys-rural-health-transformation-plan-secures-212-9m-in-federal-funding/article_2adc2281-3461-4430-995d-07f6a6973df4.html", "verified_at": "2026-09-02", "subawards_amount": None, "subawards_label": None, "usaspending_url": "https://www.usaspending.gov/award/ASST_NON_RHTCMS332079_075"},
-    {"state": "Ohio", "fiscal_year": "FY26", "amount": 202030262, "status": "subawards announced", "source_url": "http://www.athensmessenger.com/news/opa-awarded-2m-to-expand-pharmacy-connectivity-improve-rural-health-in-ohio/article_02dd0042-94dc-555d-8438-48c8ab1de1de.html", "verified_at": "2026-09-29", "subawards_amount": 13150000, "subawards_label": "$10M Ohio University workforce + $3.15M pharmacy connectivity (OPA $2M + Board of Pharmacy $1.15M)", "usaspending_url": "https://www.usaspending.gov/award/ASST_NON_RHTCMS332087_075"},
+    {"state": "Ohio", "fiscal_year": "FY26", "amount": 202030262, "status": "subawards announced", "source_url": "https://www2cdn.web.health.state.mn.us/facilities/ruralhealth/ruraltrans/grants.html", "verified_at": "2026-11-10", "subawards_amount": 105150000, "subawards_label": "$10M Ohio University + $3.15M pharmacy connectivity + $92M CMS-announced (Oct 16: care networks, maternal care, hospital upgrades); further \"over $55M\" announced Nov 2 not included", "usaspending_url": "https://www.usaspending.gov/award/ASST_NON_RHTCMS332087_075"},
     {"state": "Tennessee", "fiscal_year": "FY26", "amount": 206888882, "status": "subawards announced", "source_url": "https://www.tn.gov/health/news/2026/9/3/tennessee-department-of-health-announces-1st-recipients-of-rural-health-transformation-program-grants.html", "verified_at": "2026-09-07", "subawards_amount": None, "subawards_label": None, "usaspending_url": "https://www.usaspending.gov/award/ASST_NON_RHTCMS332057_075"},
     {"state": "Virginia", "fiscal_year": "FY26", "amount": 189544888, "status": "subawards announced", "source_url": "https://www.cms.gov/newsroom/press-releases/trump-administration-announces-122-million-expand-healthcare-access-workforce-innovation-across", "verified_at": "2026-09-07", "subawards_amount": 122000000, "subawards_label": "first disbursement wave, Aug 28 2026", "usaspending_url": "https://www.usaspending.gov/award/ASST_NON_RHTCMS332088_075"},
-    {"state": "North Carolina", "fiscal_year": "FY26", "amount": 213008356, "status": "subawards announced", "source_url": "https://www.ncdhhs.gov/news/press-releases/2026/06/08/ncdhhs-announces-10-million-ems-workforce-through-nc-rural-health-transformation-program", "verified_at": "2026-09-08", "subawards_amount": 10000000, "subawards_label": "EMS Mobile Integrated Health grant, Jun 2026 (3 digital-health programs also launched but not yet dollar-quantified)", "usaspending_url": "https://www.usaspending.gov/award/ASST_NON_RHTCMS332042_075"},
-    {"state": "Pennsylvania", "fiscal_year": "FY26", "amount": 193294054, "status": "subawards announced", "source_url": "https://www.pa.gov/agencies/dhs/programs-services/healthcare/rural-health/rhtp-funding-opportunities", "verified_at": "2026-09-02", "subawards_amount": 1800000, "subawards_label": "6 awards, FQHC track", "usaspending_url": "https://www.usaspending.gov/award/ASST_NON_RHTCMS332052_075"},
-    {"state": "Georgia", "fiscal_year": "FY26", "amount": 218862169, "status": "subawards announced", "source_url": "https://allongeorgia.com/chattooga-local-news/georgia-reaches-major-milestone-with-all-year-1-great-health-awards-fully-committed", "verified_at": "2026-09-07", "subawards_amount": 218862169, "subawards_label": "Year 1 fully committed across 4 phases", "usaspending_url": "https://www.usaspending.gov/award/ASST_NON_RHTCMS332046_075"},
-    {"state": "Alabama", "fiscal_year": "FY26", "amount": 203404327, "status": "subawards announced", "source_url": "https://governor.alabama.gov/newsroom/2026/08/governor-ivey-announces-first-grants-in-major-new-rural-healthcare-program-totaling-more-than-144-million/", "verified_at": "2026-09-02", "subawards_amount": 144000000, "subawards_label": "138 grants, 5 of 10 initiatives", "usaspending_url": "https://www.usaspending.gov/award/ASST_NON_RHTCMS332060_075"},
-    {"state": "Mississippi", "fiscal_year": "FY26", "amount": 205907220, "status": "subawards announced", "source_url": "https://governorreeves.ms.gov/governor-reeves-announces-167-rural-health-transformation-program-awards-totaling-more-than-104-million/", "verified_at": "2026-09-21", "subawards_amount": 104115146, "subawards_label": "167 grants across the first 3 of 5 Year One programs (Sept 14 2026)", "usaspending_url": "https://www.usaspending.gov/award/ASST_NON_RHTCMS332063_075"},
+    {"state": "North Carolina", "fiscal_year": "FY26", "amount": 213008356, "status": "funds obligated", "source_url": "https://www.ncdhhs.gov/news/press-releases/2026/11/02/state-launches-new-rural-health-transformation-program-dashboard", "verified_at": "2026-11-10", "subawards_amount": 134700000, "subawards_label": "ROOTS hub leads $123.5M (6 regions) + EMS Mobile Integrated Health $11.2M (40 agencies), per NCDHHS progress page (undated; Year 1 only)", "usaspending_url": "https://www.usaspending.gov/award/ASST_NON_RHTCMS332042_075"},
+    {"state": "Pennsylvania", "fiscal_year": "FY26", "amount": 193294054, "status": "subawards announced", "source_url": "https://oklahoma.gov/content/dam/ok/en/rhtp/documents/legislative-reports/10-16-26%20RHTP%20Legislative%20Quarterly%20Report_Q3.pdf", "verified_at": "2026-11-10", "subawards_amount": 120106761, "subawards_label": "179 authorized projects across rapid-response, EHR/HIO, FQHC and non-solicitation tracks (sum of PA DHS list; page header still says $43M)", "usaspending_url": "https://www.usaspending.gov/award/ASST_NON_RHTCMS332052_075"},
+    {"state": "Georgia", "fiscal_year": "FY26", "amount": 218862169, "status": "subawards announced", "source_url": "https://www.cms.gov/newsroom/press-releases/trump-administration-announces-nearly-219-million-expand-rural-healthcare-workforce-advance", "verified_at": "2026-11-10", "subawards_amount": 218862169, "subawards_label": "Year 1 fully committed across 4 phases", "usaspending_url": "https://www.usaspending.gov/award/ASST_NON_RHTCMS332046_075"},
+    {"state": "Alabama", "fiscal_year": "FY26", "amount": 203404327, "status": "subawards announced", "source_url": "https://health.alaska.gov/media/osjhhdvl/alaska-department-of-health-announces-completion-of-rural-health-transformation-program-year-1-funding-cycle.pdf", "verified_at": "2026-11-10", "subawards_amount": 198000000, "subawards_label": "172 grants (138 + 34); local reporting says \"more than $198M\" — no official combined total; governor puts round 2 at nearly $55M", "usaspending_url": "https://www.usaspending.gov/award/ASST_NON_RHTCMS332060_075"},
+    {"state": "Mississippi", "fiscal_year": "FY26", "amount": 205907220, "status": "subawards announced", "source_url": "https://governor.alabama.gov/newsroom/2026/10/governor-ivey-announces-additional-alabama-rural-health-transformation-program-grants-totaling-nearly-55-million/", "verified_at": "2026-11-10", "subawards_amount": 136721642, "subawards_label": "227 grants: 167 (Sept 14) + 60 (Oct 21, sum of itemized awards $32.6M)", "usaspending_url": "https://www.usaspending.gov/award/ASST_NON_RHTCMS332063_075"},
 ]
 
 # `confidence` is 'confirmed' (default) or 'unverified'. Unverified entries are
@@ -71,6 +71,14 @@ STATUS_EVENTS = [
     {"state": "Mississippi", "status": "RFA issued", "source_url": "https://mississippirhtp.com/", "event_date": "2026-04-29", "notes": "RHTP Office established under Governor's Office (director: Richard Grimes); first round drew ~700 applications for ~$82M available.", "confidence": "confirmed"},
     {"state": "Mississippi", "status": "RFA issued", "source_url": "https://www.wlbt.com/2026/08/06/mississippi-rural-health-transformation-program-begins-awarding-grants/", "event_date": "2026-08-06", "notes": "Selection completed for 3 grant programs (Rural Capital Care Gap Closure, Rural Technology Grant, Telehealth Hub Connectivity/Equipment/Education); selected applicants were being contacted to begin sub-award execution. Director Richard Grimes said awards were 'expected by the end of the month' (Aug 2026) with a goal of having all funds obligated by the October federal deadline. As of Sep 7, 2026 no formal named-recipient/dollar announcement has been found, so status is left at RFA issued pending that.", "confidence": "confirmed"},
     {"state": "Mississippi", "status": "subawards announced", "source_url": "https://governorreeves.ms.gov/governor-reeves-announces-167-rural-health-transformation-program-awards-totaling-more-than-104-million/", "event_date": "2026-09-14", "notes": "Gov. Reeves announced 167 awards totaling $104,115,146 — Mississippi's first named subawards, on the governor's own official page: Rural Provider Technology Grant Program (97 awards), Rural Capital Project Care Gap Closure Grant Program (43 awards), and Telehealth Hub Connectivity, Equipment & Education Grant Program (27 awards). Named recipients include Memorial Health System (e.g. $2,980,874 for an electronic oncology workflow), Hattiesburg Clinic ($537,094, ambient AI documentation), and Delta Health Center ($3,000,000, a 24/7 urgent and critical response center in Rosedale). These are only the first three of five Year One grant opportunities; workforce and psychiatric emergency services applications are still under review. Advances Mississippi from 'RFA issued' to 'subawards announced'.", "confidence": "confirmed"},
+    {"state": "North Carolina", "status": "funds obligated", "source_url": "https://www.ncdhhs.gov/news/press-releases/2026/11/02/state-launches-new-rural-health-transformation-program-dashboard", "event_date": "2026-11-02", "notes": "NCDHHS release (Nov 2, 2026): \"The state obligated all funds allocated to North Carolina within the first year\" of the program, and launched a public dashboard of Year 1 projects. CMS gave NC an initial $100M for Year 2 \"with additional funding to follow.\" NCDHHS's undated progress page lists ROOTS Hub Leads at $123.5M across six regions and EMS Mobile Integrated Health at $11.2M for 40 agencies (Year 1 only).", "confidence": "confirmed"},
+    {"state": "West Virginia", "status": "funds obligated", "source_url": "https://governor.wv.gov/article/governor-morrisey-announces-202-million-new-rural-health-funding-bringing-two-year-total", "event_date": "2026-11-09", "notes": "Governor's release (Nov 9, 2026): WV \"enters the second year having obligated 100 percent of its initial award through 145 signed awards\" before the Oct 30 deadline; Year 2 award $202,081,355 (two-year total $401,557,453.35). Named implementation awards continued through October–November 2026 (e.g., WVU Health, WVU Eye Institute, CAMC, WV Primary Care Association) and are not yet aggregated here.", "confidence": "confirmed"},
+    {"state": "Georgia", "status": "subawards announced", "source_url": "https://www.cms.gov/newsroom/press-releases/trump-administration-announces-nearly-219-million-expand-rural-healthcare-workforce-advance", "event_date": "2026-10-23", "notes": "CMS (Oct 23, 2026): \"Georgia has committed its full $219 million in funding\" across the state's 126 rural and partially rural counties. Confirms the Year 1 figure already recorded; no new subaward amount.", "confidence": "confirmed"},
+    {"state": "Alabama", "status": "subawards announced", "source_url": "https://governor.alabama.gov/newsroom/2026/10/governor-ivey-announces-additional-alabama-rural-health-transformation-program-grants-totaling-nearly-55-million/", "event_date": "2026-10-01", "notes": "Gov. Ivey (Oct 1, 2026): 34 more grants totaling nearly $55M that \"round out year one\" (largest: Alabama Community College System $20.6M, Alabama School of Healthcare Sciences $7.27M, UAB $3.44M). CMS says the round completes Alabama's initial Year 1 award cycle. The first round was 138 grants (>$144M). No official combined total is stated; local reporting and a congressman cite \"more than $198 million\" across 172 grants.", "confidence": "confirmed"},
+    {"state": "Mississippi", "status": "subawards announced", "source_url": "https://www.cms.gov/newsroom/press-releases/trump-administration-announces-32-million-recruit-rural-doctors-train-healthcare-workers-expand", "event_date": "2026-10-21", "notes": "Gov. Reeves/CMS (Oct 21, 2026): 60 more awards — workforce recruitment (20), secondary-ed career outreach (4), preceptor expansion (12), earn-while-you-learn (21), psychiatric emergency services (3) — described as \"$32 million\" (state/congressional figure $32.6M). Summing the itemized WLOX list gives $32,606,496.32; the cumulative $136,721,642 recorded here is that sum added to the Sept 14 round ($104,115,146), not a figure any source states.", "confidence": "confirmed"},
+    {"state": "Ohio", "status": "subawards announced", "source_url": "https://www.cms.gov/newsroom/press-releases/trump-administration-announces-92-million-coordinate-rural-hospital-networks-improve-maternal-care", "event_date": "2026-10-16", "notes": "CMS (Oct 16, 2026): $92M for Ohio — $31.4M for coordinated rural care networks/innovation hubs, $30.3M for maternal care, and $30.3M in one-time equipment/facility upgrades at 22 rural hospitals; CMS describes it as one part of Ohio's FY2026 funding. The recorded total adds this to the earlier $13.15M named awards.", "confidence": "confirmed"},
+    {"state": "Ohio", "status": "subawards announced", "source_url": "https://spectrumnews1.com/oh/dayton/news/2026/11/03/dewine-announces-over--55-million-for-expanding-healthcare-access-in-rural-ohio", "event_date": "2026-11-03", "notes": "Spectrum News (Nov 3, 2026) reports DeWine announced \"over $55 million\" in RHTP awards: over $18M for OhioSEE, over $17M for OhioDENTAL initiatives, over $20M for 17 new school-based health centers (plus 49 existing centers). \"Over\" amounts are floors and the article does not state the sum, so it is not added to the recorded total.", "confidence": "confirmed"},
+    {"state": "Pennsylvania", "status": "subawards announced", "source_url": "https://www.pa.gov/agencies/dhs/programs-services/healthcare/rural-health/rural-health-selected-projects", "event_date": "2026-11-04", "notes": "PA DHS's authorized-projects list (page last modified Nov 4, 2026) names 179 projects; summing its table gives $120,106,760.67 — Rapid Response Round 1 $42.2M (66), Round 2 $25.9M (71), EHR/HIO $1.7M (22), FQHC $1.2M (4), Year One Non-Solicitation $49.1M (16; Indiana University of Pennsylvania $30.2M, University of Pittsburgh $9.4M, Temple $3.3M). The total is our arithmetic on the page's table: the page's own \"Total Awarded to Date\" header still reads $43,000,000, so the two disagree.", "confidence": "confirmed"},
 ]
 
 # `confidence` is 'confirmed' (direct-fetched from an official .gov page) or
@@ -203,6 +211,7 @@ DEADLINES = [
         "notes": "Reported consistently across WV Press Association, News and Sentinel, and The Intermountain: state officials are working to obligate the full ~$199M FY26 award by this federal deadline. This is a program-mechanics deadline, not an applicant-facing one.",
         "confidence": "confirmed",
     },
+    {"state": "North Carolina", "title": "Rural Health Innovation Fund applications (~$20M/yr for up to 5 yrs; primary care, FQHCs, safety-net providers)", "start_date": "2026-09-30", "end_date": "2026-11-16", "source_url": "https://www.ncdhhs.gov/news/press-releases/2026/09/30/governor-stein-launches-20-million-fund-increase-access-care-rural-north-carolina", "notes": "Due 11:59 p.m. via the NCDIT grant portal. Awards anticipated January 2027; reimbursement-based, projects must be complete by July 30, 2027.", "confidence": "confirmed"},
 ]
 
 # Third-party commentary — opinion, analysis, and investigative coverage of
@@ -410,7 +419,7 @@ STATE_OVERVIEW = {
         "contact_name": None,
         "contact_email": None,
         "contact_note": "No public contact email found in sourced materials.",
-        "updated_at": "2026-09-29",
+        "updated_at": "2026-11-10",
     },
     "Kentucky": {
         "emphasis": "Five branded initiatives are administered together under a single coordinating body (\"A3 Team\"), with RFAs released per initiative; the Foundation for a Healthy Kentucky opened its first Hub Lead RFA in September, Kentucky's first dated development since December 2025.",
@@ -426,7 +435,7 @@ STATE_OVERVIEW = {
         "contact_name": None,
         "contact_email": None,
         "contact_note": "No public contact email found in sourced materials.",
-        "updated_at": "2026-09-29",
+        "updated_at": "2026-11-10",
     },
     "Tennessee": {
         "emphasis": "Uses a rolling, recurring RFA cycle rather than a single funding round; its first subaward round has now been announced (53 projects, 44 counties) under the branded Healthy Active Rural Tennessee initiative.",
@@ -450,7 +459,7 @@ STATE_OVERVIEW = {
         "contact_name": "Maggie Woods (RHTP Director)",
         "contact_email": None,
         "contact_note": "A director is named publicly; no direct email address has been published in sourced materials.",
-        "updated_at": "2026-09-08",
+        "updated_at": "2026-11-10",
     },
     "Pennsylvania": {
         "emphasis": "Runs multiple narrow, sequential funding rounds, each scoped to a specific technology or service track rather than one broad RFA — a new Quality Investment Program round (long-term-care facilities, ~$2.75M) opened Sept 1, 2026.",
@@ -458,7 +467,7 @@ STATE_OVERVIEW = {
         "contact_name": None,
         "contact_email": None,
         "contact_note": "No public contact email found in sourced materials.",
-        "updated_at": "2026-09-13",
+        "updated_at": "2026-11-10",
     },
     "Georgia": {
         "emphasis": "Disburses under a single branded program (GREAT Health) in sequential phases; as of Phase 4, all Year 1 funds ($218.9M) are now fully committed.",
@@ -466,7 +475,7 @@ STATE_OVERVIEW = {
         "contact_name": None,
         "contact_email": None,
         "contact_note": "No public contact email found in sourced materials.",
-        "updated_at": "2026-09-08",
+        "updated_at": "2026-11-10",
     },
     "Alabama": {
         "emphasis": "Runs the broadest initiative slate of the 10 states tracked here — 10 planned initiatives total, with the first 5 already open and a second set of 5 approved.",
@@ -474,7 +483,7 @@ STATE_OVERVIEW = {
         "contact_name": None,
         "contact_email": None,
         "contact_note": "No public contact email found in sourced materials.",
-        "updated_at": "2026-09-02",
+        "updated_at": "2026-11-10",
     },
     "Mississippi": {
         "emphasis": "Centralized under a dedicated RHTP Office reporting to the Governor's Office, rather than an existing health-agency division; its first 167 awards ($104.1M) were announced Sept 14, 2026 across the first three of five Year One grant programs.",
@@ -482,7 +491,7 @@ STATE_OVERVIEW = {
         "contact_name": "Richard Grimes (RHTP Office Director)",
         "contact_email": None,
         "contact_note": "A director is named publicly; no direct email address has been published in sourced materials.",
-        "updated_at": "2026-09-21",
+        "updated_at": "2026-11-10",
     },
 }
 
@@ -571,6 +580,36 @@ STATE_CHANGELOG = [
     {"state": "Nevada", "changed_at": "2026-09-29", "summary": "Subaward total updated from $86M to $112.9M: a third round ($26.9M) confirmed via the state's own press release, which also surfaces (but does not reconcile) a larger ~$150M aggregate claim."},
     {"state": "Kentucky", "changed_at": "2026-09-29", "summary": "First dated development since Dec 2025: an RFA opened for Rural Community Hub Lead organizations ($3.5M pool). Status remains 'RFA issued' — this is not yet a subaward."},
     {"state": "Minnesota", "changed_at": "2026-10-01", "summary": "Status advanced from 'RFA issued' to 'subawards announced': an official MDH document (Sept 17) names Stratis Health, $883,371, for an HIT technical-assistance contract."},
+    {"state": "Iowa", "changed_at": "2026-11-10", "summary": "Status advanced to 'funds obligated': Iowa HHS reports its full $209.04M first-year award is obligated (Oct 9)."},
+    {"state": "North Carolina", "changed_at": "2026-11-10", "summary": "Status advanced to 'funds obligated' (Nov 2). Subaward total updated from $10M to $134.7M: ROOTS hub leads ($123.5M) plus EMS Mobile Integrated Health ($11.2M), per NCDHHS."},
+    {"state": "North Dakota", "changed_at": "2026-11-10", "summary": "Status advanced to 'funds obligated': HHS reports all ~$199M of Year 1 obligated; Year 2 award announced at $206.4M."},
+    {"state": "Vermont", "changed_at": "2026-11-10", "summary": "Status advanced to 'funds obligated' (Oct 30). Subaward total updated from $11.7M to $182.2M of executed agreements (state list, Nov 6)."},
+    {"state": "West Virginia", "changed_at": "2026-11-10", "summary": "Status advanced to 'funds obligated': 100% of $199.5M obligated through 145 signed awards (governor, Nov 9); new named awards continued through Nov 10."},
+    {"state": "Washington", "changed_at": "2026-11-10", "summary": "Status advanced from 'RFA issued' to 'funds obligated': HCA reports 100% of the ~$181M Year 1 award obligated across 144 contracts; the Rural Collaborative's $5.43M share is now confirmed."},
+    {"state": "Pennsylvania", "changed_at": "2026-11-10", "summary": "Subaward total updated from $1.8M to $120.1M: PA DHS's authorized-projects list now names 179 projects (page header still shows an outdated $43M)."},
+    {"state": "New Mexico", "changed_at": "2026-11-10", "summary": "Status advanced from 'RFA issued' to 'subawards announced': six Healthy Horizons regional hub allocations totaling up to $74.06M (Sept 18)."},
+    {"state": "Massachusetts", "changed_at": "2026-11-10", "summary": "Status advanced from 'admin structure named' to 'RFA issued': EOHHS opened an RFA for rural hospital capital (up to $2.5M each for six named hospitals); applications closed Oct 26."},
+    {"state": "Ohio", "changed_at": "2026-11-10", "summary": "Subaward total updated from $13.15M to $105.15M after CMS announced $92M (networks, maternal care, hospital upgrades); a further 'over $55M' was announced Nov 2."},
+    {"state": "Texas", "changed_at": "2026-11-10", "summary": "Subaward total updated from $51M to ~$224M across three more Rural Texas Strong rounds ($78M, $8M, $87M) announced by CMS in October."},
+    {"state": "South Dakota", "changed_at": "2026-11-10", "summary": "Subaward total updated from $121.5M to ~$141.7M: $13M behavioral health (Sept 24) and $7.2M EMS (Oct 2) rounds added."},
+    {"state": "Maryland", "changed_at": "2026-11-10", "summary": "Subaward total updated from $80M to $96.4M: $16.4M in MD Labor workforce awards announced Oct 14 (the state's own award tables list $13.97M)."},
+    {"state": "Mississippi", "changed_at": "2026-11-10", "summary": "Subaward total updated from $104.1M to ~$136.7M: 60 more awards announced Oct 21 (sum of itemized awards)."},
+    {"state": "Missouri", "changed_at": "2026-11-10", "summary": "Subaward total updated from $45.6M to $85.3M: CMS announced $39.7M for 26 rural providers on Oct 30."},
+    {"state": "Montana", "changed_at": "2026-11-10", "summary": "Subaward total updated from $8.7M to $12.33M: $3.63M for 17 EMS agencies announced Oct 16."},
+    {"state": "Alabama", "changed_at": "2026-11-10", "summary": "Subaward total updated from $144M to more than $198M: a second round of 34 grants (~$55M) completes Year 1 (Oct 1)."},
+    {"state": "Michigan", "changed_at": "2026-11-10", "summary": "First aggregate subaward figure recorded: $124.6M allocated and CMS-approved for 236 subrecipients per MDHHS testimony; $48.4M remains to allocate."},
+    {"state": "Minnesota", "changed_at": "2026-11-10", "summary": "Subaward total updated from $0.88M to $12.5M: MDH states $12.5M has been awarded to named sole-source/competitive recipients; formula allocations still pending."},
+    {"state": "Oklahoma", "changed_at": "2026-11-10", "summary": "Subaward total updated from $3.85M to at least $58.45M after OSDH's Q3 report itemized $39.6M (20 recipients) and $15M (15 recipients) awards."},
+    {"state": "Florida", "changed_at": "2026-11-10", "summary": "Subaward total updated from $188M to $193.7M per CMS (45 organizations); the $5.7M difference from the state's figure is unexplained."},
+    {"state": "California", "changed_at": "2026-11-10", "summary": "First named subrecipients: $166.72M recommended to 108 organizations across 45 counties (tentative); CMS says California has committed its full FY2026 funding."},
+    {"state": "Idaho", "changed_at": "2026-11-10", "summary": "100+ subgrants (~$180M) announced Oct 28 with named recipients; CMS says Idaho has committed its full $186M. No exact aggregate published."},
+    {"state": "Alaska", "changed_at": "2026-11-10", "summary": "Year 1 cycle complete: just under $249M awarded to 254 projects (Oct 22); recorded total will update when an exact figure is published."},
+    {"state": "Wyoming", "changed_at": "2026-11-10", "summary": "CMS says Wyoming has committed its full $205M FY2026 funding (Oct 23); no recipients named."},
+    {"state": "Georgia", "changed_at": "2026-11-10", "summary": "CMS confirms Georgia has committed its full $219M FY2026 funding (Oct 23)."},
+    {"state": "Kansas", "changed_at": "2026-11-10", "summary": "Year 2 applications open for the $44M Regional Partnership and $11M Capital Investment programs; due Nov 13."},
+    {"state": "Nebraska", "changed_at": "2026-11-10", "summary": "CMS announced more than $177M for Nebraska (Oct 13) without naming recipients; no aggregate recorded."},
+    {"state": "Louisiana", "changed_at": "2026-11-10", "summary": "CMS announced $37.7M for the workforce initiative (Oct 9); no recipients named, so the $4.2M named-award total is unchanged."},
+    {"state": "New Hampshire", "changed_at": "2026-11-10", "summary": "CMS announced $11M+ for rural EMS and Mobile Integrated Health (Oct 16); not added to the $154.2M hub total."},
 ]
 
 # Federal-level (not state-specific) statutory/programmatic milestones for the
@@ -678,6 +717,22 @@ FEDERAL_MILESTONES = [
             "scoring/funding activity begins, not a hard deadline."
         ),
         "confidence": "unverified",
+    },
+    {
+        "title": "CMS announces Year 2 (FY2027) awards to all 50 states",
+        "category": "award",
+        "start_date": "2026-11-09",
+        "end_date": None,
+        "source_url": "https://www.cms.gov/newsroom/press-releases/trump-administration-announces-10-billion-second-year-rural-health-transformation-awards-all-50",
+        "notes": (
+            "CMS announced $10 billion in FY2027 (Year 2) awards with a per-state table, nine days after its Oct 31 target; "
+            "CMS cited an additional administrative process requirement for the delay. Per the CMS fact sheet, half of each "
+            "year's funding is baseline ($100M per state) and half is allocated on workload factors; states must obligate funds "
+            "within the applicable budget period, all funds must be expended by Sept 30, 2032 or returned to Treasury, and more "
+            "detailed quarterly reporting begins in November 2026. This tracker's award figures remain Year 1 (FY2026) amounts; "
+            "Year 2 amounts are in CMS's table."
+        ),
+        "confidence": "confirmed",
     },
     {
         "title": "Budget Period 1 ends — Year 1 funds must be obligated (Oct 30, 2026)",
@@ -791,25 +846,37 @@ _UPDATED_AT_OVERRIDES = {
     "Hawaii": "2026-09-07",
     "Delaware": "2026-09-29",
     "Indiana": "2026-09-13",
-    "Louisiana": "2026-09-13",
+    "Louisiana": "2026-11-10",
     "Nevada": "2026-09-29",
-    "New Hampshire": "2026-09-08",
+    "New Hampshire": "2026-11-10",
     "New York": "2026-09-08",
-    "Oklahoma": "2026-09-08",
-    "Vermont": "2026-09-13",
+    "Oklahoma": "2026-11-10",
+    "Vermont": "2026-11-10",
     "South Carolina": "2026-09-21",
     "Connecticut": "2026-09-21",
-    "Kansas": "2026-09-21",
+    "Kansas": "2026-11-10",
     "Rhode Island": "2026-09-13",
-    "Idaho": "2026-09-13",
-    "Alaska": "2026-09-29",
+    "Idaho": "2026-11-10",
+    "Alaska": "2026-11-10",
     "Colorado": "2026-09-29",
-    "Missouri": "2026-09-29",
-    "Montana": "2026-09-29",
-    "Texas": "2026-09-29",
+    "Missouri": "2026-11-10",
+    "Montana": "2026-11-10",
+    "Texas": "2026-11-10",
     "Arkansas": "2026-09-29",
-    "Michigan": "2026-09-29",
-    "Minnesota": "2026-10-01",
+    "Michigan": "2026-11-10",
+    "Minnesota": "2026-11-10",
+    "California": "2026-11-10",
+    "Florida": "2026-11-10",
+    "Iowa": "2026-11-10",
+    "Maryland": "2026-11-10",
+    "Massachusetts": "2026-11-10",
+    "Nebraska": "2026-11-10",
+    "New Mexico": "2026-11-10",
+    "North Dakota": "2026-11-10",
+    "South Dakota": "2026-11-10",
+    "Utah": "2026-11-10",
+    "Washington": "2026-11-10",
+    "Wyoming": "2026-11-10",
 }
 
 for _state, _fields in NEW_OVERVIEW.items():
