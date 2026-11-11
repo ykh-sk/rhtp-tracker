@@ -111,7 +111,7 @@ Every entry in the Atlas carries one Type, shown as a chip and usable as a filte
 | **Sourced operator** | Hospital operator in the curated list | `app/health_systems_data.py` (source link + verified date) | Own hospital count; ownership as reported by the source |
 | **Profile system** | System from the BD profile list | `app/bd_profiles_data.py` (**unverified** category / strategy / note) | From AHRQ when matched, else none |
 | **AHRQ system** | System that appears only in AHRQ's 2023 file | `app/data/ahrq/…csv` | AHRQ's counts; ownership decoded from AHRQ's code (inferred) |
-| **Community provider** | A single provider, not a system: community health center (FQHC), home health agency or community hospital. West Virginia only (92 entries) | `wv_providers_data.py`, generated from HRSA and CMS public data (each row names its source) | None |
+| **Community provider** | A single provider, not a system: community health center (FQHC), home health agency or community hospital. West Virginia (92 entries) plus health centers in NV, AZ, TN, CO, AK, WY (107) | `wv_providers_data.py`, `focus_fqhc_data.py`, generated from HRSA and CMS public data (each row names its source) | None |
 | **Network / association / other** | Not a hospital system: hospital network, association, university, tribal health organization | `bd_profiles_data.py` categories `network`, `association`, `tribal`, `university` | None |
 
 Overlaps are handled by hand-written files, not guessed at runtime:
@@ -128,7 +128,7 @@ Overlaps are handled by hand-written files, not guessed at runtime:
 
 `wv_providers_data.py` adds West Virginia's 30 HRSA health-center grantees, 33 Medicare-certified home health
 agencies and 29 community hospitals (CMS hospitals not already counted inside a listed system; their parent
-systems were not researched, so each says "verify"). Other states have only systems for now.
+systems were not researched, so each says "verify"). `focus_fqhc_data.py` adds the HRSA health-center grantees of Nevada, Arizona, Tennessee, Colorado, Alaska and Wyoming; other states have only systems for now.
 
 `app/bd_initial_data.py` holds the private starting records for the password-protected Outreach tab. It is
 **gitignored** because this repository is public; `seed.py` loads it only when the file exists locally, so seed

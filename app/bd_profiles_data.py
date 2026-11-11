@@ -316,3 +316,15 @@ for _r in WV_PROVIDER_ROWS:
         "basis": "Name, place and facts from free public data: " + _r["src"] + ". The category label is ours.",
         "confidence": "unverified",
     })
+
+# Community health centers in the focus states (public HRSA data; see file).
+from focus_fqhc_data import FOCUS_FQHC_ROWS  # noqa: E402
+
+for _r in FOCUS_FQHC_ROWS:
+    BD_PROFILES.append({
+        "bd_key": slugify(_r["name"]), "name": _r["name"], "operator_name": None, "match_type": None,
+        "hq_place": f'{_r["city"]}, {_r["state"]}', "hq_lat": _r["lat"], "hq_lon": _r["lon"], "category": _r["category"],
+        "strategy_tags": [], "note": _r["note"], "atlas_names": _r["name"], "part_of": None,
+        "basis": "Name, place and facts from free public data: " + _r["src"] + ". The category label is ours.",
+        "confidence": "unverified",
+    })
