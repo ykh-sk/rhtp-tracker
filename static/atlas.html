@@ -49,7 +49,7 @@
         <li><strong>Sources:</strong> CMS hospital data · AHRQ 2023 Compendium (639 systems) · each operator's own site. Category and strategy tags are <em>unverified</em>.</li>
         <li><strong>Map:</strong> dot size = hospital count; color = ownership (switchable); dashed = no size on file.</li>
         <li><strong>RHTP:</strong> a home state's funding stage is optional context, never a requirement.</li>
-        <li><strong>Views:</strong> Map · Landscape (national breakdown) · Outreach (team sign-in).</li>
+        <li><strong>Views:</strong> Map · Landscape (national breakdown) · Outreach and Targets (team sign-in).</li>
       </ul>
 
       <div class="hs-toggle-row">
@@ -95,12 +95,14 @@
           <button type="button" data-view="map" class="active">Map</button>
           <button type="button" data-view="landscape">Landscape</button>
           <button type="button" data-view="outreach" id="hs-outreach-tab" hidden>Outreach</button>
+          <button type="button" data-view="targets" id="hs-targets-tab" hidden>Targets</button>
         </div>
       </div>
       <div class="hs-bd-strip" id="hs-bd-strip"></div>
 
       <div id="hs-landscape" hidden></div>
       <div id="hs-outreach" hidden></div>
+      <div id="hs-targets" hidden></div>
 
       <div class="map-section" id="hs-map-section">
         <div id="hs-map"></div>

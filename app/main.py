@@ -504,6 +504,15 @@ def bd_outreach_put(key):
     return _bd_json(row)
 
 
+@app.route("/api/bd/hospitals")
+@bd_required
+def bd_hospitals_list():
+    conn = get_connection()
+    rows = rows_to_dicts(query(conn, "SELECT * FROM bd_target_hospitals ORDER BY state, name"))
+    conn.close()
+    return _bd_json(rows)
+
+
 @app.route("/api/bd/state_notes")
 @bd_required
 def bd_state_notes_list():

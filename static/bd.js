@@ -82,6 +82,7 @@ let hsCardLimit = 60;    // cards rendered below the map; "Show more" raises it
 let SYSTEMS_UNIFIED = [];
 let BD_AUTH = { configured: false, authed: false };
 let BD_OUTREACH = {}; // bd_key -> {status, owner, notes, updated_at}
+let BD_TARGETS = [];  // /api/bd/hospitals (private, password-gated): segmented non-profit hospital list
 let BD_STATE_NOTES = {}; // state abbr -> free-text note (private, e.g. how a round of email outreach went)
 
 const hsFilters = { category: "all", strategy: "all", rhtp: "all", state: "all", status: "all", source: "all", q: "" };
@@ -442,7 +443,7 @@ async function refreshBdSession() {
   try {
     const s = await bdFetch("/api/bd/session");
     if (s.ok && s.data) BD_AUTH = { configured: !!s.data.configured, authed: !!s.data.authed };
-    if (BD_AUTH.authed) { await loadOutreach(); await loadStateNotes(); }
+    if (BD_AUTH.authed) { await loadOutreach(); await loadStateNotes(); await loadTargets(); }
   } catch { /* leave locked */ }
   syncHsControls();
   refreshHsAll();
@@ -483,6 +484,11 @@ function renderStateNotes() {
         <button type="button" class="hs-compare-btn" id="bd-state-add-btn">Add a state note</button></div>`;
 }
 
+async function loadTargets() {
+  const r = await bdFetch("/api/bd/hospitals");
+  if (r.status === 401) { BD_AUTH.authed = false; BD_TARGETS = []; return; }
+  if (r.ok) BD_TARGETS = r.data;
+}
 async function loadOutreach() {
   const r = await bdFetch("/api/bd/outreach");
   if (r.status === 401) { BD_AUTH.authed = false; BD_OUTREACH = {}; return; }
@@ -497,6 +503,7 @@ async function bdLogin(username, password) {
   BD_AUTH.authed = true;
   await loadOutreach();
   await loadStateNotes();
+  await loadTargets();
   return null;
 }
 
@@ -505,6 +512,7 @@ async function bdLogout() {
   BD_AUTH.authed = false;
   BD_OUTREACH = {};
   BD_STATE_NOTES = {};
+  BD_TARGETS = [];
   if (hsColorMode === "status") hsColorMode = "ownership";
   hsFilters.status = "all";
 }
@@ -633,6 +641,121 @@ function renderOutreachPanel() {
     <div class="bd-table-wrap" id="bd-table-wrap"></div>`;
   renderStateNotes();
   renderBdTable();
+}
+
+// ---------- target hospitals (private) ----------
+
+const TG_SEGMENTS = {
+  A: "A · Mid-size/smaller hospital, independent or small/mid system",
+  B: "B · Mid-size/smaller hospital inside a large system (40+)",
+  C: "C · Larger hospital (>300 beds), small/mid system",
+  D: "D · Larger hospital, large system",
+  U: "Unclassified (beds or system unknown)",
+};
+const TG_EVIDENCE = { A: "Accredited/certified", S: "Service listed", N: "Not found", "?": "Unverified" };
+const TG_RPM = { H: "Hospital-level program", Y: "System-level program", T: "Telehealth only", N: "Not found", "?": "Unverified" };
+const TG_PROGRAMS = [["v_oncology", "Oncology"], ["v_obesity", "Obesity"], ["v_diabetes", "Diabetes"], ["v_orthopedics", "Ortho"], ["v_aging", "Aging"]];
+const tgFilters = { segment: "A", state: "all", type: "all", check: "all", program: "all", q: "" };
+let tgLimit = 200;
+
+function tgFiltered() {
+  const q = tgFilters.q.trim().toLowerCase();
+  return BD_TARGETS.filter(h => {
+    if (tgFilters.segment !== "all" && h.segment !== tgFilters.segment) return false;
+    if (tgFilters.state !== "all" && h.state !== tgFilters.state) return false;
+    if (tgFilters.type !== "all" && h.hospital_type !== tgFilters.type) return false;
+    if (tgFilters.check === "verified" && !h.verified) return false;
+    if (tgFilters.check === "rpm" && !(h.verified && ["H", "Y"].includes(h.v_rpm))) return false;
+    if (tgFilters.check === "norpm" && !(h.verified && ["N", "T"].includes(h.v_rpm))) return false;
+    if (tgFilters.program !== "all" && !(h.verified && ["A", "S"].includes(h[tgFilters.program]))) return false;
+    if (q && !(h.name + " " + h.city + " " + h.state + " " + (h.system || "")).toLowerCase().includes(q)) return false;
+    return true;
+  });
+}
+
+function tgSignalsHtml(h) {
+  const s = h.signals || {};
+  if (h.coverage && h.coverage !== "covered") return `<span class="bd-sub">${esc(h.coverage)}</span>`;
+  const bits = [["Joint", s.joint_repl_dsch], ["Ortho", s.ortho_outpt_srvcs], ["Breast", s.breast_surg_outpt_srvcs], ["Diabetes", s.diabetes_dsch], ["Hip fx", s.hip_fracture_dsch]]
+    .filter(([, n]) => n).map(([l, n]) => `${l} ${Number(n).toLocaleString()}`);
+  const readm = s.hrrp_excess_readm_conditions ? ` · excess readmits: ${esc(s.hrrp_excess_readm_conditions.replace(/\|/g, ", "))}` : "";
+  return bits.length || readm ? `<span class="bd-sub">${esc(bits.join(" · "))}${readm}</span>` : `<span class="bd-sub">no Medicare activity on file</span>`;
+}
+
+function tgProgramsHtml(h) {
+  if (!h.verified) return `<span class="bd-sub">Not checked</span>`;
+  const mark = c => ({ A: "●", S: "◐", N: "○", "?": "?" }[c] || "?");
+  return TG_PROGRAMS.map(([k, l]) => `<span title="${escAttr(l + ": " + (TG_EVIDENCE[h[k]] || ""))}">${l} ${mark(h[k])}</span>`).join(" · ");
+}
+
+function tgRowHtml(h) {
+  const rpm = h.verified ? `<span title="${escAttr(TG_RPM[h.v_rpm] || "")}">${esc(TG_RPM[h.v_rpm] || h.v_rpm)}</span>` : `<span class="bd-sub">Not checked</span>`;
+  const size = /^\d+$/.test(h.system_size || "") ? `${h.system_size} hospitals` : (h.system_size || "");
+  const sys = h.system ? `${esc(h.system)}<div class="bd-sub">${esc(size)}</div>` : `<span class="bd-sub">${esc(h.system_size || "—")}</span>`;
+  const note = [h.v_note, h.flags].filter(Boolean).join(" | ");
+  return `
+    <tr>
+      <td class="bd-col-name"><strong>${esc(h.name)}</strong><div class="bd-sub">${esc(h.city || "")}, ${esc(h.state)} · ${esc(h.hospital_type || "")}</div></td>
+      <td>${h.beds == null ? "—" : h.beds.toLocaleString()}<div class="bd-sub">${esc(h.beds_source || "")}</div></td>
+      <td title="${escAttr(TG_SEGMENTS[h.segment] || "")}"><strong>${esc(h.segment)}</strong></td>
+      <td>${sys}</td>
+      <td>${tgProgramsHtml(h)}<div>${tgSignalsHtml(h)}</div></td>
+      <td>${rpm}</td>
+      <td class="bd-sub">${esc(note)}</td>
+    </tr>`;
+}
+
+function renderTargetsTable() {
+  const wrap = document.getElementById("tg-table-wrap");
+  if (!wrap) return;
+  const rows = tgFiltered();
+  document.getElementById("tg-count").textContent = `${rows.length.toLocaleString()} of ${BD_TARGETS.length.toLocaleString()} hospitals` +
+    (rows.length > tgLimit ? ` — showing the first ${tgLimit}` : "");
+  wrap.innerHTML = `
+    <table class="bd-table">
+      <thead><tr><th>Hospital</th><th>Beds</th><th>Seg.</th><th>System</th><th>Programs (hand-checked) &amp; Medicare activity</th><th>Remote monitoring</th><th>Notes</th></tr></thead>
+      <tbody>${rows.slice(0, tgLimit).map(tgRowHtml).join("") || `<tr><td colspan="7" class="bd-empty">No hospitals match.</td></tr>`}</tbody>
+    </table>
+    ${rows.length > tgLimit ? `<p class="cal-caption"><button type="button" class="hs-compare-btn" id="tg-more">Show 200 more</button></p>` : ""}`;
+}
+
+function tgDownloadCsv() {
+  const rows = tgFiltered();
+  const cols = ["ccn", "name", "city", "state", "hospital_type", "beds", "beds_source", "segment", "system", "system_size", "system_basis",
+    "verified", "v_oncology", "v_obesity", "v_diabetes", "v_orthopedics", "v_aging", "v_rpm", "v_note", "flags"];
+  const q = v => { const t = v == null ? "" : String(v); return /[",\n]/.test(t) ? `"${t.replace(/"/g, '""')}"` : t; };
+  const csv = [cols.join(",")].concat(rows.map(r => cols.map(c => q(r[c])).join(","))).join("\n");
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob(["﻿" + csv], { type: "text/csv" }));
+  a.download = "target-hospitals-filtered.csv";
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function renderTargetsPanel() {
+  const el = document.getElementById("hs-targets");
+  if (!el) return;
+  if (!BD_AUTH.authed) { el.innerHTML = ""; return; }
+  if (!BD_TARGETS.length) {
+    el.innerHTML = `<p class="cal-caption">No target-hospital data is loaded on this server yet.</p>`;
+    return;
+  }
+  const states = [...new Set(BD_TARGETS.map(h => h.state))].sort();
+  const opt = (pairs, cur) => pairs.map(([v, l]) => `<option value="${escAttr(v)}"${v === cur ? " selected" : ""}>${esc(l)}</option>`).join("");
+  el.innerHTML = `
+    <p class="cal-caption"><strong>Non-profit acute-care and critical-access hospitals (CMS), first-pass segmentation.</strong> Size = 300 beds or fewer; large system = 40+ hospitals. Program evidence (●&nbsp;accredited, ◐&nbsp;listed only, ○&nbsp;not found, ?&nbsp;unverified) exists only for hospitals checked by hand; everything else says "Not checked", which is not the same as "none". "Not found" does not prove a program is absent. Bed counts and system links come from federal data and may lag recent deals — see Notes.</p>
+    <div class="bd-toolbar">
+      <select id="tg-segment" aria-label="Segment">${opt([["all", "All segments"], ...Object.entries(TG_SEGMENTS)], tgFilters.segment)}</select>
+      <select id="tg-state" aria-label="State">${opt([["all", "All states"], ...states.map(s => [s, s])], tgFilters.state)}</select>
+      <select id="tg-type" aria-label="Hospital type">${opt([["all", "Acute + critical access"], ["Acute care", "Acute care"], ["Critical access", "Critical access"]], tgFilters.type)}</select>
+      <select id="tg-check" aria-label="Verification">${opt([["all", "Any verification state"], ["verified", "Hand-checked only"], ["rpm", "Remote monitoring found (checked)"], ["norpm", "No remote monitoring found (checked)"]], tgFilters.check)}</select>
+      <select id="tg-program" aria-label="Program">${opt([["all", "Any program"], ...TG_PROGRAMS.map(([k, l]) => [k, l + " evidence (checked)"])], tgFilters.program)}</select>
+      <input type="search" id="tg-search" placeholder="Search hospital, city or system…" value="${escAttr(tgFilters.q)}" aria-label="Search hospitals">
+      <button type="button" class="hs-compare-btn" id="tg-csv">Download filtered CSV</button>
+    </div>
+    <p class="cal-caption" id="tg-count"></p>
+    <div class="bd-table-wrap" id="tg-table-wrap"></div>`;
+  renderTargetsTable();
 }
 
 // ---------- national landscape ----------
@@ -822,19 +945,22 @@ function renderLandscape() {
 // ---------- controls + refresh ----------
 
 function setHsView(view) {
-  if (view === "outreach" && !BD_AUTH.authed) view = "map";
+  if ((view === "outreach" || view === "targets") && !BD_AUTH.authed) view = "map";
   hsView = view;
   const map = view === "map";
   document.getElementById("hs-map-section").hidden = !map;
   document.getElementById("hs-list").hidden = !map;
   document.getElementById("hs-landscape").hidden = view !== "landscape";
   document.getElementById("hs-outreach").hidden = view !== "outreach";
+  document.getElementById("hs-targets").hidden = view !== "targets";
   document.querySelectorAll("#hs-view-toggle button").forEach(b => b.classList.toggle("active", b.dataset.view === view));
   if (map) {
     if (hsMap) hsMap.invalidateSize();
   } else if (view === "landscape") {
     renderLandscape();
     if (typeof ensureFacilitiesLoaded === "function") ensureFacilitiesLoaded();
+  } else if (view === "targets") {
+    renderTargetsPanel();
   } else {
     renderOutreachPanel();
   }
@@ -857,6 +983,7 @@ function syncHsControls() {
   document.getElementById("hs-color-status-btn").hidden = !BD_AUTH.authed;
   document.querySelectorAll("#hs-color-toggle button").forEach(b => b.classList.toggle("active", b.dataset.color === hsColorMode));
   document.getElementById("hs-outreach-tab").hidden = !BD_AUTH.authed;
+  document.getElementById("hs-targets-tab").hidden = !BD_AUTH.authed;
   const signin = document.getElementById("team-signin");
   signin.hidden = !BD_AUTH.configured;
   signin.textContent = BD_AUTH.authed ? "Sign out" : "Team sign-in";
@@ -904,7 +1031,7 @@ async function signInOrOut() {
   if (!BD_AUTH.authed) { openSignIn(); return; }
   await bdLogout();
   syncHsControls(); refreshHsAll();
-  setHsView(hsView === "outreach" ? "map" : hsView);
+  setHsView(hsView === "outreach" || hsView === "targets" ? "map" : hsView);
 }
 
 function wireHsBdControls() {
@@ -988,6 +1115,14 @@ function wireHsBdControls() {
     const err = await bdLogin(document.getElementById("bd-username").value, document.getElementById("bd-password").value);
     if (err) { document.getElementById("bd-login-error").textContent = err; return; }
     closeBdModal(); syncHsControls(); refreshHsAll(); setHsView("outreach");
+  });
+  const tg = document.getElementById("hs-targets");
+  const tgKey = { "tg-segment": "segment", "tg-state": "state", "tg-type": "type", "tg-check": "check", "tg-program": "program" };
+  tg.addEventListener("change", e => { const k = tgKey[e.target.id]; if (k) { tgFilters[k] = e.target.value; tgLimit = 200; renderTargetsTable(); } });
+  tg.addEventListener("input", e => { if (e.target.id === "tg-search") { tgFilters.q = e.target.value; tgLimit = 200; renderTargetsTable(); } });
+  tg.addEventListener("click", e => {
+    if (e.target.id === "tg-more") { tgLimit += 200; renderTargetsTable(); }
+    if (e.target.id === "tg-csv") tgDownloadCsv();
   });
   const panel = document.getElementById("hs-outreach");
   panel.addEventListener("input", e => {

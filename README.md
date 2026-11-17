@@ -14,7 +14,10 @@ Tracks Rural Health Transformation Program funding, status, and sources across a
   pipeline-stage colors). Both pages use the same Flask API and database.
 - The Atlas's **Outreach** tab (who has been contacted, by whom) is invisible until a team member signs in
   (one shared password, `BD_PASSWORD`; see "Deploying"). Signed out, the page shows no status controls at all
-  and the API refuses the data (401).
+  and the API refuses the data (401). The same sign-in unlocks a **Targets** tab: 2,727 CMS non-profit
+  acute-care and critical-access hospitals segmented by hospital size (300 beds or fewer) and system size
+  (40+ hospitals), with Medicare-activity signals and a hand-checked program layer for the highest-ranked
+  hospitals ("Not checked" never means "none").
 
 ## Local setup
 
@@ -78,6 +81,9 @@ python3 app/main.py   # serves the dashboard at http://localhost:5050
 - `bd_outreach` — private contact tracking (status / owner / notes per system), written only through the
   password-gated `/api/bd/*` routes. **`seed.py` never clears this table** — it's hand-entered working
   data, not seed data. Keys are slugs (`slug(operator name)` or the profile's own key).
+- `bd_target_hospitals` — the private hospital target list behind the Targets tab, served only by
+  `/api/bd/hospitals`. Its source, `app/bd_targets.json`, is **gitignored** (public repo); `seed.py` reloads the
+  table only when that file exists locally and otherwise leaves the table alone.
 - `bd_login_failures` — failed unlock attempts, kept only to throttle guessing (8 per IP per 15 min).
 
 - `ahrq_systems` / `ahrq_crosswalk` — AHRQ's free **Compendium of U.S. Health Systems, 2023** (system file,

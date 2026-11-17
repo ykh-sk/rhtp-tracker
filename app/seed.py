@@ -25,6 +25,7 @@ try:
 except ImportError:
     INITIAL_OUTREACH, INITIAL_STATE_NOTES = [], {}
 
+BD_TARGETS_PATH = Path(__file__).resolve().parent / "bd_targets.json"  # private, gitignored — see db.py
 CMS_HOSPITALS_PATH = Path(__file__).resolve().parent / "data" / "cms_hospitals.json"
 CMS_DATASET_MODIFIED = "2026-07-22"  # data.cms.gov's own stated "modified" date for this dataset
 CMS_GEOCODED_AT = "2026-09-21"  # when this project last fetched + geocoded it
@@ -208,6 +209,20 @@ def seed():
         "INSERT INTO bd_state_notes (abbr, note) VALUES (%(abbr)s, %(note)s) ON CONFLICT (abbr) DO NOTHING",
         [{"abbr": a, "note": n} for a, n in INITIAL_STATE_NOTES.items()],
     )
+
+    # Private target-hospital list: reloaded only when the local (gitignored) file exists.
+    targets = json.loads(BD_TARGETS_PATH.read_text()) if BD_TARGETS_PATH.exists() else None
+    if targets is not None:
+        execute(conn, "DELETE FROM bd_target_hospitals")
+        cols = list(targets[0].keys())
+        execute_many(
+            conn,
+            f"INSERT INTO bd_target_hospitals ({', '.join(cols)}) VALUES ({', '.join(f'%({c})s' for c in cols)})",
+            [{**t, "signals": json.dumps(t["signals"])} for t in targets],
+        )
+        print(f"Loaded {len(targets)} private target hospitals.")
+    else:
+        print("No app/bd_targets.json here: bd_target_hospitals left as it is.")
 
     conn.commit()
     conn.close()

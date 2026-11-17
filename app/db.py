@@ -274,6 +274,36 @@ CREATE TABLE IF NOT EXISTS bd_state_notes (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+-- Private hospital target list (CMS non-profit acute / critical-access hospitals, segmented by hospital and system
+-- size, with Medicare-activity signals and a hand-verified program layer for the top-ranked hospitals).
+-- Loaded by seed.py from app/bd_targets.json, which is NOT committed (this repository is public); served only through
+-- the password-gated /api/bd/hospitals route. If the local file is absent, seed.py leaves this table untouched.
+CREATE TABLE IF NOT EXISTS bd_target_hospitals (
+    ccn TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    city TEXT,
+    state TEXT NOT NULL,
+    hospital_type TEXT,
+    beds INTEGER,
+    beds_source TEXT,
+    segment TEXT NOT NULL,
+    system TEXT,
+    system_size TEXT,
+    system_basis TEXT,
+    meets_criteria TEXT,
+    coverage TEXT,
+    signals JSONB NOT NULL DEFAULT '{}',
+    verified BOOLEAN NOT NULL DEFAULT false,
+    v_oncology TEXT,
+    v_obesity TEXT,
+    v_diabetes TEXT,
+    v_orthopedics TEXT,
+    v_aging TEXT,
+    v_rpm TEXT,
+    v_note TEXT,
+    flags TEXT
+);
+
 -- Failed BD logins, kept only to throttle guessing (per client IP, short window). Not seed data.
 CREATE TABLE IF NOT EXISTS bd_login_failures (
     ip TEXT NOT NULL,
